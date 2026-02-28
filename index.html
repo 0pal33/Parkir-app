@@ -50,10 +50,15 @@ font-size:18px;
 <div id="defaultMenu">
 <button class="orange" id="btnScan">Start Scanning</button>
 <button class="blue" id="btnManual">Ketik Manual</button>
-<button id="btnLogin">Login Admin</button>
+<button class="blue" id="btnLogin">Login Admin</button>
 </div>
 
 <div id="reader" style="display:none"></div>
+
+<div id="scanControl" style="display:none">
+<button class="red" id="btnStop">Stop Scanning</button>
+<button class="blue" id="btnSwitch">Switch Kamera</button>
+</div>
 
 <div id="manualBox" style="display:none">
 Parkir-<input id="manualInput" maxlength="3" size="3">
@@ -80,6 +85,8 @@ const supabase = window.supabase.createClient(
 );
 
 let scanner;
+let currentCamera = "environment";
+let scanLocked = false;
 
 document.getElementById("btnScan").onclick = startScan;
 document.getElementById("btnManual").onclick = showManual;
@@ -87,15 +94,47 @@ document.getElementById("btnLogin").onclick = showLogin;
 document.getElementById("manualCancel").onclick = cancelManual;
 document.getElementById("manualOK").onclick = manualOK;
 document.getElementById("loginCancel").onclick = cancelLogin;
+document.getElementById("btnStop").onclick = stopScan;
+document.getElementById("btnSwitch").onclick = switchCamera;
 
 function startScan(){
 document.getElementById("reader").style.display="block"
+document.getElementById("scanControl").style.display="block"
+document.getElementById("btnScan").style.display="none"
+
 scanner = new Html5Qrcode("reader");
 scanner.start(
-{ facingMode:"environment" },
+{ facingMode:currentCamera },
 { fps:10, qrbox:250 },
 onScan
 );
+}
+
+function stopScan(){
+if(scanner){
+scanner.stop();
+document.getElementById("reader").style.display="none";
+document.getElementById("scanControl").style.display="none";
+document.getElementById("btnScan").style.display="inline-block";
+}
+}
+
+function switchCamera(){
+
+if(currentCamera=="environment"){
+currentCamera="user"
+}else{
+currentCamera="environment"
+}
+
+scanner.stop().then(()=>{
+scanner.start(
+{ facingMode:currentCamera },
+{ fps:10, qrbox:250 },
+onScan
+);
+})
+
 }
 
 function showManual(){
@@ -113,37 +152,80 @@ onScan(code)
 
 async function onScan(text){
 
-if(!text.startsWith("Parkir-")) return
+if(scanLocked) return;
+if(!text.startsWith("Parkir-")) return;
+
+scanLocked = true;
+
+if(scanner){
+await scanner.stop();
+document.getElementById("reader").style.display="none";
+document.getElementById("scanControl").style.display="none";
+document.getElementById("btnScan").style.display="inline-block";
+}
 
 let kode = text
 
-const { data } = await supabase
+const { data, error } = await supabase
 .from('parkir')
 .select('*')
 .eq('kode',kode)
 .eq('status','on')
-.single()
+.maybeSingle()
 
 if(!data){
 
 document.getElementById("resultBox").innerHTML = `
 <h3>${kode}</h3>
 <button class="green" onclick="checkin('${kode}')">CHECK-IN</button>
+<br><br>
+<button class="blue" onclick="scanUlang()">Scan Lagi</button>
 `
+setTimeout(()=> scanLocked=false, 2000);
 
 }else{
 
 let start = new Date(data.checkin_at)
 let now = new Date()
-let diff = Math.floor((now-start)/86400000)+1
+
+// WIB conversion
+let wibNow = new Date(now.toLocaleString("en-US", {timeZone:"Asia/Jakarta"}))
+let wibStart = new Date(start.toLocaleString("en-US", {timeZone:"Asia/Jakarta"}))
+
+let hour = wibStart.getHours()
+
+let durasi = 1
+
+
+if(hour >= 21){
+let tomorrow = new Date(wibStart)
+tomorrow.setDate(tomorrow.getDate()+1)
+tomorrow.setHours(0,0,0)
+
+let diff = Math.floor((wibNow - tomorrow)/86400000)
+
+if(wibNow.getHours() <= 6){
+durasi = 1
+}else{
+durasi = diff+2
+}
+
+}else{
+let diff = Math.floor((wibNow - wibStart)/86400000)
+durasi = diff+1
+}
+let tarif = durasi * 3000
 
 document.getElementById("resultBox").innerHTML = `
 <h3>${kode}</h3>
-Mulai: ${start.toLocaleString('id-ID')}
-<br>Durasi: ${diff} Hari
+Mulai: ${wibStart.toLocaleString('id-ID')}
+<br>Durasi: ${durasi} Hari
+<br>Tarif: Rp ${tarif.toLocaleString('id-ID')}
 <br><br>
 <button class="orange" onclick="checkout('${kode}')">Checkout</button>
 <button class="red" onclick="cancelParkir('${kode}')">Batal Parkir</button>
+<br><br>
+<button class="blue" onclick="scanUlang()">Scan Lagi</button>
 `
 
 }
@@ -156,8 +238,9 @@ kode:kode,
 status:'on',
 checkin_at:new Date()
 })
+scanLocked = false;
 alert("Check-in sukses")
-location.reload()
+scanUlang()
 }
 
 window.checkout = async function(kode){
@@ -165,17 +248,38 @@ await supabase.from('parkir')
 .update({status:'off',checkout_at:new Date()})
 .eq('kode',kode)
 .eq('status','on')
+scanLocked = false;
 alert("Checkout sukses")
-location.reload()
+scanUlang()
 }
 
 window.cancelParkir = async function(kode){
-await supabase.from('parkir')
+
+const { data } = await supabase
+.from('parkir')
+.select('*')
+.eq('kode',kode)
+.eq('status','on')
+.single()
+
+let start = new Date(data.checkin_at)
+let wibStart = new Date(start.toLocaleString("en-US", {timeZone:"Asia/Jakarta"}))
+let hour = wibStart.getHours()
+scanLocked = false;
+
+if(hour < 21){
+await supabase
+.from('parkir')
 .delete()
 .eq('kode',kode)
 .eq('status','on')
-alert("Dibatalkan")
-location.reload()
+
+alert("Parkir dibatalkan sebelum aturan malam")
+scanUlang()
+}else{
+alert("Tidak bisa dibatalkan setelah 21:00 WIB")
+}
+
 }
 
 function showLogin(){
@@ -184,6 +288,12 @@ document.getElementById("loginBox").style.display="block"
 
 function cancelLogin(){
 document.getElementById("loginBox").style.display="none"
+}
+
+function scanUlang(){
+document.getElementById("resultBox").innerHTML = ""
+scanLocked = false;
+startScan();
 }
 
 });
