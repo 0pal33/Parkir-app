@@ -60,8 +60,23 @@ font-size:18px;
 <button class="blue" id="btnSwitch">Switch Kamera</button>
 </div>
 
-<div id="manualBox" style="display:none">
-Parkir-<input id="manualInput" maxlength="3" size="3">
+<div id="manualBox" style="display:none; margin-top:15px;">
+<div style="font-size:18px; margin-bottom:10px;">Parkir-</div>
+
+<input id="manualInput"
+maxlength="3"
+inputmode="numeric"
+pattern="[0-9]*"
+style="
+width:120px;
+height:50px;
+font-size:24px;
+text-align:center;
+border-radius:12px;
+border:2px solid #ccc;
+margin-right:10px;
+">
+
 <button class="green square" id="manualOK">✓</button>
 <button class="red square" id="manualCancel">×</button>
 </div>
@@ -139,14 +154,32 @@ onScan
 
 function showManual(){
 document.getElementById("manualBox").style.display="block"
+document.getElementById("manualInput").focus()
+document.getElementById("manualInput").value=""
+scanLocked = false;
 }
 
 function cancelManual(){
 document.getElementById("manualBox").style.display="none"
+document.getElementById("manualInput").value=""
+scanLocked = false;
 }
 
 function manualOK(){
-let code = "Parkir-" + document.getElementById("manualInput").value
+let input = document.getElementById("manualInput").value
+
+if(input.length !== 3){
+alert("Masukkan 3 digit angka")
+return
+}
+
+let code = "Parkir-" + input
+
+document.getElementById("manualBox").style.display="none"
+document.getElementById("manualInput").value=""
+
+scanLocked = false;
+
 onScan(code)
 }
 
