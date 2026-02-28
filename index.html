@@ -83,14 +83,6 @@ margin-right:10px;
 
 <div id="resultBox"></div>
 
-<div id="loginBox" style="display:none">
-<br>
-<input id="email" placeholder="Email"><br><br>
-<input id="password" type="password" placeholder="Password"><br><br>
-<button id="loginSubmit">Login</button>
-<button class="red" id="loginCancel">Batal</button>
-</div>
-
 <script>
 document.addEventListener("DOMContentLoaded", function(){
 
@@ -108,7 +100,6 @@ document.getElementById("btnManual").onclick = showManual;
 document.getElementById("btnLogin").onclick = showLogin;
 document.getElementById("manualCancel").onclick = cancelManual;
 document.getElementById("manualOK").onclick = manualOK;
-document.getElementById("loginCancel").onclick = cancelLogin;
 document.getElementById("btnStop").onclick = stopScan;
 document.getElementById("btnSwitch").onclick = switchCamera;
 
@@ -316,11 +307,7 @@ alert("Tidak bisa dibatalkan setelah 21:00 WIB")
 }
 
 function showLogin(){
-document.getElementById("loginBox").style.display="block"
-}
-
-function cancelLogin(){
-document.getElementById("loginBox").style.display="none"
+window.location.href = "admin.html"
 }
 
 function scanUlang(){
