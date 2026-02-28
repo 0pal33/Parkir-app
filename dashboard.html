@@ -10,18 +10,29 @@
 <style>
 body{
 font-family:Arial;
-background:#f4f4f4;
+background:#eee;
 text-align:center;
 padding:20px;
 }
+.card{
+background:white;
+padding:20px;
+margin:15px auto;
+border-radius:15px;
+width:90%;
+max-width:400px;
+box-shadow:0 4px 8px rgba(0,0,0,0.1);
+}
 button{
 padding:15px;
-margin:10px;
+margin:8px;
 border:none;
 border-radius:12px;
 font-size:16px;
 cursor:pointer;
 }
+.blue{background:#3498db;color:white}
+.orange{background:orange;color:white}
 .red{background:#e74c3c;color:white}
 </style>
 </head>
@@ -30,14 +41,73 @@ cursor:pointer;
 
 <h2>Dashboard</h2>
 
-<button onclick="logout()" class="red">Logout</button>
+<div class="card">
+<h3>Laporan Hari Ini</h3>
+<p>Checkout: <span id="todayCount">0</span></p>
+<p>Total: Rp <span id="todayTotal">0</span></p>
+</div>
+
+<div class="card">
+<h3>Parkir Aktif</h3>
+<div id="activeList">Loading...</div>
+</div>
+
+<button class="red" onclick="logout()">Logout</button>
 
 <script>
+
+async function loadDashboard(){
+
+// PARKIR AKTIF
+const { data: active } = await supabase
+.from("parkir")
+.select("*")
+.eq("status","on")
+
+let html=""
+
+if(active.length === 0){
+html="Tidak ada parkir aktif"
+}else{
+active.forEach(p=>{
+html += `
+<div style="margin:10px;padding:10px;border:1px solid #ddd;border-radius:10px">
+<b>${p.kode}</b><br>
+${new Date(p.checkin_at).toLocaleString('id-ID')}
+</div>`
+})
+}
+
+document.getElementById("activeList").innerHTML = html
+
+// LAPORAN HARI INI
+let today = new Date().toISOString().split("T")[0]
+
+const { data: done } = await supabase
+.from("parkir")
+.select("*")
+.eq("status","off")
+
+let count=0
+
+done.forEach(p=>{
+let t = new Date(p.checkout_at).toISOString().split("T")[0]
+if(t === today){
+count++
+}
+})
+
+document.getElementById("todayCount").innerText = count
+document.getElementById("todayTotal").innerText = (count*3000).toLocaleString('id-ID')
+
+}
 
 async function logout(){
 await supabase.auth.signOut()
 window.location.href="admin.html"
 }
+
+loadDashboard()
 
 </script>
 
