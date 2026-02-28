@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Admin Login</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+body{
+font-family:Arial;
+text-align:center;
+background:#eee;
+padding:30px;
+}
+
+.box{
+background:white;
+padding:25px;
+border-radius:16px;
+max-width:300px;
+margin:auto;
+box-shadow:0 5px 15px rgba(0,0,0,0.1);
+}
+
+input{
+width:100%;
+padding:12px;
+margin:10px 0;
+border-radius:8px;
+border:1px solid #ccc;
+font-size:16px;
+}
+
+button{
+padding:12px;
+border:none;
+border-radius:10px;
+font-size:16px;
+cursor:pointer;
+margin-top:10px;
+width:100%;
+}
+
+.login{background:#3498db;color:white}
+.cancel{background:#e74c3c;color:white}
+</style>
+</head>
+
+<body>
+
+<h2>Login Admin</h2>
+
+<div class="box">
+<input id="email" placeholder="Email">
+<input id="password" type="password" placeholder="Password">
+
+<button class="login" onclick="login()">Login</button>
+<button class="cancel" onclick="kembali()">Batal</button>
+</div>
+
+<script>
+
+const supabase = window.supabase.createClient(
+"https://ktpvkmmuugjcoscxbfja.supabase.co",
+"sb_publishable_1SJL-5yxWSAC3osTXiEdMw_3Q-060K2"
+);
+
+async function login(){
+
+let email = document.getElementById("email").value
+let password = document.getElementById("password").value
+
+const { data, error } = await supabase.auth.signInWithPassword({
+email: email,
+password: password
+})
+
+if(error){
+alert("Login gagal")
+return
+}
+
+// ROLE SYSTEM
+let role = "editor"
+
+if(email === "afrupradana2@gmail.com"){
+role = "owner"
+}
+
+localStorage.setItem("role", role)
+
+window.location.href = "dashboard.html"
+
+}
+
+function kembali(){
+window.location.href = "index.html"
+}
+
+</script>
+
+</body>
+</html>
