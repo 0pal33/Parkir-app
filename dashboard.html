@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dashboard</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+
+<style>
+body{
+font-family:Arial;
+background:#f4f4f4;
+text-align:center;
+padding:20px;
+}
+button{
+padding:15px;
+margin:10px;
+border:none;
+border-radius:12px;
+font-size:16px;
+cursor:pointer;
+}
+.red{background:#e74c3c;color:white}
+</style>
+</head>
+
+<body>
+
+<h2>Dashboard</h2>
+
+<button onclick="logout()" class="red">Logout</button>
+
+<script>
+
+async function logout(){
+await supabase.auth.signOut()
+window.location.href="admin.html"
+}
+
+</script>
+
+</body>
+</html>
