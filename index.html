@@ -5,52 +5,160 @@
 <title>Parkir</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://unpkg.com/html5-qrcode"></script>
 
 <style>
-body{
-  font-family:Arial;
-  background:#eee;
-  text-align:center;
-  padding:20px
-}
-button{
-  padding:15px;
-  border:none;
-  border-radius:10px;
-  background:orange;
-  color:white;
-  font-size:18px
-}
+body{font-family:Arial;text-align:center;background:#eee;margin:0;padding:20px}
+button{padding:12px 20px;margin:5px;border:none;border-radius:10px;font-size:16px}
+.green{background:#2ecc71;color:white}
+.red{background:#e74c3c;color:white}
+.blue{background:#3498db;color:white}
+.orange{background:orange;color:white}
+.box{margin-top:20px}
+#reader{width:300px;margin:auto}
+.square{width:40px;height:40px}
 </style>
-
 </head>
 
 <body>
 
-<h2>Scan QR</h2>
+<h2>Parkir Scanner</h2>
 
-<button onclick="checkin()">CHECK-IN</button>
+<div id="defaultMenu">
+<button class="orange" onclick="startScan()">Start Scanning</button>
+<button class="blue" onclick="showManual()">Ketik Manual</button>
+<button onclick="showLogin()">Login Admin</button>
+</div>
+
+<div id="reader" style="display:none"></div>
+
+<div id="manualBox" style="display:none">
+Parkir-<input id="manualInput" maxlength="3" size="3">
+<button class="green square" onclick="manualOK()">✓</button>
+<button class="red square" onclick="cancelManual()">×</button>
+</div>
+
+<div id="resultBox" class="box"></div>
+
+<div id="loginBox" style="display:none">
+<input id="email" placeholder="Email"><br><br>
+<input id="password" type="password" placeholder="Password"><br><br>
+<button onclick="login()">Login</button>
+<button class="red" onclick="cancelLogin()">Batal</button>
+</div>
 
 <script>
+
 const supabase = window.supabase.createClient(
-  "https://ktpvkmmuugjcoscxbfja.supabase.co",
-  "sb_publishable_1SJL-5yxWSAC3osTXiEdMw_3Q-060K2"
+"https://ktpvkmmuugjcoscxbfja.supabase.co",
+"sb_publishable_1SJL-5yxWSAC3osTXiEdMw_3Q-060K2"
+)
+
+let scanner;
+
+function startScan(){
+document.getElementById("reader").style.display="block"
+scanner = new Html5Qrcode("reader");
+scanner.start(
+{ facingMode:"environment" },
+{ fps:10, qrbox:250 },
+onScan
 );
+}
 
-async function checkin(){
+function stopScan(){
+scanner.stop();
+document.getElementById("reader").style.display="none"
+}
 
-  const { error } = await supabase
-    .from('parkir')
-    .insert({ status:'on' });
+function showManual(){
+document.getElementById("manualBox").style.display="block"
+}
 
-  if(error){
-    alert("Gagal: " + error.message)
-  }else{
-    alert("Check-in sukses")
-  }
+function cancelManual(){
+document.getElementById("manualBox").style.display="none"
+}
+
+function manualOK(){
+let code = "Parkir-" + document.getElementById("manualInput").value
+onScan(code)
+}
+
+async function onScan(text){
+
+if(!text.startsWith("Parkir-")) return
+
+let kode = text
+
+const { data } = await supabase
+.from('parkir')
+.select('*')
+.eq('kode',kode)
+.eq('status','on')
+.single()
+
+if(!data){
+
+document.getElementById("resultBox").innerHTML = `
+<h3>${kode}</h3>
+<button class="green" onclick="checkin('${kode}')">CHECK-IN</button>
+`
+
+}else{
+
+let start = new Date(data.checkin_at)
+let now = new Date()
+let diff = Math.floor((now-start)/86400000)+1
+
+document.getElementById("resultBox").innerHTML = `
+<h3>${kode}</h3>
+Mulai: ${start.toLocaleString('id-ID')}
+<br>Durasi: ${diff} Hari
+<br><br>
+<button class="orange" onclick="checkout('${kode}')">Checkout</button>
+<button class="red" onclick="cancelParkir('${kode}')">Batal Parkir</button>
+`
 
 }
-</script>
 
+}
+
+async function checkin(kode){
+await supabase.from('parkir').insert({
+kode:kode,
+status:'on',
+checkin_at:new Date()
+})
+alert("Check-in sukses")
+location.reload()
+}
+
+async function checkout(kode){
+await supabase.from('parkir')
+.update({status:'off',checkout_at:new Date()})
+.eq('kode',kode)
+.eq('status','on')
+alert("Checkout sukses")
+location.reload()
+}
+
+async function cancelParkir(kode){
+await supabase.from('parkir')
+.delete()
+.eq('kode',kode)
+.eq('status','on')
+alert("Dibatalkan")
+location.reload()
+}
+
+function showLogin(){
+document.getElementById("loginBox").style.display="block"
+}
+
+function cancelLogin(){
+document.getElementById("loginBox").style.display="none"
+}
+
+</script>
 </body>
 </html>
