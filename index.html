@@ -1,29 +1,56 @@
-<!DOCTYPE html><html>
+<!DOCTYPE html>
+<html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Parkir</title><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><style>
-body{font-family:Arial;background:#eee;text-align:center;padding:20px}
-button{padding:15px;border:none;border-radius:10px;background:orange;color:white;font-size:18px}
-</style></head>
-<body><h2>Scan QR</h2>
-<button onclick="checkin()">CHECK-IN</button><script>
+<title>Parkir</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+body{
+  font-family:Arial;
+  background:#eee;
+  text-align:center;
+  padding:20px
+}
+button{
+  padding:15px;
+  border:none;
+  border-radius:10px;
+  background:orange;
+  color:white;
+  font-size:18px
+}
+</style>
+
+</head>
+
+<body>
+
+<h2>Scan QR</h2>
+
+<button onclick="checkin()">CHECK-IN</button>
+
+<script>
 const supabase = window.supabase.createClient(
-"https://ktpvkmmuugjcoscxbfja.supabase.co",
-"PASTE_KEY_BARU_NANTI"
-)
+  "https://ktpvkmmuugjcoscxbfja.supabase.co",
+  "sb_publishable_1SJL-5yxWSAC3osTXiEdMw_3Q-060K2"
+);
 
 async function checkin(){
 
-const { error } = await supabase
-.from('parkir')
-.insert({ status:'on' })
+  const { error } = await supabase
+    .from('parkir')
+    .insert({ status:'on' });
 
-if(error){
-alert("Gagal")
-}else{
-alert("Check-in sukses")
-}
+  if(error){
+    alert("Gagal: " + error.message)
+  }else{
+    alert("Check-in sukses")
+  }
 
 }
-</script></body>
+</script>
+
+</body>
 </html>
