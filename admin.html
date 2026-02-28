@@ -46,11 +46,11 @@ cursor:pointer;
 
 <script>
 
-function back(){
+window.back = function(){
 window.location.href="index.html"
 }
 
-async function login(){
+window.login = async function(){
 
 let email=document.getElementById("email").value
 let password=document.getElementById("password").value
