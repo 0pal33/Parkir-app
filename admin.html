@@ -9,24 +9,24 @@
 <style>
 body{
 font-family:Arial;
-background:#f4f4f4;
 text-align:center;
+background:#eee;
 margin:0;
 padding:20px;
 }
 
-.card{
-background:white;
-padding:20px;
-margin:15px auto;
-border-radius:15px;
-width:90%;
-max-width:400px;
-box-shadow:0 4px 8px rgba(0,0,0,0.1);
+input{
+width:250px;
+height:45px;
+font-size:16px;
+margin:10px;
+border-radius:10px;
+border:1px solid #ccc;
+padding:5px;
 }
 
 button{
-padding:15px;
+padding:15px 25px;
 margin:8px;
 border:none;
 border-radius:12px;
@@ -35,197 +35,49 @@ cursor:pointer;
 }
 
 .blue{background:#3498db;color:white}
-.orange{background:orange;color:white}
 .red{background:#e74c3c;color:white}
-.green{background:#2ecc71;color:white}
-
-.square{
-width:50px;
-height:50px;
-font-size:20px;
-}
-
-.topbar{
-display:flex;
-justify-content:space-between;
-align-items:center;
-}
-
-table{
-width:100%;
-margin-top:10px;
-border-collapse:collapse;
-}
-
-td,th{
-padding:8px;
-border-bottom:1px solid #ddd;
-}
 </style>
 </head>
 
 <body>
 
-<div id="loginPage">
 <h2>Login Admin</h2>
-<input id="email" placeholder="Email"><br><br>
-<input id="password" type="password" placeholder="Password"><br><br>
+
+<input id="email" placeholder="Email"><br>
+<input id="password" type="password" placeholder="Password"><br>
+
 <button class="blue" onclick="login()">Login</button>
-<button class="red" onclick="back()">Batal</button>
-</div>
-
-<div id="dashboard" style="display:none">
-
-<div class="topbar">
-<h3>Dashboard</h3>
-<button class="red square" onclick="logout()">⏻</button>
-</div>
-
-<div class="card">
-<h4>Laporan</h4>
-<table>
-<tr><th></th><th>Checkout</th><th>Total</th></tr>
-<tr><td>Hari Ini</td><td id="d1">0</td><td id="t1">0</td></tr>
-<tr><td>Minggu Ini</td><td id="d2">0</td><td id="t2">0</td></tr>
-<tr><td>Bulan Ini</td><td id="d3">0</td><td id="t3">0</td></tr>
-</table>
-</div>
-
-<div class="card">
-<button class="orange" onclick="openActive()">Parkir Aktif</button>
-<button class="blue" onclick="openHistory()">Laporan Sebelumnya</button>
-</div>
-
-</div>
-
-<div id="activePage" style="display:none">
-<h3>Parkir Aktif</h3>
-<div id="activeList"></div>
-<button class="red" onclick="backDash()">Kembali</button>
-</div>
-
-<div id="historyPage" style="display:none">
-<h3>Laporan Sebelumnya</h3>
-<div id="historyButtons"></div>
-<button class="red" onclick="backDash()">Kembali</button>
-</div>
+<button class="red" onclick="kembali()">Batal</button>
 
 <script>
+
 const supabase = window.supabase.createClient(
 "https://ktpvkmmuugjcoscxbfja.supabase.co",
 "sb_publishable_1SJL-5yxWSAC3osTXiEdMw_3Q-060K2"
 );
 
-const OWNER = "afrupradana2@gmail.com";
-const EDITOR = "fakha3161@gmail.com";
-
-function back(){
-window.location.href="index.html"
-}
-
 async function login(){
-let email=document.getElementById("email").value
-let password=document.getElementById("password").value
 
-const {data,error} = await supabase.auth.signInWithPassword({
-email,password
+let email = document.getElementById("email").value
+let password = document.getElementById("password").value
+
+const { data, error } = await supabase.auth.signInWithPassword({
+email: email,
+password: password
 })
 
 if(error){
-alert("Login gagal")
-return
+alert("Login gagal: " + error.message)
+}else{
+window.location.href = "dashboard.html"
 }
 
-loadDashboard()
 }
 
-async function loadDashboard(){
-
-document.getElementById("loginPage").style.display="none"
-document.getElementById("dashboard").style.display="block"
-
-let now=new Date()
-let today=now.toISOString().split("T")[0]
-
-let week=new Date()
-week.setDate(week.getDate()-7)
-
-let month=new Date()
-month.setMonth(month.getMonth()-1)
-
-const {data}=await supabase
-.from("parkir")
-.select("*")
-.eq("status","off")
-
-let dayCount=0
-let weekCount=0
-let monthCount=0
-
-data.forEach(p=>{
-let c=new Date(p.checkout_at)
-
-if(c.toISOString().split("T")[0]==today){
-dayCount++
+function kembali(){
+window.location.href = "index.html"
 }
 
-if(c>=week){
-weekCount++
-}
-
-if(c>=month){
-monthCount++
-}
-})
-
-document.getElementById("d1").innerText=dayCount
-document.getElementById("d2").innerText=weekCount
-document.getElementById("d3").innerText=monthCount
-
-document.getElementById("t1").innerText=dayCount*3000
-document.getElementById("t2").innerText=weekCount*3000
-document.getElementById("t3").innerText=monthCount*3000
-}
-
-async function logout(){
-await supabase.auth.signOut()
-location.reload()
-}
-
-async function openActive(){
-
-document.getElementById("dashboard").style.display="none"
-document.getElementById("activePage").style.display="block"
-
-const {data}=await supabase
-.from("parkir")
-.select("*")
-.eq("status","on")
-
-let html="<table><tr><th>QR</th><th>Checkin</th></tr>"
-
-data.forEach(p=>{
-html+=`<tr>
-<td>${p.kode}</td>
-<td>${new Date(p.checkin_at).toLocaleString('id-ID')}</td>
-</tr>`
-})
-
-html+="</table>"
-
-document.getElementById("activeList").innerHTML=html
-}
-
-function openHistory(){
-document.getElementById("dashboard").style.display="none"
-document.getElementById("historyPage").style.display="block"
-}
-
-function backDash(){
-document.getElementById("activePage").style.display="none"
-document.getElementById("historyPage").style.display="none"
-document.getElementById("dashboard").style.display="block"
-}
 </script>
 
 </body>
