@@ -13,8 +13,45 @@ font-family:Arial;
 background:#eee;
 text-align:center;
 padding:20px;
+margin:0;
 }
+
+.topbar{
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:10px;
+}
+
+.logout{
+background:#e74c3c;
+color:white;
+border:none;
+padding:10px 15px;
+border-radius:10px;
+font-size:14px;
+cursor:pointer;
+}
+
+.slider{
+display:flex;
+overflow-x:auto;
+scroll-snap-type:x mandatory;
+gap:15px;
+padding-bottom:10px;
+}
+
 .card{
+flex:0 0 90%;
+max-width:400px;
+background:white;
+padding:20px;
+border-radius:15px;
+box-shadow:0 4px 8px rgba(0,0,0,0.1);
+scroll-snap-align:center;
+}
+
+.activeCard{
 background:white;
 padding:20px;
 margin:15px auto;
@@ -23,42 +60,53 @@ width:90%;
 max-width:400px;
 box-shadow:0 4px 8px rgba(0,0,0,0.1);
 }
-button{
-padding:15px;
-margin:8px;
-border:none;
-border-radius:12px;
-font-size:16px;
-cursor:pointer;
-}
-.blue{background:#3498db;color:white}
-.orange{background:orange;color:white}
-.red{background:#e74c3c;color:white}
+
 </style>
 </head>
 
 <body>
 
+<div class="topbar">
 <h2>Dashboard</h2>
+<button class="logout" onclick="logout()">Logout</button>
+</div>
+
+<!-- SLIDER LAPORAN -->
+<div class="slider">
 
 <div class="card">
-<h3>Laporan Hari Ini</h3>
-<p>Checkout: <span id="todayCount">0</span></p>
-<p>Total: Rp <span id="todayTotal">0</span></p>
+<h3>Hari Ini</h3>
+<p>Checkout: <span id="d1">0</span></p>
+<p>Total: Rp <span id="t1">0</span></p>
 </div>
 
 <div class="card">
+<h3>Minggu Ini</h3>
+<p>Checkout: <span id="d2">0</span></p>
+<p>Total: Rp <span id="t2">0</span></p>
+</div>
+
+<div class="card">
+<h3>Bulan Ini</h3>
+<p>Checkout: <span id="d3">0</span></p>
+<p>Total: Rp <span id="t3">0</span></p>
+</div>
+
+</div>
+
+<!-- PARKIR AKTIF -->
+<div class="activeCard">
 <h3>Parkir Aktif</h3>
 <div id="activeList">Loading...</div>
 </div>
-
-<button class="red" onclick="logout()">Logout</button>
 
 <script>
 
 async function loadDashboard(){
 
+// =================
 // PARKIR AKTIF
+// =================
 const { data: active } = await supabase
 .from("parkir")
 .select("*")
@@ -80,25 +128,49 @@ ${new Date(p.checkin_at).toLocaleString('id-ID')}
 
 document.getElementById("activeList").innerHTML = html
 
-// LAPORAN HARI INI
-let today = new Date().toISOString().split("T")[0]
 
+// =================
+// LAPORAN
+// =================
 const { data: done } = await supabase
 .from("parkir")
 .select("*")
 .eq("status","off")
 
-let count=0
+let today = new Date()
+let week = new Date()
+week.setDate(today.getDate()-7)
+
+let month = new Date()
+month.setMonth(today.getMonth()-1)
+
+let dayCount=0
+let weekCount=0
+let monthCount=0
 
 done.forEach(p=>{
-let t = new Date(p.checkout_at).toISOString().split("T")[0]
-if(t === today){
-count++
+let t = new Date(p.checkout_at)
+
+if(t.toDateString() === today.toDateString()){
+dayCount++
+}
+
+if(t >= week){
+weekCount++
+}
+
+if(t >= month){
+monthCount++
 }
 })
 
-document.getElementById("todayCount").innerText = count
-document.getElementById("todayTotal").innerText = (count*3000).toLocaleString('id-ID')
+document.getElementById("d1").innerText = dayCount
+document.getElementById("d2").innerText = weekCount
+document.getElementById("d3").innerText = monthCount
+
+document.getElementById("t1").innerText = (dayCount*3000).toLocaleString('id-ID')
+document.getElementById("t2").innerText = (weekCount*3000).toLocaleString('id-ID')
+document.getElementById("t3").innerText = (monthCount*3000).toLocaleString('id-ID')
 
 }
 
