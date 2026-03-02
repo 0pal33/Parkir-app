@@ -160,9 +160,11 @@ onScan
 );
 }
 
-window.stopScan=function(){
+window.stopScan = async function(){
 if(scanner){
-scanner.stop();
+await scanner.stop().catch(()=>{});
+scanner.clear();
+scanner = null;
 }
 showHome();
 }
@@ -171,6 +173,8 @@ showHome();
 
 window.showManual=function(){
 showManualState();
+document.getElementById("manualInput").value="";
+scanLocked=false;
 }
 
 window.cancelManual=function(){
@@ -189,6 +193,8 @@ alert("3 digit");
 return;
 }
 
+document.getElementById("manualInput").value="";
+scanLocked=false;
 onScan("Parkir-"+val);
 }
 
@@ -202,7 +208,9 @@ if(!text.startsWith("Parkir-")) return;
 scanLocked=true;
 
 if(scanner){
-await scanner.stop();
+await scanner.stop().catch(()=>{});
+scanner.clear();
+scanner = null;
 }
 
 hideAll();
@@ -236,25 +244,8 @@ let now=new Date();
 let wStart=new Date(start.toLocaleString("en-US",{timeZone:"Asia/Jakarta"}));
 let wNow=new Date(now.toLocaleString("en-US",{timeZone:"Asia/Jakarta"}));
 
-let durasi=1;
-
-let startHour=wStart.getHours();
-
-if(startHour>=21){
-
-if(wNow.getHours()<6){
-durasi=1;
-}else{
-durasi=daysBetween(wStart,wNow)+1;
-}
-
-}else{
-
-durasi=daysBetween(wStart,wNow)+1;
-
-}
-
-let tarif=durasi*3000;
+let durasi = hitungDurasiWAHAYE(wStart, wNow);
+let tarif = durasi * 3000;
 
 document.getElementById("resultBox").innerHTML=`
 <h3>${kode}</h3>
@@ -278,30 +269,89 @@ let d2=new Date(b.getFullYear(),b.getMonth(),b.getDate());
 return Math.floor((d2-d1)/86400000);
 }
 
+/* ===== HELPER WAHAYE ===== */
+
+function hitungDurasiWAHAYE(wStart, wNow){
+
+let startHour = wStart.getHours();
+
+// ===== MASUK MALAM =====
+if(startHour >= 21){
+
+let anchor = new Date(wStart);
+anchor.setDate(anchor.getDate()+1);
+anchor.setHours(6,0,0,0);
+
+// sebelum 06:00 → masih hari 1
+if(wNow < anchor){
+return 1;
+}
+
+// setelah 06:00 → lanjut normal
+let today = new Date(wNow.getFullYear(), wNow.getMonth(), wNow.getDate());
+let base  = new Date(anchor.getFullYear(), anchor.getMonth(), anchor.getDate());
+
+let diff = Math.floor((today-base)/86400000);
+
+return diff + 2;
+}
+
+// ===== MASUK NORMAL =====
+else{
+
+let today = new Date(wNow.getFullYear(), wNow.getMonth(), wNow.getDate());
+let base  = new Date(wStart.getFullYear(), wStart.getMonth(), wStart.getDate());
+
+let diff = Math.floor((today-base)/86400000);
+
+return diff + 1;
+}
+
+}
+
 /* ===== ACTION ===== */
 
-window.scanUlang=function(){
-showHome();
+window.scanUlang = async function(){
+scanLocked=false;
+
+if(scanner){
+await scanner.stop().catch(()=>{});
+scanner.clear();
+scanner = null;
+}
+
+startScan();
 }
 
 window.checkin=async function(k){
-await supabase.from('parkir').insert({
+const { error } = await supabase.from('parkir').insert({
 kode:k,
 status:'on',
 checkin_at:new Date()
 });
-alert("Checkin sukses");
-showHome();
+
+if(error){
+alert("Gagal checkin");
+return;
+}
+
+scanLocked=false;
+await onScan(k);
 }
 
 window.checkout=async function(k){
-await supabase.from('parkir')
+const { error } = await supabase.from('parkir')
 .update({status:'off',checkout_at:new Date()})
 .eq('kode',k)
 .eq('status','on');
 
-alert("Checkout sukses");
-showHome();
+if(error){
+alert("Gagal checkout");
+return;
+}
+
+scanLocked=false;
+await onScan(k);
 }
 
 window.cancelParkir=async function(k){
@@ -318,19 +368,23 @@ let wStart=new Date(start.toLocaleString("en-US",{timeZone:"Asia/Jakarta"}));
 
 if(wStart.getHours()<21){
 
-await supabase
+const { error } = await supabase
 .from('parkir')
 .delete()
 .eq('kode',k)
 .eq('status','on');
 
-alert("Dibatalkan");
+if(error){
+alert("Gagal batal parkir");
+return;
+}
 
 }else{
 alert("Tidak bisa dibatalkan setelah 21:00");
 }
 
-showHome();
+scanLocked=false;
+await onScan(k);
 }
 
 showHome();
