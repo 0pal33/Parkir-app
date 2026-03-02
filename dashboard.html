@@ -67,8 +67,11 @@ box-shadow:0 4px 8px rgba(0,0,0,0.1);
 <body>
 
 <div class="topbar">
-<h2>Dashboard</h2>
-<button class="logout" onclick="logout()">Logout</button>
+<h3>Dashboard</h3>
+<div>
+<button id="resetBtn" class="orange" style="display:none" onclick="resetData()">Reset Data Test</button>
+<button class="red square" onclick="logout()">⏻</button>
+</div>
 </div>
 
 <!-- SLIDER LAPORAN -->
@@ -103,6 +106,12 @@ box-shadow:0 4px 8px rgba(0,0,0,0.1);
 <script>
 
 async function loadDashboard(){
+
+const { data: { user } } = await supabase.auth.getUser();
+
+if(user?.email === "fakha3161@gmail.com"){
+document.getElementById("resetBtn").style.display = "inline-block";
+}
 
 // =================
 // PARKIR AKTIF
@@ -180,6 +189,26 @@ window.location.href="admin.html"
 }
 
 loadDashboard()
+
+async function resetData(){
+
+if(!confirm("Yakin hapus semua data parkir?")){
+return;
+}
+
+const { error } = await supabase
+.from("parkir")
+.delete()
+.neq("kode","");
+
+if(error){
+alert("Gagal reset data");
+return;
+}
+
+alert("Data test berhasil dihapus");
+location.reload();
+}
 
 </script>
 
