@@ -64,7 +64,8 @@ alert("Login gagal")
 return
 }
 
-window.location.href="dashboard.html"
+localStorage.setItem("adminLogin","true");
+window.location.href="dashboard.html";
 }
 
 </script>
