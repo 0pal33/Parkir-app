@@ -2,10 +2,39 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Cache-Control" content="no-store" />
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+
 <title>Dashboard</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
+
+<script>
+
+// cek login lokal
+const user = localStorage.getItem("adminLogin");
+
+if(!user){
+window.location.href = "admin.html";
+}
+
+// cek session supabase
+async function checkSession(){
+
+const { data:{session} } = await supabase.auth.getSession()
+
+if(!session){
+localStorage.removeItem("adminLogin")
+window.location.href="admin.html"
+}
+
+}
+
+checkSession()
+
+</script>
 
 <style>
 body{
@@ -274,12 +303,20 @@ document.getElementById("t3").innerText = (monthCount*3000).toLocaleString('id-I
 }
 
 async function logout(){
-await supabase.auth.signOut()
-window.location.href="admin.html"
+
+await supabase.auth.signOut();
+
+localStorage.removeItem("adminLogin");
+
+window.location.href="admin.html";
+
 }
 
 loadDashboard()
-setInterval(loadDashboard,10000)
+
+setInterval(async ()=>{
+await loadDashboard()
+},10000)
 
 async function resetData(){
 
