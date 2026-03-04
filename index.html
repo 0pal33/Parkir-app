@@ -16,10 +16,7 @@ margin:0;
 display:flex;
 flex-direction:column;
 min-height:100vh;
-height:100dvh;
-overflow:hidden;
 text-align:center;
-overscroll-behavior:none;
 }
 
 /* ===== SPACE ===== */
@@ -31,6 +28,7 @@ font-weight:bold;
 
 .middle{
 flex:1;
+min-height:60vh;
 display:flex;
 justify-content:center;
 align-items:center;
@@ -38,8 +36,7 @@ flex-direction:column;
 }
 
 .bottom{
-padding:15px;
-padding-bottom:calc(20px + env(safe-area-inset-bottom));
+padding:20px 15px 40px 15px;
 background:white;
 }
 
@@ -206,7 +203,7 @@ showManualState();
 
 window.manualOK=function(){
 
-let val=document.getElementById("manualInput").value;
+let val=document.getElementById("manualInput").value.replace(/\D/g,'');
 if(val.length!==3){
 alert("3 digit");
 return;
@@ -234,14 +231,22 @@ scanner = null;
 
 hideAll();
 
+document.getElementById("resultBox").innerHTML="Memproses...";
+
 let kode=text;
 
-const {data}=await supabase
+const {data,error}=await supabase
 .from('parkir')
 .select('*')
 .eq('kode',kode)
 .eq('status','on')
 .maybeSingle();
+
+if(error){
+document.getElementById("resultBox").innerHTML="Koneksi bermasalah";
+scanLocked=false;
+return;
+}
 
 if(!data){
 
@@ -393,12 +398,24 @@ await onScan(k);
 
 window.cancelParkir=async function(k){
 
-const {data}=await supabase
+const {data,error}=await supabase
 .from('parkir')
 .select('*')
 .eq('kode',k)
 .eq('status','on')
-.single();
+.maybeSingle();
+
+if(error){
+alert("Koneksi bermasalah");
+scanLocked=false;
+return;
+}
+
+if(!data){
+scanLocked=false;
+await onScan(k);
+return;
+}
 
 let start=new Date(data.checkin_at);
 let wStart=new Date(start.toLocaleString("en-US",{timeZone:"Asia/Jakarta"}));
