@@ -19,6 +19,7 @@ min-height:100vh;
 height:100dvh;
 overflow:hidden;
 text-align:center;
+overscroll-behavior:none;
 }
 
 /* ===== SPACE ===== */
@@ -38,6 +39,7 @@ flex-direction:column;
 
 .bottom{
 padding:15px;
+padding-bottom:calc(20px + env(safe-area-inset-bottom));
 background:white;
 }
 
@@ -85,7 +87,11 @@ Selamat datang di layanan WAHAYE PARKIR
 
 <div id="manualBox" style="display:none">
 Parkir-<br><br>
-<input id="manualInput" maxlength="3">
+<input id="manualInput"
+maxlength="3"
+inputmode="numeric"
+pattern="[0-9]*"
+type="tel">
 <br><br>
 <button class="green" onclick="manualOK()">✓</button>
 </div>
@@ -186,6 +192,7 @@ showHome();
 window.showManual=function(){
 showManualState();
 document.getElementById("manualInput").value="";
+document.getElementById("manualInput").focus();
 scanLocked=false;
 }
 
