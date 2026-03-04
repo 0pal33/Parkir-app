@@ -15,7 +15,9 @@ background:#eee;
 margin:0;
 display:flex;
 flex-direction:column;
-height:100vh;
+min-height:100vh;
+height:100dvh;
+overflow:hidden;
 text-align:center;
 }
 
@@ -148,14 +150,24 @@ window.location.href="admin.html"
 
 /* ===== SCAN ===== */
 
-window.startScan=function(){
+window.startScan=async function(){
 
 showScan();
+
+if(scanner){
+await scanner.stop().catch(()=>{});
+scanner.clear();
+scanner = null;
+}
 
 scanner=new Html5Qrcode("reader");
 scanner.start(
 {facingMode:currentCamera},
-{fps:10,qrbox:250},
+{
+fps:10,
+qrbox:250,
+focusMode:"continuous"
+},
 onScan
 );
 }
@@ -324,6 +336,7 @@ startScan();
 }
 
 window.checkin=async function(k){
+
 const { error } = await supabase.from('parkir').insert({
 kode:k,
 status:'on',
@@ -335,8 +348,25 @@ alert("Gagal checkin");
 return;
 }
 
+hideAll();
+
+document.getElementById("resultBox").innerHTML = `
+<div style="
+font-size:20px;
+font-weight:bold;
+color:#2ecc71;
+">
+Checkin berhasil ✓
+</div>
+`;
+
+document.getElementById("bottomButtons").innerHTML=`
+<button class="orange" onclick="scanUlang()">Scan Ulang</button>
+<button class="blue" onclick="showManual()">Ketik Manual</button>
+<button class="blue" onclick="goAdmin()">Login Admin</button>
+`;
+
 scanLocked=false;
-await onScan(k);
 }
 
 window.checkout=async function(k){
