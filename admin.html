@@ -2,71 +2,631 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Login Admin</title>
+<title>WAHAYE PARKIR</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://unpkg.com/html5-qrcode"></script>
 <script src="config.js"></script>
 
 <style>
 body{
 font-family:Arial;
 background:#eee;
+margin:0;
+display:flex;
+flex-direction:column;
+min-height:100vh;
 text-align:center;
-padding:20px;
 }
-input{
-width:80%;
-padding:12px;
-margin:10px;
-border-radius:10px;
-border:1px solid #ccc;
-}
-button{
+
+/* ===== SPACE ===== */
+.top{
 padding:15px;
-margin:10px;
+background:white;
+font-weight:bold;
+}
+
+.middle{
+flex:1;
+min-height:60vh;
+display:flex;
+justify-content:center;
+align-items:center;
+flex-direction:column;
+}
+
+.bottom{
+padding:20px 15px 40px 15px;
+background:white;
+}
+
+/* ===== BUTTON ===== */
+button{
+padding:15px 20px;
+margin:6px;
 border:none;
 border-radius:12px;
 font-size:16px;
 cursor:pointer;
 }
+
+.orange{background:orange;color:white}
 .blue{background:#3498db;color:white}
 .red{background:#e74c3c;color:white}
+.green{background:#2ecc71;color:white}
+
+#reader{
+width:300px;
+}
+
+input{
+width:120px;
+height:50px;
+font-size:24px;
+text-align:center;
+border-radius:12px;
+border:2px solid #ccc;
+}
 </style>
 </head>
 
 <body>
 
-<h2>Login Admin</h2>
+<!-- ===== TOP ===== -->
+<div class="top" style="display:flex;align-items:center;justify-content:center;gap:10px">
 
-<input id="email" placeholder="Email"><br>
-<input id="password" type="password" placeholder="Password"><br>
+<button onclick="goAdmin()" style="
+background:#2ecc71;
+border:none;
+width:36px;
+height:36px;
+border-radius:50%;
+display:flex;
+align-items:center;
+justify-content:center;
+cursor:pointer;
+">
 
-<button class="blue" onclick="login()">Login</button>
-<button class="red" onclick="back()">Batal</button>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="18" fill="white">
+<path d="M288 32c0-17.7-14.3-32-32-32s-32 14.3-32 32V256c0 17.7 14.3 32 32 32s32-14.3 32-32V32zM143.5 120.6c13.6-11.3 15.4-31.5 4.1-45.1s-31.5-15.4-45.1-4.1C49.7 115.4 16 181.8 16 256c0 132.5 107.5 240 240 240s240-107.5 240-240c0-74.2-33.8-140.6-86.6-184.6c-13.6-11.3-33.8-9.4-45.1 4.1s-9.4 33.8 4.1 45.1c38.9 32.3 63.7 81.2 63.7 135.3c0 97.2-78.8 176-176 176s-176-78.8-176-176c0-54.1 24.7-103 63.7-135.3z"/>
+</svg>
+
+</button>
+
+Selamat datang di layanan WAHAYE PARKIR
+
+</div>
+
+<!-- ===== MIDDLE ===== -->
+<div class="middle">
+
+<div id="reader" style="display:none"></div>
+
+<div id="manualBox" style="display:none">
+Parkir-<br><br>
+<input id="manualInput"
+maxlength="3"
+inputmode="numeric"
+pattern="[0-9]*"
+type="tel">
+<br><br>
+<button class="green" onclick="manualOK()">✓</button>
+</div>
+
+<div id="resultBox"></div>
+
+</div>
+
+<!-- ===== BOTTOM ===== -->
+<div class="bottom" id="bottomButtons"></div>
 
 <script>
+let scanner;
+let scanLocked=false;
+let currentCamera="environment";
 
-window.back = function(){
-window.location.href="index.html"
+/* ===== BUTTON STATE ===== */
+
+/* ===== BULANAN MENU ===== */
+
+function showBulanan(){
+
+hideAll();
+
+document.getElementById("resultBox").innerHTML=`
+<h3>Layanan Bulanan</h3>
+
+<button class="green" onclick="formTambah()">Tambah</button>
+
+<button class="orange" onclick="listBayar()">Bayar</button>
+`;
+
+document.getElementById("bottomButtons").innerHTML=`
+<button class="blue" onclick="showHome()">Kembali</button>
+`;
+
 }
 
-window.login = async function(){
+/* ===== FORM TAMBAH ===== */
 
-let email=document.getElementById("email").value
-let password=document.getElementById("password").value
+function formTambah(){
 
-const { data, error } = await supabase.auth.signInWithPassword({
-email,password
-})
+hideAll();
 
-if(error){
-alert("Login gagal")
+document.getElementById("resultBox").innerHTML=`
+
+<h3>Tambah Pelanggan</h3>
+
+<input id="namaBulanan" placeholder="Nama (wajib)" style="width:220px;height:40px;font-size:16px"><br>
+
+<input id="platBulanan" placeholder="Plat (opsional)" style="width:220px;height:40px;font-size:16px"><br>
+
+<input id="tempoBulanan" type="number" min="1" max="31" placeholder="Tanggal jatuh tempo" style="width:220px;height:40px;font-size:16px"><br><br><br>
+
+<button class="green" onclick="simpanBulanan()">Simpan</button>
+
+`;
+
+document.getElementById("bottomButtons").innerHTML=`
+<button class="blue" onclick="showBulanan()">Kembali</button>
+`;
+
+}
+
+/* ===== SIMPAN ===== */
+
+async function simpanBulanan(){
+
+let nama=document.getElementById("namaBulanan").value.trim()
+let plat=document.getElementById("platBulanan").value
+let tempo=parseInt(document.getElementById("tempoBulanan").value)
+
+if(!nama || !tempo){
+alert("Nama dan jatuh tempo wajib")
 return
 }
 
-localStorage.setItem("adminLogin","true");
-window.location.href="dashboard.html";
+if(tempo < 1 || tempo > 31){
+alert("Tanggal harus 1 - 31")
+return
 }
+
+const { error } = await supabase.from('bulanan').insert({
+
+nama:nama,
+plat:plat,
+jatuh_tempo:tempo,
+status:'aktif'
+
+})
+
+if(error){
+alert("Gagal simpan")
+return
+}
+
+alert("Pelanggan berhasil ditambah")
+
+showBulanan()
+
+}
+
+/* ===== LIST BAYAR ===== */
+
+async function listBayar(){
+
+hideAll();
+
+document.getElementById("resultBox").innerHTML="Loading..."
+
+const {data}=await supabase
+.from('bulanan')
+.select('*')
+.eq('status','aktif')
+
+let html="<h3>Daftar Pelanggan</h3>"
+
+if(!data || data.length===0){
+document.getElementById("resultBox").innerHTML="<h3>Belum ada pelanggan</h3>";
+
+document.getElementById("bottomButtons").innerHTML=`
+<button class="blue" onclick="showBulanan()">Kembali</button>
+`;
+
+return;
+}
+
+data.forEach(p=>{
+
+html+=`
+<div style="margin:10px;padding:10px;border:1px solid #ccc;border-radius:10px">
+
+<b>${p.nama}</b><br>
+
+Plat: ${p.plat || "-"}
+
+<br>
+
+Jatuh tempo: ${p.jatuh_tempo}
+
+<br><br>
+
+<button class="green" onclick="bayarBulanan('${p.id}')">Bayar</button>
+
+</div>
+`
+
+})
+
+document.getElementById("resultBox").innerHTML=html
+
+document.getElementById("bottomButtons").innerHTML=`
+<button class="blue" onclick="showBulanan()">Kembali</button>
+`
+
+}
+
+/* ===== BAYAR ===== */
+
+async function bayarBulanan(id){
+
+if(!confirm("Konfirmasi pembayaran pelanggan ini?")){
+return
+}
+
+const {error}=await supabase
+.from('bulanan')
+.update({
+last_paid_at:new Date()
+})
+.eq('id',id)
+
+if(error){
+alert("Gagal bayar")
+return
+}
+
+alert("Pembayaran berhasil")
+
+listBayar()
+
+}
+
+function showHome(){
+hideAll();
+document.getElementById("bottomButtons").innerHTML=`
+<button class="orange" onclick="startScan()">Start Scanning</button>
+<button class="blue" onclick="showManual()">Ketik Manual</button>
+<button class="green" onclick="showBulanan()">Bulanan</button>
+`;
+}
+
+function showScan(){
+hideAll();
+document.getElementById("reader").style.display="block";
+document.getElementById("bottomButtons").innerHTML=`
+<button class="red" onclick="stopScan()">Stop</button>
+`;
+}
+
+function showResult(){
+document.getElementById("bottomButtons").innerHTML=`
+<button class="orange" onclick="scanUlang()">Scan Ulang</button>
+<button class="blue" onclick="manualAgain()">Ketik Lagi</button>
+`;
+}
+
+function showManualState(){
+hideAll();
+document.getElementById("manualBox").style.display="block";
+document.getElementById("bottomButtons").innerHTML=`
+<button class="red" onclick="cancelManual()">Batal</button>
+`;
+}
+
+function hideAll(){
+document.getElementById("reader").style.display="none";
+document.getElementById("manualBox").style.display="none";
+document.getElementById("resultBox").innerHTML="";
+}
+
+/* ===== NAV ===== */
+
+window.goAdmin=function(){
+window.location.href="admin.html"
+}
+
+/* ===== SCAN ===== */
+
+window.startScan=async function(){
+
+showScan();
+
+if(scanner){
+await scanner.stop().catch(()=>{});
+scanner.clear();
+scanner = null;
+}
+
+scanner=new Html5Qrcode("reader");
+scanner.start(
+{facingMode:currentCamera},
+{
+fps:10,
+qrbox:250,
+focusMode:"continuous"
+},
+onScan
+);
+}
+
+window.stopScan = async function(){
+if(scanner){
+await scanner.stop().catch(()=>{});
+scanner.clear();
+scanner = null;
+}
+showHome();
+}
+
+/* ===== MANUAL ===== */
+
+window.showManual=function(){
+showManualState();
+document.getElementById("manualInput").value="";
+document.getElementById("manualInput").focus();
+scanLocked=false;
+}
+
+window.cancelManual=function(){
+showHome();
+}
+
+window.manualAgain=function(){
+showManualState();
+}
+
+window.manualOK=function(){
+
+let val=document.getElementById("manualInput").value.replace(/\D/g,'');
+if(val.length!==3){
+alert("3 digit");
+return;
+}
+
+document.getElementById("manualInput").value="";
+scanLocked=false;
+onScan("Parkir-"+val);
+}
+
+/* ===== SCAN RESULT ===== */
+
+async function onScan(text){
+
+if(scanLocked) return;
+if(!text.startsWith("Parkir-")) return;
+
+scanLocked=true;
+
+if(scanner){
+await scanner.stop().catch(()=>{});
+scanner.clear();
+scanner = null;
+}
+
+hideAll();
+
+document.getElementById("resultBox").innerHTML="Memproses...";
+
+let kode=text;
+
+const {data,error}=await supabase
+.from('parkir')
+.select('*')
+.eq('kode',kode)
+.eq('status','on')
+.maybeSingle();
+
+if(error){
+document.getElementById("resultBox").innerHTML="Koneksi bermasalah";
+scanLocked=false;
+return;
+}
+
+if(!data){
+
+document.getElementById("resultBox").innerHTML=`
+<h3>${kode}</h3>
+<button class="green" onclick="checkin('${kode}')">CHECK-IN</button>
+`;
+
+showResult();
+scanLocked=false;
+return;
+}
+
+/* ===== DURASI BARU ===== */
+
+let start=new Date(data.checkin_at);
+let now=new Date();
+
+let wStart=new Date(start.toLocaleString("en-US",{timeZone:"Asia/Jakarta"}));
+let wNow=new Date(now.toLocaleString("en-US",{timeZone:"Asia/Jakarta"}));
+
+let durasi = hitungDurasiWAHAYE(wStart, wNow);
+let tarif = durasi * 3000;
+
+document.getElementById("resultBox").innerHTML=`
+<h3>${kode}</h3>
+Mulai: ${wStart.toLocaleString('id-ID')}
+<br>Durasi: ${durasi} Hari
+<br>Tarif: Rp ${tarif.toLocaleString('id-ID')}
+<br><br>
+<button class="orange" onclick="checkout('${kode}')">Checkout</button>
+<button class="red" onclick="cancelParkir('${kode}')">Batal Parkir</button>
+`;
+
+showResult();
+scanLocked=false;
+}
+
+/* ===== HITUNG HARI WIB ===== */
+
+function daysBetween(a,b){
+let d1=new Date(a.getFullYear(),a.getMonth(),a.getDate());
+let d2=new Date(b.getFullYear(),b.getMonth(),b.getDate());
+return Math.floor((d2-d1)/86400000);
+}
+
+/* ===== HELPER WAHAYE ===== */
+
+function hitungDurasiWAHAYE(wStart, wNow){
+
+let startHour = wStart.getHours();
+
+// ===== MASUK MALAM =====
+if(startHour >= 21){
+
+let anchor = new Date(wStart);
+anchor.setDate(anchor.getDate()+1);
+anchor.setHours(6,0,0,0);
+
+// sebelum 06:00 → masih hari 1
+if(wNow < anchor){
+return 1;
+}
+
+// setelah 06:00 → lanjut normal
+let today = new Date(wNow.getFullYear(), wNow.getMonth(), wNow.getDate());
+let base  = new Date(anchor.getFullYear(), anchor.getMonth(), anchor.getDate());
+
+let diff = Math.floor((today-base)/86400000);
+
+return diff + 2;
+}
+
+// ===== MASUK NORMAL =====
+else{
+
+let today = new Date(wNow.getFullYear(), wNow.getMonth(), wNow.getDate());
+let base  = new Date(wStart.getFullYear(), wStart.getMonth(), wStart.getDate());
+
+let diff = Math.floor((today-base)/86400000);
+
+return diff + 1;
+}
+
+}
+
+/* ===== ACTION ===== */
+
+window.scanUlang = async function(){
+scanLocked=false;
+
+if(scanner){
+await scanner.stop().catch(()=>{});
+scanner.clear();
+scanner = null;
+}
+
+startScan();
+}
+
+window.checkin=async function(k){
+
+const { error } = await supabase.from('parkir').insert({
+kode:k,
+status:'on',
+checkin_at:new Date()
+});
+
+if(error){
+alert("Gagal checkin");
+return;
+}
+
+hideAll();
+
+document.getElementById("resultBox").innerHTML = `
+<div style="
+font-size:20px;
+font-weight:bold;
+color:#2ecc71;
+">
+Checkin berhasil ✓
+</div>
+`;
+
+document.getElementById("bottomButtons").innerHTML=`
+<button class="orange" onclick="scanUlang()">Scan Ulang</button>
+<button class="blue" onclick="showManual()">Ketik Manual</button>
+<button class="green" onclick="showBulanan()">Bulanan</button>
+`;
+
+scanLocked=false;
+}
+
+window.checkout=async function(k){
+const { error } = await supabase.from('parkir')
+.update({status:'off',checkout_at:new Date()})
+.eq('kode',k)
+.eq('status','on');
+
+if(error){
+alert("Gagal checkout");
+return;
+}
+
+scanLocked=false;
+await onScan(k);
+}
+
+window.cancelParkir=async function(k){
+
+const {data,error}=await supabase
+.from('parkir')
+.select('*')
+.eq('kode',k)
+.eq('status','on')
+.maybeSingle();
+
+if(error){
+alert("Koneksi bermasalah");
+scanLocked=false;
+return;
+}
+
+if(!data){
+scanLocked=false;
+await onScan(k);
+return;
+}
+
+let start=new Date(data.checkin_at);
+let wStart=new Date(start.toLocaleString("en-US",{timeZone:"Asia/Jakarta"}));
+
+if(wStart.getHours()<21){
+
+const { error } = await supabase
+.from('parkir')
+.delete()
+.eq('kode',k)
+.eq('status','on');
+
+if(error){
+alert("Gagal batal parkir");
+return;
+}
+
+}else{
+alert("Tidak bisa dibatalkan setelah 21:00");
+}
+
+scanLocked=false;
+await onScan(k);
+}
+
+showHome();
 
 </script>
 
