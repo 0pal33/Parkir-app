@@ -30,9 +30,10 @@ font-weight:bold;
 flex:1;
 min-height:60vh;
 display:flex;
-justify-content:center;
+justify-content:flex-start;
 align-items:center;
 flex-direction:column;
+padding-top:20px;
 }
 
 .bottom{
@@ -78,13 +79,16 @@ border:2px solid #ccc;
 <button onclick="goAdmin()" style="
 background:#2ecc71;
 border:none;
-width:36px;
-height:36px;
+width:42px;
+height:42px;
+min-width:42px;
+min-height:42px;
 border-radius:50%;
 display:flex;
 align-items:center;
 justify-content:center;
 cursor:pointer;
+flex-shrink:0;
 ">
 
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="18" fill="white">
@@ -223,6 +227,7 @@ const {data}=await supabase
 .from('bulanan')
 .select('*')
 .eq('status','aktif')
+.order('nama')
 
 let html="<h3>Daftar Pelanggan</h3>"
 
@@ -293,12 +298,17 @@ listBayar()
 }
 
 function showHome(){
+
 hideAll();
+
 document.getElementById("bottomButtons").innerHTML=`
 <button class="orange" onclick="startScan()">Start Scanning</button>
 <button class="blue" onclick="showManual()">Ketik Manual</button>
 <button class="green" onclick="showBulanan()">Bulanan</button>
 `;
+
+loadReminder();
+
 }
 
 function showScan(){
@@ -328,6 +338,88 @@ function hideAll(){
 document.getElementById("reader").style.display="none";
 document.getElementById("manualBox").style.display="none";
 document.getElementById("resultBox").innerHTML="";
+}
+
+async function loadReminder(){
+
+const {data}=await supabase
+.from('bulanan')
+.select('*')
+.eq('status','aktif')
+
+if(!data) return
+
+let now = new Date()
+let today = now.getDate()
+let month = now.getMonth()
+let year = now.getFullYear()
+
+let lastDay = new Date(year, month + 1, 0).getDate()
+
+let html=""
+
+data.forEach(p=>{
+
+let tempo = p.jatuh_tempo
+
+let jatuhTempo = tempo
+
+if(tempo > lastDay){
+jatuhTempo = lastDay
+}
+
+let diff = jatuhTempo - today
+
+if(diff < 0){
+
+let nextMonthLastDay = new Date(year, month + 2, 0).getDate()
+
+let nextTempo = tempo
+
+if(tempo > nextMonthLastDay){
+nextTempo = nextMonthLastDay
+}
+
+diff = (lastDay - today) + nextTempo
+}
+
+if(diff <=5){
+
+let text=""
+
+if(diff===0) text="Hari ini"
+else if(diff===1) text="Besok"
+else text=diff+" hari lagi"
+
+html+=`
+<div style="
+background:#fff3cd;
+padding:10px;
+margin:6px;
+border-radius:10px;
+font-size:14px
+">
+⚠ <b>${p.nama}</b><br>
+Jatuh tempo ${text}
+</div>
+`
+
+}
+
+})
+
+if(html !== ""){
+document.getElementById("resultBox").innerHTML = `
+<h3>Reminder Pembayaran</h3>
+${html}
+`
+}else{
+document.getElementById("resultBox").innerHTML = `
+<div style="color:#777;font-size:14px">
+Tidak ada pembayaran yang mendekati jatuh tempo
+</div>
+`
+}
 }
 
 /* ===== NAV ===== */
