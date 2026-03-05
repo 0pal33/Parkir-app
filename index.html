@@ -73,8 +73,28 @@ border:2px solid #ccc;
 <body>
 
 <!-- ===== TOP ===== -->
-<div class="top">
+<div class="top" style="display:flex;align-items:center;justify-content:center;gap:10px">
+
+<button onclick="goAdmin()" style="
+background:#2ecc71;
+border:none;
+width:36px;
+height:36px;
+border-radius:50%;
+display:flex;
+align-items:center;
+justify-content:center;
+cursor:pointer;
+">
+
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="18" fill="white">
+<path d="M288 32c0-17.7-14.3-32-32-32s-32 14.3-32 32V256c0 17.7 14.3 32 32 32s32-14.3 32-32V32zM143.5 120.6c13.6-11.3 15.4-31.5 4.1-45.1s-31.5-15.4-45.1-4.1C49.7 115.4 16 181.8 16 256c0 132.5 107.5 240 240 240s240-107.5 240-240c0-74.2-33.8-140.6-86.6-184.6c-13.6-11.3-33.8-9.4-45.1 4.1s-9.4 33.8 4.1 45.1c38.9 32.3 63.7 81.2 63.7 135.3c0 97.2-78.8 176-176 176s-176-78.8-176-176c0-54.1 24.7-103 63.7-135.3z"/>
+</svg>
+
+</button>
+
 Selamat datang di layanan WAHAYE PARKIR
+
 </div>
 
 <!-- ===== MIDDLE ===== -->
@@ -107,12 +127,177 @@ let currentCamera="environment";
 
 /* ===== BUTTON STATE ===== */
 
+/* ===== BULANAN MENU ===== */
+
+function showBulanan(){
+
+hideAll();
+
+document.getElementById("resultBox").innerHTML=`
+<h3>Layanan Bulanan</h3>
+
+<button class="green" onclick="formTambah()">Tambah</button>
+
+<button class="orange" onclick="listBayar()">Bayar</button>
+`;
+
+document.getElementById("bottomButtons").innerHTML=`
+<button class="blue" onclick="showHome()">Kembali</button>
+`;
+
+}
+
+/* ===== FORM TAMBAH ===== */
+
+function formTambah(){
+
+hideAll();
+
+document.getElementById("resultBox").innerHTML=`
+
+<h3>Tambah Pelanggan</h3>
+
+<input id="namaBulanan" placeholder="Nama (wajib)" style="width:220px;height:40px;font-size:16px"><br>
+
+<input id="platBulanan" placeholder="Plat (opsional)" style="width:220px;height:40px;font-size:16px"><br>
+
+<input id="tempoBulanan" type="number" min="1" max="31" placeholder="Tanggal jatuh tempo" style="width:220px;height:40px;font-size:16px"><br><br><br>
+
+<button class="green" onclick="simpanBulanan()">Simpan</button>
+
+`;
+
+document.getElementById("bottomButtons").innerHTML=`
+<button class="blue" onclick="showBulanan()">Kembali</button>
+`;
+
+}
+
+/* ===== SIMPAN ===== */
+
+async function simpanBulanan(){
+
+let nama=document.getElementById("namaBulanan").value.trim()
+let plat=document.getElementById("platBulanan").value
+let tempo=parseInt(document.getElementById("tempoBulanan").value)
+
+if(!nama || !tempo){
+alert("Nama dan jatuh tempo wajib")
+return
+}
+
+if(tempo < 1 || tempo > 31){
+alert("Tanggal harus 1 - 31")
+return
+}
+
+const { error } = await supabase.from('bulanan').insert({
+
+nama:nama,
+plat:plat,
+jatuh_tempo:tempo,
+status:'aktif'
+
+})
+
+if(error){
+alert("Gagal simpan")
+return
+}
+
+alert("Pelanggan berhasil ditambah")
+
+showBulanan()
+
+}
+
+/* ===== LIST BAYAR ===== */
+
+async function listBayar(){
+
+hideAll();
+
+document.getElementById("resultBox").innerHTML="Loading..."
+
+const {data}=await supabase
+.from('bulanan')
+.select('*')
+.eq('status','aktif')
+
+let html="<h3>Daftar Pelanggan</h3>"
+
+if(!data || data.length===0){
+document.getElementById("resultBox").innerHTML="<h3>Belum ada pelanggan</h3>";
+
+document.getElementById("bottomButtons").innerHTML=`
+<button class="blue" onclick="showBulanan()">Kembali</button>
+`;
+
+return;
+}
+
+data.forEach(p=>{
+
+html+=`
+<div style="margin:10px;padding:10px;border:1px solid #ccc;border-radius:10px">
+
+<b>${p.nama}</b><br>
+
+Plat: ${p.plat || "-"}
+
+<br>
+
+Jatuh tempo: ${p.jatuh_tempo}
+
+<br><br>
+
+<button class="green" onclick="bayarBulanan('${p.id}')">Bayar</button>
+
+</div>
+`
+
+})
+
+document.getElementById("resultBox").innerHTML=html
+
+document.getElementById("bottomButtons").innerHTML=`
+<button class="blue" onclick="showBulanan()">Kembali</button>
+`
+
+}
+
+/* ===== BAYAR ===== */
+
+async function bayarBulanan(id){
+
+if(!confirm("Konfirmasi pembayaran pelanggan ini?")){
+return
+}
+
+const {error}=await supabase
+.from('bulanan')
+.update({
+last_paid_at:new Date()
+})
+.eq('id',id)
+
+if(error){
+alert("Gagal bayar")
+return
+}
+
+alert("Pembayaran berhasil")
+
+listBayar()
+
+}
+
 function showHome(){
 hideAll();
 document.getElementById("bottomButtons").innerHTML=`
 <button class="orange" onclick="startScan()">Start Scanning</button>
 <button class="blue" onclick="showManual()">Ketik Manual</button>
-<button class="blue" onclick="goAdmin()">Login Admin</button>
+<button class="green" onclick="showBulanan()">Bulanan</button>
 `;
 }
 
@@ -375,7 +560,7 @@ Checkin berhasil ✓
 document.getElementById("bottomButtons").innerHTML=`
 <button class="orange" onclick="scanUlang()">Scan Ulang</button>
 <button class="blue" onclick="showManual()">Ketik Manual</button>
-<button class="blue" onclick="goAdmin()">Login Admin</button>
+<button class="green" onclick="showBulanan()">Bulanan</button>
 `;
 
 scanLocked=false;
