@@ -322,16 +322,27 @@ background:${bg};
 font-size:14px
 ">
 
-<div style="text-align:left">
+<div style="
+display:flex;
+gap:12px;
+align-items:center;
+font-size:14px
+">
 
-<b>${p.nama}</b><br>
-${p.motor || "-"}<br>
-JT: ${p.jatuh_tempo}
+<b style="min-width:80px">${p.nama}</b>
+
+<span style="min-width:80px">
+${p.motor || "-"}
+</span>
+
+<span>
+JT:${p.jatuh_tempo}
+</span>
 
 </div>
 
 <button class="green"
-style="padding:10px 16px;font-size:14px"
+style="padding:6px 14px;font-size:13px"
 onclick="bayarBulanan('${p.id}')">
 Bayar
 </button>
