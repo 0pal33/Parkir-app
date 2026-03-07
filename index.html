@@ -310,20 +310,31 @@ if(todayDate>paid) expired=true
 let bg = expired ? "#ffd6d6" : "#ffffff"
 
 html+=`
-<div style="margin:10px;padding:10px;border:1px solid #ccc;border-radius:10px;background:${bg}">
+<div style="
+display:flex;
+align-items:center;
+justify-content:space-between;
+margin:8px 10px;
+padding:10px;
+border:1px solid #ccc;
+border-radius:10px;
+background:${bg};
+font-size:14px
+">
+
+<div style="text-align:left">
 
 <b>${p.nama}</b><br>
+${p.motor || "-"}<br>
+JT: ${p.jatuh_tempo}
 
-Motor: ${p.motor || "-"}
+</div>
 
-<br>
-
-Jatuh tempo: ${p.jatuh_tempo}<br>
-Aktif sampai: ${p.paid_until ? new Date(p.paid_until).toLocaleDateString('id-ID') : "-"}
-
-<br><br>
-
-<button class="green" onclick="bayarBulanan('${p.id}')">Bayar</button>
+<button class="green"
+style="padding:10px 16px;font-size:14px"
+onclick="bayarBulanan('${p.id}')">
+Bayar
+</button>
 
 </div>
 `
