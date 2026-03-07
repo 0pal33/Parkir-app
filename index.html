@@ -179,9 +179,45 @@ document.getElementById("resultBox").innerHTML=`
 
 <input id="namaBulanan" placeholder="Nama (wajib)" style="width:220px;height:40px;font-size:16px"><br>
 
-<input id="platBulanan" placeholder="Plat (opsional)" style="width:220px;height:40px;font-size:16px"><br>
+<input id="motorBulanan" placeholder="Motornya apa?" style="width:220px;height:40px;font-size:16px"><br>
 
-<input id="tempoBulanan" type="number" min="1" max="31" placeholder="Tanggal jatuh tempo" style="width:220px;height:40px;font-size:16px"><br><br><br>
+<select id="tempoBulanan" style="width:220px;height:40px;font-size:16px">
+
+<option value="">Tanggal jatuh tempo</option>
+
+<option value="1">1</option>
+<option value="2">2</option>
+<option value="3">3</option>
+<option value="4">4</option>
+<option value="5">5</option>
+<option value="6">6</option>
+<option value="7">7</option>
+<option value="8">8</option>
+<option value="9">9</option>
+<option value="10">10</option>
+<option value="11">11</option>
+<option value="12">12</option>
+<option value="13">13</option>
+<option value="14">14</option>
+<option value="15">15</option>
+<option value="16">16</option>
+<option value="17">17</option>
+<option value="18">18</option>
+<option value="19">19</option>
+<option value="20">20</option>
+<option value="21">21</option>
+<option value="22">22</option>
+<option value="23">23</option>
+<option value="24">24</option>
+<option value="25">25</option>
+<option value="26">26</option>
+<option value="27">27</option>
+<option value="28">28</option>
+<option value="29">29</option>
+<option value="30">30</option>
+<option value="31">31</option>
+
+</select><br><br><br>
 
 <button class="green" onclick="simpanBulanan()">Simpan</button>
 
@@ -198,7 +234,7 @@ document.getElementById("bottomButtons").innerHTML=`
 async function simpanBulanan(){
 
 let nama=document.getElementById("namaBulanan").value.trim()
-let plat=document.getElementById("platBulanan").value
+let motor=document.getElementById("motorBulanan").value
 let tempo=parseInt(document.getElementById("tempoBulanan").value)
 
 if(!nama || !tempo){
@@ -214,18 +250,22 @@ return
 const { error } = await supabase.from('bulanan').insert({
 
 nama:nama,
-plat:plat,
+motor:motor,
 jatuh_tempo:tempo,
 status:'aktif'
 
 })
 
 if(error){
-alert("Gagal simpan")
+alert("Gagal simpan: "+error.message)
 return
 }
 
 alert("Pelanggan berhasil ditambah")
+
+document.getElementById("namaBulanan").value=""
+document.getElementById("motorBulanan").value=""
+document.getElementById("tempoBulanan").value=""
 
 showBulanan()
 
@@ -243,9 +283,9 @@ const {data}=await supabase
 .from('bulanan')
 .select('*')
 .eq('status','aktif')
-.order('nama')
+.order('jatuh_tempo')
 
-let html="<h3>Daftar Pelanggan</h3>"
+let html="<h3>Daftar Pelanggan ("+(data ? data.length : 0)+")</h3>"
 
 if(!data || data.length===0){
 document.getElementById("resultBox").innerHTML="<h3>Belum ada pelanggan</h3>";
@@ -259,16 +299,27 @@ return;
 
 data.forEach(p=>{
 
+let expired=false
+
+if(p.paid_until){
+let todayDate=new Date()
+let paid=new Date(p.paid_until)
+if(todayDate>paid) expired=true
+}
+
+let bg = expired ? "#ffd6d6" : "#ffffff"
+
 html+=`
-<div style="margin:10px;padding:10px;border:1px solid #ccc;border-radius:10px">
+<div style="margin:10px;padding:10px;border:1px solid #ccc;border-radius:10px;background:${bg}">
 
 <b>${p.nama}</b><br>
 
-Plat: ${p.plat || "-"}
+Motor: ${p.motor || "-"}
 
 <br>
 
-Jatuh tempo: ${p.jatuh_tempo}
+Jatuh tempo: ${p.jatuh_tempo}<br>
+Aktif sampai: ${p.paid_until ? new Date(p.paid_until).toLocaleDateString('id-ID') : "-"}
 
 <br><br>
 
@@ -295,9 +346,16 @@ if(!confirm("Konfirmasi pembayaran pelanggan ini?")){
 return
 }
 
+const today = new Date()
+
+const nextMonth = new Date(today)
+nextMonth.setMonth(today.getMonth()+1)
+nextMonth.setDate(today.getDate())
+
 const {error}=await supabase
 .from('bulanan')
 .update({
+paid_until:nextMonth,
 last_paid_at:new Date()
 })
 .eq('id',id)
@@ -307,7 +365,7 @@ alert("Gagal bayar")
 return
 }
 
-alert("Pembayaran berhasil")
+alert("Pembayaran berhasil sampai "+nextMonth.toLocaleDateString())
 
 listBayar()
 
@@ -375,6 +433,14 @@ let lastDay = new Date(year, month + 1, 0).getDate()
 let html=""
 
 data.forEach(p=>{
+
+let expired=false
+
+if(p.paid_until){
+let todayDate=new Date()
+let paid=new Date(p.paid_until)
+if(todayDate>paid) expired=true
+}
 
 let tempo = p.jatuh_tempo
 
@@ -766,6 +832,8 @@ alert("Tidak bisa dibatalkan setelah 21:00");
 scanLocked=false;
 await onScan(k);
 }
+
+const reminderInterval = setInterval(loadReminder,30000)
 
 showHome();
 
