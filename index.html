@@ -416,6 +416,10 @@ document.getElementById("resultBox").innerHTML="";
 
 async function loadReminder(){
 
+if(!document.getElementById("bottomButtons").innerHTML.includes("Start Scanning")){
+return
+}
+
 const {data}=await supabase
 .from('bulanan')
 .select('*')
