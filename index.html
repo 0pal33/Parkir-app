@@ -7,6 +7,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://unpkg.com/html5-qrcode"></script>
 <script src="config.js"></script>
+<script src="parkirEngine.js"></script>
 
 <style>
 body{
@@ -657,14 +658,11 @@ return;
 
 /* ===== DURASI BARU ===== */
 
-let start=new Date(data.checkin_at);
-let now=new Date();
+let start = new Date(data.checkin_at)
+let now = new Date()
 
-let wStart=new Date(start.toLocaleString("en-US",{timeZone:"Asia/Jakarta"}));
-let wNow=new Date(now.toLocaleString("en-US",{timeZone:"Asia/Jakarta"}));
-
-let durasi = hitungDurasiWAHAYE(wStart, wNow);
-let tarif = durasi * 3000;
+let durasi = hitungDurasiParkir(start, now)
+let tarif = hitungTarifParkir(durasi)
 
 document.getElementById("resultBox").innerHTML=`
 
@@ -673,7 +671,7 @@ ${kode}
 </div>
 
 <div style="font-size:18px;margin-bottom:5px">
-Mulai: ${wStart.toLocaleString('id-ID')}
+Mulai: ${start.toLocaleString('id-ID')}
 </div>
 
 <div style="font-size:22px;font-weight:bold">
@@ -701,54 +699,6 @@ Batal Parkir
 
 showResult();
 scanLocked=false;
-}
-
-/* ===== HITUNG HARI WIB ===== */
-
-function daysBetween(a,b){
-let d1=new Date(a.getFullYear(),a.getMonth(),a.getDate());
-let d2=new Date(b.getFullYear(),b.getMonth(),b.getDate());
-return Math.floor((d2-d1)/86400000);
-}
-
-/* ===== HELPER WAHAYE ===== */
-
-function hitungDurasiWAHAYE(wStart, wNow){
-
-let startHour = wStart.getHours();
-
-// ===== MASUK MALAM =====
-if(startHour >= 21){
-
-let anchor = new Date(wStart);
-anchor.setDate(anchor.getDate()+1);
-anchor.setHours(6,0,0,0);
-
-// sebelum 06:00 → masih hari 1
-if(wNow < anchor){
-return 1;
-}
-
-// setelah 06:00 → lanjut normal
-let today = new Date(wNow.getFullYear(), wNow.getMonth(), wNow.getDate());
-let base  = new Date(anchor.getFullYear(), anchor.getMonth(), anchor.getDate());
-
-let diff = Math.floor((today-base)/86400000);
-
-return diff + 2;
-}
-
-// ===== MASUK NORMAL =====
-else{
-
-let today = new Date(wNow.getFullYear(), wNow.getMonth(), wNow.getDate());
-let base  = new Date(wStart.getFullYear(), wStart.getMonth(), wStart.getDate());
-
-let diff = Math.floor((today-base)/86400000);
-
-return diff + 1;
-}
-
 }
 
 /* ===== ACTION ===== */
