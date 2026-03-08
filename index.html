@@ -288,6 +288,10 @@ const {data}=await supabase
 
 let html="<h3>Daftar Pelanggan ("+(data ? data.length : 0)+")</h3>"
 
+let now = new Date()
+let year = now.getFullYear()
+let month = now.getMonth()
+
 if(!data || data.length===0){
 document.getElementById("resultBox").innerHTML="<h3>Belum ada pelanggan</h3>";
 
@@ -309,6 +313,20 @@ if(todayDate>paid) expired=true
 }
 
 let bg = expired ? "#ffd6d6" : "#ffffff"
+
+let tempoDate
+
+if(p.paid_until){
+tempoDate = new Date(p.paid_until)
+}else{
+tempoDate = new Date(year,month,p.jatuh_tempo)
+}
+
+let tanggalLengkap = tempoDate.toLocaleDateString('id-ID',{
+day:'numeric',
+month:'long',
+year:'numeric'
+})
 
 html+=`
 <div style="
@@ -336,8 +354,9 @@ font-size:14px
 ${p.motor || "-"}
 </span>
 
-<span>
-JT:${p.jatuh_tempo}
+<span style="display:flex;flex-direction:column;font-size:13px">
+<b>Jatuh Tempo</b>
+${tanggalLengkap}
 </span>
 
 </div>
@@ -350,7 +369,6 @@ Bayar
 
 </div>
 `
-
 })
 
 document.getElementById("resultBox").innerHTML=html
@@ -373,7 +391,7 @@ const today = new Date()
 
 const nextMonth = new Date(today)
 nextMonth.setMonth(today.getMonth()+1)
-nextMonth.setDate(today.getDate())
+nextMonth.setDate(Math.min(today.getDate(),28))
 
 const {error}=await supabase
 .from('bulanan')
@@ -455,44 +473,24 @@ let today = now.getDate()
 let month = now.getMonth()
 let year = now.getFullYear()
 
-let lastDay = new Date(year, month + 1, 0).getDate()
-
 let html=""
 
 data.forEach(p=>{
 
-let expired=false
+let target
 
 if(p.paid_until){
-let todayDate=new Date()
-let paid=new Date(p.paid_until)
-if(todayDate>paid) expired=true
+target = new Date(p.paid_until)
+}else{
+target = new Date(year,month,p.jatuh_tempo)
 }
 
-let tempo = p.jatuh_tempo
+let todayDate = new Date(year,month,today)
+let targetDate = new Date(target.getFullYear(),target.getMonth(),target.getDate())
 
-let jatuhTempo = tempo
+let diff = Math.floor((targetDate - todayDate)/86400000)
 
-if(tempo > lastDay){
-jatuhTempo = lastDay
-}
-
-let diff = jatuhTempo - today
-
-if(diff < 0){
-
-let nextMonthLastDay = new Date(year, month + 2, 0).getDate()
-
-let nextTempo = tempo
-
-if(tempo > nextMonthLastDay){
-nextTempo = nextMonthLastDay
-}
-
-diff = (lastDay - today) + nextTempo
-}
-
-if(diff <=5){
+if(diff <=5 && diff >=0){
 
 let text=""
 
@@ -512,7 +510,6 @@ font-size:14px
 Jatuh tempo ${text}
 </div>
 `
-
 }
 
 })
@@ -809,7 +806,7 @@ scanLocked=false;
 await onScan(k);
 }
 
-const reminderInterval = setInterval(loadReminder,30000)
+const reminderInterval = setInterval(loadReminder,60000)
 
 showHome();
 
