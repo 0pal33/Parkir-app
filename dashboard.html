@@ -10,6 +10,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
+<script src="parkirEngine.js"></script>
 
 <script>
 
@@ -234,7 +235,7 @@ active.forEach(p=>{
 let start = new Date(p.checkin_at)
 let now = new Date()
 
-let durasi = Math.floor((now - start) / 86400000) + 1
+let durasi = hitungDurasiParkir(start, now)
 let jam = Math.floor((now - start) / 3600000)
 
 let durasiClass = "duration"
@@ -320,25 +321,50 @@ await loadDashboard()
 
 async function resetData(){
 
-if(!confirm("Yakin hapus semua data parkir?")){
+let confirmText = prompt("Ketik RESET untuk menghapus semua data");
+
+if(confirmText !== "RESET"){
 return;
 }
 
-const { error } = await supabase
+if(!confirm("Reset SEMUA data test?\n\nParkir, pelanggan bulanan, dan histori pembayaran akan dihapus.")){
+return;
+}
+
+// hapus parkir
+const r1 = await supabase
 .from("parkir")
 .delete()
 .neq("kode","");
 
-if(error){
-alert("Gagal reset data");
+// hapus pelanggan bulanan
+const r2 = await supabase
+.from("bulanan")
+.delete()
+.neq("nama","");
+
+// hapus log bayar (jika ada)
+let r3 = {error:null};
+
+try{
+r3 = await supabase
+.from("log_bayar")
+.delete()
+.neq("id",0);
+}catch(e){}
+
+// cek error
+if(r1.error || r2.error){
+alert("Gagal reset database");
 return;
 }
 
-alert("Data test berhasil dihapus");
+alert("Database berhasil dibersihkan.\nAplikasi siap dipakai operasional.");
+
 location.reload();
 }
 
 </script>
 
 </body>
-</html>
+                                     </html>
