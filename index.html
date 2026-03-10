@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>WAHAYE PARKIR</title>
 
@@ -22,27 +23,33 @@
 
 <body>
 
-<div class="top" style="display:flex;align-items:center;justify-content:center;gap:10px">
+<!-- TOP -->
+<div class="top">
 
 <button class="logout-btn" onclick="goAdmin()" title="Admin">
+
 <svg class="power-icon" viewBox="0 0 24 24">
 <path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path>
 <line x1="12" y1="2" x2="12" y2="12"></line>
 </svg>
+
 </button>
 
 Selamat datang di layanan WAHAYE PARKIR
 
 </div>
 
+<!-- MIDDLE -->
 <div class="middle">
 
 <div id="reader" style="display:none"></div>
 
 <div id="manualBox" style="display:none">
+
 Parkir-<br><br>
 
-<input id="manualInput"
+<input
+id="manualInput"
 maxlength="3"
 inputmode="numeric"
 pattern="[0-9]*"
@@ -58,6 +65,7 @@ type="tel">
 
 </div>
 
+<!-- BOTTOM -->
 <div class="bottom" id="bottomButtons"></div>
 
 <script>
