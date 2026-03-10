@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>Parkir Aktif</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="js/parkirEngine.js"></script>
+
+<style>
+
+body{
+font-family:Arial;
+background:#eee;
+padding:20px;
+text-align:center;
+}
+
+table{
+width:100%;
+max-width:500px;
+margin:auto;
+border-collapse:collapse;
+background:white;
+}
+
+td,th{
+border:1px solid #ddd;
+padding:8px;
+}
+
+th{
+background:#3498db;
+color:white;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h3>Parkir Aktif</h3>
+
+<table>
+
+<tr>
+<th>QR</th>
+<th>Mulai</th>
+<th>Durasi</th>
+</tr>
+
+<tbody id="list"></tbody>
+
+</table>
+
+<br>
+
+<button onclick="history.back()">Kembali</button>
+
+<script>
+
+async function load(){
+
+const {data}=await supabase
+.from("parkir")
+.select("*")
+.eq("status","on")
+.order("checkin_at",{ascending:true})
+
+let html=""
+
+data.forEach(p=>{
+
+let start=new Date(p.checkin_at)
+let now=new Date()
+
+let durasi=hitungDurasiParkir(start,now)
+
+html+=`
+<tr>
+<td>${p.kode}</td>
+<td>${start.toLocaleString('id-ID')}</td>
+<td>${durasi} hari</td>
+</tr>
+`
+
+})
+
+document.getElementById("list").innerHTML=html
+
+}
+
+load()
+
+setInterval(load,5000)
+
+</script>
+
+</body>
+</html>
