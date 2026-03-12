@@ -1,37 +1,4 @@
-loadReminder();
-
-}
-
-function showScan(){
-hideAll();
-document.getElementById("reader").style.display="block";
-document.getElementById("bottomButtons").innerHTML=`
-<button class="red" onclick="stopScan()">Stop</button>
-`;
-}
-
-function showResult(){
-document.getElementById("bottomButtons").innerHTML=`
-<button class="orange" onclick="scanUlang()">Scan Ulang</button>
-<button class="blue" onclick="manualAgain()">Ketik Lagi</button>
-`;
-}
-
-function showManualState(){
-hideAll();
-document.getElementById("manualBox").style.display="block";
-document.getElementById("bottomButtons").innerHTML=`
-<button class="red" onclick="cancelManual()">Batal</button>
-`;
-}
-
-function hideAll(){
-document.getElementById("reader").style.display="none";
-document.getElementById("manualBox").style.display="none";
-document.getElementById("resultBox").innerHTML="";
-}
-
-async function loadReminder(){
+window.loadReminder = async function(){
 
 if(!document.getElementById("bottomButtons").innerHTML.includes("Start Scanning")){
 return
@@ -102,4 +69,5 @@ Tidak ada pembayaran yang mendekati jatuh tempo
 </div>
 `
 }
+
 }
