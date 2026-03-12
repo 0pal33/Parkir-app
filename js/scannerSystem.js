@@ -16,7 +16,11 @@ scanner = new Html5Qrcode("reader")
 
 scanner.start(
 { facingMode: currentCamera },
-{ fps:10, qrbox:250 },
+{
+fps:10,
+qrbox:250,
+focusMode:"continuous"
+},
 onScan
 )
 
