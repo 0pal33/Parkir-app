@@ -30,6 +30,7 @@ window.onScan("Parkir-"+val);
 
 window.onScan = async function(text){
 
+if(!text || typeof text !== "string") return;
 if(scanLocked) return;
 if(!text.startsWith("Parkir-")) return;
 
