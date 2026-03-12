@@ -186,7 +186,7 @@ return;
 }
 
 scanLocked=false;
-await onScan(k);
+await window.onScan(k);
 }
 
 window.cancelParkir=async function(k){
@@ -206,7 +206,7 @@ return;
 
 if(!data){
 scanLocked=false;
-await onScan(k);
+await window.onScan(k);
 return;
 }
 
@@ -231,5 +231,5 @@ alert("Tidak bisa dibatalkan setelah 21:00");
 }
 
 scanLocked=false;
-await onScan(k);
+await window.onScan(k);
 }
