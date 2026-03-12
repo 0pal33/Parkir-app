@@ -103,7 +103,7 @@ Durasi: ${durasi} Hari
 </div>
 
 <div style="font-size:26px;font-weight:bold;color:#e67e22;margin:10px 0">
-Rp ${tarif.toLocaleString('id-ID')}
+Rp ${formatRupiah(tarif)}
 </div>
 
 <div style="width:90%;max-width:420px">
