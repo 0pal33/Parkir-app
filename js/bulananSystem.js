@@ -82,7 +82,7 @@ document.getElementById("bottomButtons").innerHTML=`
 
 /* ===== SIMPAN ===== */
 
-window.simpanBulanan = function(){
+window.simpanBulanan = async function(){
 
 let nama=document.getElementById("namaBulanan").value.trim()
 let motor=document.getElementById("motorBulanan").value
@@ -124,7 +124,7 @@ showBulanan()
 
 /* ===== LIST BAYAR ===== */
 
-window.listBayar = function(){
+window.listBayar = async function(){
 
 hideAll();
 
@@ -231,7 +231,7 @@ document.getElementById("bottomButtons").innerHTML=`
 
 /* ===== BAYAR ===== */
 
-window.bayarBulanan = function(id){
+window.bayarBulanan = async function(id){
 
 if(!confirm("Konfirmasi pembayaran pelanggan ini?")){
 return
@@ -261,11 +261,3 @@ alert("Pembayaran berhasil sampai "+nextMonth.toLocaleDateString())
 listBayar()
 
 }
-
-hideAll();
-
-document.getElementById("bottomButtons").innerHTML=`
-<button class="orange" onclick="startScan()">Start Scanning</button>
-<button class="blue" onclick="showManual()">Ketik Manual</button>
-<button class="green" onclick="showBulanan()">Bulanan</button>
-`;
