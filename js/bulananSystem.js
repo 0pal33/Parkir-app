@@ -262,8 +262,6 @@ listBayar()
 
 }
 
-function showHome(){
-
 hideAll();
 
 document.getElementById("bottomButtons").innerHTML=`
