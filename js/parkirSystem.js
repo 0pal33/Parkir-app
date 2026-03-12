@@ -28,7 +28,7 @@ onScan("Parkir-"+val);
 
 /* ===== SCAN RESULT ===== */
 
-async function onScan(text){
+window.onScan = async function(text){
 
 if(scanLocked) return;
 if(!text.startsWith("Parkir-")) return;
