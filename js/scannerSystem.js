@@ -12,9 +12,9 @@ window.scanner.clear()
 window.scanner=null
 }
 
-scanner = new Html5Qrcode("reader")
+window.scanner = new Html5Qrcode("reader")
 
-await scanner.start(
+await window.scanner.start(
 { facingMode: currentCamera },
 {
 fps:10,
