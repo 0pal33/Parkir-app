@@ -35,7 +35,7 @@ if(!text.startsWith("Parkir-")) return;
 
 scanLocked=true;
 
-if(scanner){
+if(window.scanner){
 await scanner.stop().catch(()=>{});
 scanner.clear();
 scanner = null;
@@ -121,13 +121,16 @@ Batal Parkir
 </div>
 `
 
+showResult();
+scanLocked=false;
+
 }
 
 window.scanUlang = async function(){
 
 scanLocked=false;
 
-if(scanner){
+if(window.scanner){
 await scanner.stop().catch(()=>{})
 scanner.clear()
 scanner=null
