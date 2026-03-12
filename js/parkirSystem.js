@@ -88,6 +88,39 @@ let now = new Date()
 let durasi = hitungDurasiParkir(start, now)
 let tarif = hitungTarifParkir(durasi)
 
+document.getElementById("resultBox").innerHTML=`
+
+<div style="font-size:32px;font-weight:bold;margin-bottom:10px">
+${kode}
+</div>
+
+<div style="font-size:18px;margin-bottom:5px">
+Mulai: ${start.toLocaleString('id-ID')}
+</div>
+
+<div style="font-size:22px;font-weight:bold">
+Durasi: ${durasi} Hari
+</div>
+
+<div style="font-size:26px;font-weight:bold;color:#e67e22;margin:10px 0">
+Rp ${tarif.toLocaleString('id-ID')}
+</div>
+
+<div style="width:90%;max-width:420px">
+
+<button class="orange" style="width:100%;font-size:20px;padding:18px"
+onclick="checkout('${kode}')">
+Checkout
+</button>
+
+<button class="red" style="width:100%;font-size:18px;padding:16px"
+onclick="cancelParkir('${kode}')">
+Batal Parkir
+</button>
+
+</div>
+`
+
 }
 
 window.scanUlang = async function(){
