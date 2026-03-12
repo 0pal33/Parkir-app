@@ -83,15 +83,17 @@ return;
 }
 
 window.scanUlang = async function(){
+
 scanLocked=false;
 
 if(scanner){
-await scanner.stop().catch(()=>{});
-scanner.clear();
-scanner = null;
+await scanner.stop().catch(()=>{})
+scanner.clear()
+scanner=null
 }
 
-startScan();
+startScan()
+
 }
 
 window.checkin=async function(k){
