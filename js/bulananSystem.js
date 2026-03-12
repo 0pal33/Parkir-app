@@ -1,6 +1,6 @@
 /* ===== BULANAN MENU ===== */
 
-function showBulanan(){
+window.showBulanan = function(){
 
 hideAll();
 
@@ -20,7 +20,7 @@ document.getElementById("bottomButtons").innerHTML=`
 
 /* ===== FORM TAMBAH ===== */
 
-function formTambah(){
+window.formTambah = function(){
 
 hideAll();
 
@@ -82,7 +82,7 @@ document.getElementById("bottomButtons").innerHTML=`
 
 /* ===== SIMPAN ===== */
 
-async function simpanBulanan(){
+window.simpanBulanan = function(){
 
 let nama=document.getElementById("namaBulanan").value.trim()
 let motor=document.getElementById("motorBulanan").value
@@ -124,7 +124,7 @@ showBulanan()
 
 /* ===== LIST BAYAR ===== */
 
-async function listBayar(){
+window.listBayar = function(){
 
 hideAll();
 
@@ -231,7 +231,7 @@ document.getElementById("bottomButtons").innerHTML=`
 
 /* ===== BAYAR ===== */
 
-async function bayarBulanan(id){
+window.bayarBulanan = function(id){
 
 if(!confirm("Konfirmasi pembayaran pelanggan ini?")){
 return
