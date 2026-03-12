@@ -2,7 +2,7 @@ let scanner
 let scanLocked=false
 let currentCamera="environment"
 
-async function startScan(){
+window.startScan = async function(){
 
 showScan()
 
@@ -12,17 +12,17 @@ scanner.clear()
 scanner=null
 }
 
-scanner=new Html5Qrcode("reader")
+scanner = new Html5Qrcode("reader")
 
 scanner.start(
-{facingMode:currentCamera},
-{fps:10,qrbox:250},
+{ facingMode: currentCamera },
+{ fps:10, qrbox:250 },
 onScan
 )
 
 }
 
-async function stopScan(){
+window.stopScan = async function(){
 
 if(scanner){
 await scanner.stop().catch(()=>{})
