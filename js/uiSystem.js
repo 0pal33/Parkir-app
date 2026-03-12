@@ -1,8 +1,16 @@
-window.showHome = function(){
+window.hideAll=function(){
+
+document.getElementById("reader").style.display="none"
+document.getElementById("manualBox").style.display="none"
+document.getElementById("resultBox").innerHTML=""
+
+}
+
+window.showHome=function(){
 
 hideAll()
 
-document.getElementById("bottomButtons").innerHTML = `
+document.getElementById("bottomButtons").innerHTML=`
 <button class="orange" onclick="startScan()">Start Scanning</button>
 <button class="blue" onclick="showManual()">Ketik Manual</button>
 <button class="green" onclick="showBulanan()">Bulanan</button>
@@ -12,7 +20,7 @@ loadReminder()
 
 }
 
-window.showScan = function(){
+window.showScan=function(){
 
 hideAll()
 
@@ -24,7 +32,7 @@ document.getElementById("bottomButtons").innerHTML=`
 
 }
 
-window.showResult = function(){
+window.showResult=function(){
 
 document.getElementById("bottomButtons").innerHTML=`
 <button class="orange" onclick="scanUlang()">Scan Ulang</button>
@@ -33,7 +41,7 @@ document.getElementById("bottomButtons").innerHTML=`
 
 }
 
-window.showManual = function(){
+window.showManualState=function(){
 
 hideAll()
 
@@ -43,32 +51,8 @@ document.getElementById("bottomButtons").innerHTML=`
 <button class="red" onclick="cancelManual()">Batal</button>
 `
 
-document.getElementById("manualInput").focus()
-
 }
 
-window.cancelManual = function(){
-
-showHome()
-
-}
-
-window.manualAgain = function(){
-
-showManual()
-
-}
-
-window.hideAll = function(){
-
-document.getElementById("reader").style.display="none"
-document.getElementById("manualBox").style.display="none"
-document.getElementById("resultBox").innerHTML=""
-
-}
-
-window.goAdmin = function(){
-
+window.goAdmin=function(){
 window.location.href="admin.html"
-
 }
