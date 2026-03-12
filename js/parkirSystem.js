@@ -23,7 +23,7 @@ return;
 
 document.getElementById("manualInput").value="";
 scanLocked=false;
-onScan("Parkir-"+val);
+window.onScan("Parkir-"+val);
 }
 
 /* ===== SCAN RESULT ===== */
