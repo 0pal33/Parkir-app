@@ -6,15 +6,15 @@ window.startScan = async function(){
 
 showScan()
 
-if(scanner){
-await scanner.stop().catch(()=>{})
-scanner.clear()
-scanner=null
+if(window.scanner){
+await window.scanner.stop().catch(()=>{})
+window.scanner.clear()
+window.scanner=null
 }
 
 scanner = new Html5Qrcode("reader")
 
-scanner.start(
+await scanner.start(
 { facingMode: currentCamera },
 {
 fps:10,
@@ -28,10 +28,10 @@ onScan
 
 window.stopScan = async function(){
 
-if(scanner){
-await scanner.stop().catch(()=>{})
-scanner.clear()
-scanner=null
+if(window.scanner){
+await window.scanner.stop().catch(()=>{})
+window.scanner.clear()
+window.scanner=null
 }
 
 showHome()
