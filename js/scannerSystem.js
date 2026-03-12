@@ -1,6 +1,6 @@
-let scanner
-let scanLocked=false
-let currentCamera="environment"
+window.scanner = null
+window.scanLocked = false
+window.currentCamera = "environment"
 
 window.startScan = async function(){
 
