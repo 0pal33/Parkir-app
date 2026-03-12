@@ -88,6 +88,8 @@ let now = new Date()
 let durasi = hitungDurasiParkir(start, now)
 let tarif = hitungTarifParkir(durasi)
 
+}
+
 window.scanUlang = async function(){
 
 scanLocked=false;
