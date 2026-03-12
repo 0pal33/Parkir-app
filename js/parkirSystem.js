@@ -63,7 +63,6 @@ return;
 if(!data){
 
 document.getElementById("resultBox").innerHTML=`
-
 <div style="font-size:32px;font-weight:bold;margin-bottom:20px">
 ${kode}
 </div>
@@ -71,16 +70,23 @@ ${kode}
 <button class="green"
 style="font-size:22px;padding:20px;width:260px"
 onclick="checkin('${kode}')">
-
 CHECK-IN
-
 </button>
 `;
 
 showResult();
 scanLocked=false;
 return;
+
 }
+
+/* ===== HITUNG DURASI ===== */
+
+let start = new Date(data.checkin_at)
+let now = new Date()
+
+let durasi = hitungDurasiParkir(start, now)
+let tarif = hitungTarifParkir(durasi)
 
 window.scanUlang = async function(){
 
