@@ -1,16 +1,53 @@
+loadReminder();
+
+}
+
+function showScan(){
+hideAll();
+document.getElementById("reader").style.display="block";
+document.getElementById("bottomButtons").innerHTML=`
+<button class="red" onclick="stopScan()">Stop</button>
+`;
+}
+
+function showResult(){
+document.getElementById("bottomButtons").innerHTML=`
+<button class="orange" onclick="scanUlang()">Scan Ulang</button>
+<button class="blue" onclick="manualAgain()">Ketik Lagi</button>
+`;
+}
+
+function showManualState(){
+hideAll();
+document.getElementById("manualBox").style.display="block";
+document.getElementById("bottomButtons").innerHTML=`
+<button class="red" onclick="cancelManual()">Batal</button>
+`;
+}
+
+function hideAll(){
+document.getElementById("reader").style.display="none";
+document.getElementById("manualBox").style.display="none";
+document.getElementById("resultBox").innerHTML="";
+}
+
 async function loadReminder(){
 
+if(!document.getElementById("bottomButtons").innerHTML.includes("Start Scanning")){
+return
+}
+
 const {data}=await supabase
-.from("bulanan")
-.select("*")
-.eq("status","aktif")
+.from('bulanan')
+.select('*')
+.eq('status','aktif')
 
 if(!data) return
 
-let now=new Date()
-let today=now.getDate()
-let month=now.getMonth()
-let year=now.getFullYear()
+let now = new Date()
+let today = now.getDate()
+let month = now.getMonth()
+let year = now.getFullYear()
 
 let html=""
 
@@ -19,21 +56,17 @@ data.forEach(p=>{
 let target
 
 if(p.paid_until){
-target=new Date(p.paid_until)
+target = new Date(p.paid_until)
 }else{
-target=new Date(year,month,p.jatuh_tempo)
+target = new Date(year,month,p.jatuh_tempo)
 }
 
-let todayDate=new Date(year,month,today)
-let targetDate=new Date(
-target.getFullYear(),
-target.getMonth(),
-target.getDate()
-)
+let todayDate = new Date(year,month,today)
+let targetDate = new Date(target.getFullYear(),target.getMonth(),target.getDate())
 
-let diff=Math.floor((targetDate-todayDate)/86400000)
+let diff = Math.floor((targetDate - todayDate)/86400000)
 
-if(diff<=5 && diff>=0){
+if(diff <=5 && diff >=0){
 
 let text=""
 
@@ -53,11 +86,20 @@ font-size:14px
 Jatuh tempo ${text}
 </div>
 `
-
 }
 
 })
 
-document.getElementById("resultBox").innerHTML=html
-
-                     }
+if(html !== ""){
+document.getElementById("resultBox").innerHTML = `
+<h3>Reminder Pembayaran</h3>
+${html}
+`
+}else{
+document.getElementById("resultBox").innerHTML = `
+<div style="color:#777;font-size:14px">
+Tidak ada pembayaran yang mendekati jatuh tempo
+</div>
+`
+}
+}
