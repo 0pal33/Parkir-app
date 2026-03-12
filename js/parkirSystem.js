@@ -36,9 +36,9 @@ if(!text.startsWith("Parkir-")) return;
 scanLocked=true;
 
 if(window.scanner){
-await scanner.stop().catch(()=>{});
-scanner.clear();
-scanner = null;
+await window.scanner.stop().catch(()=>{})
+window.scanner.clear()
+window.scanner=null
 }
 
 hideAll();
@@ -131,9 +131,9 @@ window.scanUlang = async function(){
 scanLocked=false;
 
 if(window.scanner){
-await scanner.stop().catch(()=>{})
-scanner.clear()
-scanner=null
+await window.scanner.stop().catch(()=>{})
+window.scanner.clear()
+window.scanner=null
 }
 
 startScan()
