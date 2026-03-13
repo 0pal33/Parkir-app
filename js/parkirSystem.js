@@ -1,4 +1,5 @@
 const beep = new Audio("https://actions.google.com/sounds/v1/alarms/beep_short.ogg")
+beep.preload = "auto"
 let lastScanTime = 0
 window.showManual=function(){
 showManualState();
