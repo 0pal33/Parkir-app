@@ -42,6 +42,8 @@ let nowScan = Date.now()
 if(nowScan - lastScanTime < 1500) return
 lastScanTime = nowScan
 
+beep.play().catch(()=>{})
+
 window.scanLocked = true
 
 try{
