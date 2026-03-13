@@ -22,7 +22,7 @@ display:flex;
 justify-content:center;
 align-items:center;
 flex-direction:column;
-padding-top:20px;
+padding:30px 15px;
 }
 
 .bottom{
@@ -101,4 +101,24 @@ border-radius:12px;
 
 .logout-btn:hover{
 transform:scale(1.1);
+}
+
+#reader{
+width:320px;
+max-width:95%;
+margin:auto;
+position:relative;
+}
+
+#reader::after{
+content:"";
+position:absolute;
+top:50%;
+left:50%;
+width:200px;
+height:200px;
+transform:translate(-50%,-50%);
+border:3px solid #2ecc71;
+border-radius:12px;
+pointer-events:none;
 }
