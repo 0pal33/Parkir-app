@@ -34,6 +34,16 @@ window.scanner.clear()
 window.scanner=null
 }
 
+scanner.start(
+{ facingMode: currentCamera },
+{
+fps:10,
+qrbox:250,
+aspectRatio:1.0
+},
+onScan
+)
+
 showHome()
 
 }
