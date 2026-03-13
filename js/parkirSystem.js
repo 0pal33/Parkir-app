@@ -3,7 +3,7 @@ window.showManual=function(){
 showManualState();
 document.getElementById("manualInput").value="";
 document.getElementById("manualInput").focus();
-scanLocked=false;
+window.scanLocked = false;
 }
 
 window.cancelManual=function(){
@@ -23,7 +23,7 @@ return;
 }
 
 document.getElementById("manualInput").value="";
-scanLocked=false;
+window.scanLocked = false;
 window.onScan("Parkir-"+val);
 }
 
@@ -62,7 +62,7 @@ const {data,error}=await supabase
 
 if(error){
 document.getElementById("resultBox").innerHTML="Koneksi bermasalah";
-scanLocked=false;
+window.scanLocked = false;
 return;
 }
 
@@ -81,7 +81,7 @@ CHECK-IN
 `;
 
 showResult();
-scanLocked=false;
+window.scanLocked = false;
 return;
 
 }
@@ -128,13 +128,13 @@ Batal Parkir
 `
 
 showResult();
-scanLocked=false;
+window.scanLocked = false;
 
 }
 
 window.scanUlang = async function(){
 
-scanLocked=false;
+window.scanLocked = false;
 
 if(window.scanner){
 await window.scanner.stop().catch(()=>{})
@@ -177,7 +177,7 @@ document.getElementById("bottomButtons").innerHTML=`
 <button class="green" onclick="showBulanan()">Bulanan</button>
 `;
 
-scanLocked=false;
+window.scanLocked = false;
 }
 
 window.checkout=async function(k){
@@ -191,7 +191,7 @@ alert("Gagal checkout");
 return;
 }
 
-scanLocked=false;
+window.scanLocked = false;
 await window.onScan(k);
 }
 
@@ -206,12 +206,12 @@ const {data,error}=await supabase
 
 if(error){
 alert("Koneksi bermasalah");
-scanLocked=false;
+window.scanLocked = false;
 return;
 }
 
 if(!data){
-scanLocked=false;
+window.scanLocked = false;
 await window.onScan(k);
 return;
 }
@@ -236,6 +236,6 @@ return;
 alert("Tidak bisa dibatalkan setelah 21:00");
 }
 
-scanLocked=false;
+window.scanLocked = false;
 await window.onScan(k);
 }
