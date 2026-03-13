@@ -52,23 +52,22 @@ window.scanner.clear()
 window.scanner=null
 }
 
-hideAll();
+hideAll()
 
-document.getElementById("resultBox").innerHTML="Memproses...";
+document.getElementById("resultBox").innerHTML="Memproses..."
 
-let kode=text;
+let kode=text
 
 const {data,error}=await supabase
 .from('parkir')
 .select('*')
 .eq('kode',kode)
 .eq('status','on')
-.maybeSingle();
+.maybeSingle()
 
 if(error){
-document.getElementById("resultBox").innerHTML="Koneksi bermasalah";
-window.scanLocked = false;
-return;
+document.getElementById("resultBox").innerHTML="Koneksi bermasalah"
+return
 }
 
 if(!data){
@@ -83,11 +82,10 @@ style="font-size:22px;padding:20px;width:260px"
 onclick="checkin('${kode}')">
 CHECK-IN
 </button>
-`;
+`
 
-showResult();
-window.scanLocked = false;
-return;
+showResult()
+return
 
 }
 
@@ -132,118 +130,7 @@ Batal Parkir
 </div>
 `
 
-showResult();
-window.scanLocked = false;
-
-}
-
-window.scanUlang = async function(){
-
-window.scanLocked = false;
-
-if(window.scanner){
-await window.scanner.stop().catch(()=>{})
-window.scanner.clear()
-window.scanner=null
-}
-
-startScan()
-
-}
-
-window.checkin=async function(k){
-
-const { error } = await supabase.from('parkir').insert({
-kode:k,
-status:'on',
-checkin_at:new Date()
-});
-
-if(error){
-alert("Gagal checkin");
-return;
-}
-
-hideAll();
-
-document.getElementById("resultBox").innerHTML = `
-<div style="
-font-size:20px;
-font-weight:bold;
-color:#2ecc71;
-">
-Checkin berhasil ✓
-</div>
-`;
-
-document.getElementById("bottomButtons").innerHTML=`
-<button class="orange" onclick="scanUlang()">Scan Ulang</button>
-<button class="blue" onclick="showManual()">Ketik Manual</button>
-<button class="green" onclick="showBulanan()">Bulanan</button>
-`;
-
-window.scanLocked = false;
-}
-
-window.checkout=async function(k){
-const { error } = await supabase.from('parkir')
-.update({status:'off',checkout_at:new Date()})
-.eq('kode',k)
-.eq('status','on');
-
-if(error){
-alert("Gagal checkout");
-return;
-}
-
-window.scanLocked = false;
-await window.onScan(k);
-}
-
-window.cancelParkir=async function(k){
-
-const {data,error}=await supabase
-.from('parkir')
-.select('*')
-.eq('kode',k)
-.eq('status','on')
-.maybeSingle();
-
-if(error){
-alert("Koneksi bermasalah");
-window.scanLocked = false;
-return;
-}
-
-if(!data){
-window.scanLocked = false;
-await window.onScan(k);
-return;
-}
-
-let start=new Date(data.checkin_at);
-let wStart=new Date(start.toLocaleString("en-US",{timeZone:"Asia/Jakarta"}));
-
-if(wStart.getHours()<21){
-
-const { error } = await supabase
-.from('parkir')
-.delete()
-.eq('kode',k)
-.eq('status','on');
-
-if(error){
-alert("Gagal batal parkir");
-return;
-}
-
-}else{
-alert("Tidak bisa dibatalkan setelah 21:00");
-}
-
-window.scanLocked = false;
-await window.onScan(k);
-}
+showResult()
 
 }
 finally{
