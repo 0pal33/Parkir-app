@@ -54,12 +54,6 @@ border-radius:12px;
 border:2px solid #ccc;
 }
 
-#reader{
-width:320px;
-max-width:95%;
-margin:auto;
-}
-
 .logout-btn{
 position:absolute;
 top:70px;
@@ -121,4 +115,21 @@ transform:translate(-50%,-50%);
 border:3px solid #2ecc71;
 border-radius:12px;
 pointer-events:none;
+}
+
+.scan-line{
+position:absolute;
+top:50%;
+left:50%;
+width:200px;
+height:2px;
+background:#2ecc71;
+transform:translate(-50%,-50%);
+animation:scanMove 2s linear infinite;
+}
+
+@keyframes scanMove{
+0%{ transform:translate(-50%,-100px); }
+50%{ transform:translate(-50%,100px); }
+100%{ transform:translate(-50%,-100px); }
 }
