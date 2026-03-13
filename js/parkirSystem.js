@@ -30,16 +30,16 @@ window.onScan("Parkir-"+val);
 /* ===== SCAN RESULT ===== */
 
 window.onScan = async function(text){
-  
-  let nowScan = Date.now()
+
+if(!text || typeof text !== "string") return;
+if(!text.startsWith("Parkir-")) return;
+if(window.scanLocked) return;
+
+let nowScan = Date.now()
 if(nowScan - lastScanTime < 1500) return
 lastScanTime = nowScan
 
-if(!text || typeof text !== "string") return;
-if(scanLocked) return;
-if(!text.startsWith("Parkir-")) return;
-
-scanLocked=true;
+window.scanLocked = true
 
 if(window.scanner){
 await window.scanner.stop().catch(()=>{})
