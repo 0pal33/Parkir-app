@@ -1,3 +1,4 @@
+const beep = new Audio("https://actions.google.com/sounds/v1/alarms/beep_short.ogg")
 let lastScanTime = 0
 window.showManual=function(){
 showManualState();
@@ -35,11 +36,15 @@ if(!text || typeof text !== "string") return;
 if(!text.startsWith("Parkir-")) return;
 if(window.scanLocked) return;
 
+beep.play().catch(()=>{})
+
 let nowScan = Date.now()
 if(nowScan - lastScanTime < 1500) return
 lastScanTime = nowScan
 
 window.scanLocked = true
+
+try{
 
 if(window.scanner){
 await window.scanner.stop().catch(()=>{})
@@ -238,4 +243,11 @@ alert("Tidak bisa dibatalkan setelah 21:00");
 
 window.scanLocked = false;
 await window.onScan(k);
+}
+
+}
+finally{
+window.scanLocked=false
+}
+
 }
