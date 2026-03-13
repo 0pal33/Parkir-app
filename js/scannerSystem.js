@@ -15,11 +15,14 @@ window.scanner=null
 window.scanner = new Html5Qrcode("reader")
 
 await window.scanner.start(
-{ facingMode: currentCamera },
+{ facingMode: "environment" },
 {
-fps:10,
-qrbox:250,
-aspectRatio:1.0
+fps:15,
+qrbox:{ width:250, height:250 },
+aspectRatio:1.0,
+experimentalFeatures: {
+useBarCodeDetectorIfSupported: true
+}
 },
 window.onScan
 )
