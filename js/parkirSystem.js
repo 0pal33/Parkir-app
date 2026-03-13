@@ -36,8 +36,6 @@ if(!text || typeof text !== "string") return;
 if(!text.startsWith("Parkir-")) return;
 if(window.scanLocked) return;
 
-beep.play().catch(()=>{})
-
 let nowScan = Date.now()
 if(nowScan - lastScanTime < 1500) return
 lastScanTime = nowScan
