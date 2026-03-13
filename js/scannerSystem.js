@@ -19,9 +19,9 @@ await window.scanner.start(
 {
 fps:10,
 qrbox:250,
-focusMode:"continuous"
+aspectRatio:1.0
 },
-onScan
+window.onScan
 )
 
 }
@@ -33,16 +33,6 @@ await window.scanner.stop().catch(()=>{})
 window.scanner.clear()
 window.scanner=null
 }
-
-scanner.start(
-{ facingMode: currentCamera },
-{
-fps:10,
-qrbox:250,
-aspectRatio:1.0
-},
-onScan
-)
 
 showHome()
 
