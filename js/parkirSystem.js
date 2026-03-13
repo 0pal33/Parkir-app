@@ -1,3 +1,4 @@
+let lastScanTime = 0
 window.showManual=function(){
 showManualState();
 document.getElementById("manualInput").value="";
@@ -29,6 +30,10 @@ window.onScan("Parkir-"+val);
 /* ===== SCAN RESULT ===== */
 
 window.onScan = async function(text){
+  
+  let nowScan = Date.now()
+if(nowScan - lastScanTime < 1500) return
+lastScanTime = nowScan
 
 if(!text || typeof text !== "string") return;
 if(scanLocked) return;
