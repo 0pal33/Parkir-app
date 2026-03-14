@@ -304,7 +304,7 @@ alert("Masukkan nominal")
 return
 }
 
-if(!confirm("Konfirmasi pembayaran Rp "+Number(nominal).toLocaleString('id-ID')+" ?")){
+if(!confirm("Konfirmasi pembayaran Rp "+Number(nominal).toLocaleString('id-ID')+",- ?")){
 return
 }
 
@@ -333,3 +333,12 @@ alert("Pembayaran berhasil")
 listBayar()
 
 }
+
+<input 
+id="nominalBayar"
+inputmode="numeric"
+pattern="[0-9]*"
+type="tel"
+placeholder="Nominal"
+oninput="this.value=this.value.replace(/[^0-9]/g,'')"
+>
