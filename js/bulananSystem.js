@@ -213,7 +213,7 @@ ${tanggalLengkap}
 
 <button class="green"
 style="padding:6px 14px;font-size:13px"
-onclick="bayarBulanan('${p.id}')">
+onclick="formBayar('${p.id}','${p.nama}')">
 Bayar
 </button>
 
@@ -257,6 +257,78 @@ return
 }
 
 alert("Pembayaran berhasil sampai "+nextMonth.toLocaleDateString())
+
+listBayar()
+
+}
+
+window.formBayar=function(id,nama){
+
+hideAll()
+
+document.getElementById("resultBox").innerHTML=`
+
+<h3>Bayar Bulanan</h3>
+
+<div style="font-size:20px;font-weight:bold;margin-bottom:20px">
+${nama}
+</div>
+
+Rp.<br><br>
+
+<input 
+id="nominalBayar"
+inputmode="numeric"
+pattern="[0-9]*"
+type="tel"
+placeholder="Nominal">
+
+<br><br>
+
+<button class="green" onclick="konfirmasiBayar('${id}')">✓</button>
+
+`
+
+document.getElementById("bottomButtons").innerHTML=`
+<button class="red" onclick="listBayar()">Batal</button>
+`
+
+}
+
+window.konfirmasiBayar = async function(id){
+
+let nominal = document.getElementById("nominalBayar").value.replace(/\D/g,'')
+
+if(!nominal){
+alert("Masukkan nominal")
+return
+}
+
+if(!confirm("Konfirmasi pembayaran Rp "+Number(nominal).toLocaleString('id-ID')+" ?")){
+return
+}
+
+const today = new Date()
+
+const nextMonth = new Date(today)
+nextMonth.setMonth(today.getMonth()+1)
+nextMonth.setDate(Math.min(today.getDate(),28))
+
+const {error}=await supabase
+.from('bulanan')
+.update({
+paid_until:nextMonth,
+last_paid_at:new Date(),
+last_paid_amount:Number(nominal)
+})
+.eq('id',id)
+
+if(error){
+alert("Gagal bayar")
+return
+}
+
+alert("Pembayaran berhasil")
 
 listBayar()
 
