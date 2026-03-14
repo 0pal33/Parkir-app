@@ -198,7 +198,7 @@ align-items:center;
 font-size:14px
 ">
 
-<b style="min-width:80px">${p.nama}</b>
+<div style="display:flex;flex-direction:column">  <b>${p.nama}</b>  <span style="font-size:12px;color:#666"> Tarif: Rp ${Number(p.last_paid_amount || 0).toLocaleString('id-ID')} </span>  </div>
 
 <span style="min-width:80px">
 ${p.motor || "-"}
@@ -281,7 +281,9 @@ id="nominalBayar"
 inputmode="numeric"
 pattern="[0-9]*"
 type="tel"
-placeholder="Nominal">
+placeholder="Nominal"
+oninput="this.value=this.value.replace(/[^0-9]/g,'')"
+>
 
 <br><br>
 
@@ -334,11 +336,3 @@ listBayar()
 
 }
 
-<input 
-id="nominalBayar"
-inputmode="numeric"
-pattern="[0-9]*"
-type="tel"
-placeholder="Nominal"
-oninput="this.value=this.value.replace(/[^0-9]/g,'')"
->
