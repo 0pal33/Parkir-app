@@ -239,39 +239,6 @@ document.getElementById("bottomButtons").innerHTML=`
 
 }
 
-/* ===== BAYAR ===== */
-
-window.bayarBulanan = async function(id){
-
-if(!confirm("Konfirmasi pembayaran pelanggan ini?")){
-return
-}
-
-const today = new Date()
-
-const nextMonth = new Date(today)
-nextMonth.setMonth(today.getMonth()+1)
-nextMonth.setDate(Math.min(today.getDate(),28))
-
-const {error}=await supabase
-.from('bulanan')
-.update({
-paid_until:nextMonth,
-last_paid_at:new Date()
-})
-.eq('id',id)
-
-if(error){
-alert("Gagal bayar")
-return
-}
-
-alert("Pembayaran berhasil sampai "+nextMonth.toLocaleDateString())
-
-listBayar()
-
-}
-
 window.formBayar=function(id,nama){
 
 hideAll()
