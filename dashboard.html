@@ -345,7 +345,11 @@ const slides = document.querySelector(".slides")
 const dots = document.querySelectorAll(".dot")
 
 if(slides && dots.length){
-slides.addEventListener("scroll",()=>{
+let scrollTimer  slides.addEventListener("scroll",()=>{  clearTimeout(scrollTimer)  scrollTimer=setTimeout(()=>{  
+let cardWidth = slides.querySelector(".card").offsetWidth + 15 
+let index = Math.round(slides.scrollLeft / cardWidth)  dots.forEach(d=>d.classList.remove("active")) 
+if(dots[index]) dots[index].classList.add("active")  
+},50)  })
 let cardWidth = slides.querySelector(".card").offsetWidth + 15
 let index = Math.round(slides.scrollLeft / cardWidth)
 
