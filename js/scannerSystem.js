@@ -42,6 +42,12 @@ window.scanner.clear()
 window.scanner=null
 }
 
+showHome()
+
+}
+
+/* ===== SWITCH CAMERA ===== */
+
 window.switchCamera = async function(){
 
 if(window.currentCamera === "environment"){
@@ -52,9 +58,5 @@ window.currentCamera = "environment"
 
 await window.stopScan()
 await window.startScan()
-
-}
-
-showHome()
 
 }
