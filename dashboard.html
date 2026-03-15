@@ -203,6 +203,16 @@ Reset Data Test
 
 async function loadDashboard(){
 
+setTimeout(()=>{
+if(slides){
+let cardWidth = slides.querySelector(".card").offsetWidth + 15
+let index = Math.round(slides.scrollLeft / cardWidth)
+
+dots.forEach(d=>d.classList.remove("active"))
+if(dots[index]) dots[index].classList.add("active")
+}
+},100)
+
 // =====================
 // DATA PARKIR
 // =====================
@@ -363,14 +373,6 @@ if(dots[index]) dots[index].classList.add("active")
 
 })
 
-}
-
-let cardWidth = slides.querySelector(".card").offsetWidth + 15
-let index = Math.round(slides.scrollLeft / cardWidth)
-
-dots.forEach(d=>d.classList.remove("active"))
-if(dots[index]) dots[index].classList.add("active")
-})
 }
 
 </script>
