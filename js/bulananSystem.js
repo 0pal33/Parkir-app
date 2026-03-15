@@ -211,11 +211,21 @@ ${tanggalLengkap}
 
 </div>
 
+<<div style="display:flex;gap:6px">
+
 <button class="green"
-style="padding:6px 14px;font-size:13px"
+style="padding:6px 12px;font-size:13px"
 onclick="formBayar('${p.id}','${p.nama}')">
 Bayar
 </button>
+
+<button class="blue"
+style="padding:6px 12px;font-size:13px"
+onclick="editTempo('${p.id}','${p.nama}','${p.jatuh_tempo}')">
+Edit
+</button>
+
+</div>
 
 </div>
 `
@@ -310,12 +320,27 @@ if(!confirm("Konfirmasi pembayaran Rp "+Number(nominal).toLocaleString('id-ID')+
 return
 }
 
+/* ambil data pelanggan dulu */
+
+const {data,error:err1} = await supabase
+.from('bulanan')
+.select('jatuh_tempo')
+.eq('id',id)
+.single()
+
+if(err1){
+alert("Gagal mengambil data")
+return
+}
+
+let tempo = data.jatuh_tempo
+
 let today = new Date()
 
-let nextMonth = new Date(today.getFullYear(), today.getMonth()+1, p.jatuh_tempo)
+let nextMonth = new Date(today.getFullYear(), today.getMonth()+1, tempo)
 
-// jika tanggal tidak ada di bulan itu
-if(nextMonth.getDate() !== p.jatuh_tempo){
+/* jika bulan itu tidak punya tanggal tersebut */
+if(nextMonth.getDate() !== tempo){
 nextMonth = new Date(today.getFullYear(), today.getMonth()+2, 0)
 }
 
@@ -339,3 +364,63 @@ listBayar()
 
 }
 
+window.editTempo=function(id,nama,tempo){
+
+hideAll()
+
+document.getElementById("resultBox").innerHTML=`
+
+<h3>Edit Jatuh Tempo</h3>
+
+<div style="font-size:20px;font-weight:bold;margin-bottom:20px">
+${nama}
+</div>
+
+<select id="tempoEdit" style="width:220px;height:45px;font-size:16px">
+
+<option value="">Tanggal baru</option>
+
+${Array.from({length:31},(_,i)=>`
+<option value="${i+1}" ${tempo==i+1?'selected':''}>${i+1}</option>
+`).join('')}
+
+</select>
+
+<br><br>
+
+<button class="green" onclick="simpanTempo('${id}')">✓</button>
+
+`
+
+document.getElementById("bottomButtons").innerHTML=`
+<button class="red" onclick="listBayar()">Batal</button>
+`
+
+}
+
+window.simpanTempo = async function(id){
+
+let tempo = parseInt(document.getElementById("tempoEdit").value)
+
+if(!tempo){
+alert("Pilih tanggal")
+return
+}
+
+const {error}=await supabase
+.from('bulanan')
+.update({
+jatuh_tempo:tempo
+})
+.eq('id',id)
+
+if(error){
+alert("Gagal update")
+return
+}
+
+alert("Jatuh tempo diperbarui")
+
+listBayar()
+
+}
