@@ -211,7 +211,7 @@ ${tanggalLengkap}
 
 </div>
 
-<<div style="display:flex;gap:6px">
+<div style="display:flex;gap:6px">
 
 <button class="green"
 style="padding:6px 12px;font-size:13px"
