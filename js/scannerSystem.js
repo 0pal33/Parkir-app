@@ -56,7 +56,16 @@ window.currentCamera = "user"
 window.currentCamera = "environment"
 }
 
-await window.stopScan()
-await window.startScan()
+/* stop scanner TANPA showHome */
+if(window.scanner){
+try{
+await window.scanner.stop()
+}catch(e){}
+window.scanner.clear()
+window.scanner=null
+}
+
+/* start lagi */
+window.startScan()
 
 }
