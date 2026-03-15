@@ -333,7 +333,9 @@ loadDashboard()
 
 setInterval(loadDashboard,10000)
 
-</script>
+/* =========================
+   SLIDER DOT INDICATOR
+========================= */
 
 const slides=document.querySelector(".slides")
 const dots=document.querySelectorAll(".dot")
@@ -346,6 +348,8 @@ dots.forEach(d=>d.classList.remove("active"))
 if(dots[index]) dots[index].classList.add("active")
 
 })
+
+</script>
 
 </body>
 </html>
