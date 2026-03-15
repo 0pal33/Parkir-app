@@ -314,7 +314,7 @@ let nextMonth = new Date(baseDate.getFullYear(), baseDate.getMonth()+1, tempo)
 
 /* jika bulan itu tidak punya tanggal tersebut */
 if(nextMonth.getDate() !== tempo){
-nextMonth = new Date(today.getFullYear(), today.getMonth()+2, 0)
+nextMonth = new Date(baseDate.getFullYear(), baseDate.getMonth()+2, 0)
 }
 
 const {error}=await supabase
