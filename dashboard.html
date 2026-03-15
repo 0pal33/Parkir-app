@@ -200,6 +200,12 @@ Reset Data Test
 </div>
 
 <script>
+  
+function nowWIB(){
+return new Date(
+new Date().toLocaleString("en-US",{timeZone:"Asia/Jakarta"})
+)
+}
 
 async function loadDashboard(){
 
@@ -221,13 +227,14 @@ const {data:bulanan}=await supabase
 .select("*")
 .not("last_paid_at","is",null)
 
-let today=new Date()
+let today = nowWIB()
 
-let week=new Date()
+let week = new Date(today)
 week.setDate(today.getDate()-7)
 
-let month=new Date()
+let month = new Date(today)
 month.setMonth(today.getMonth()-1)
+
 
 let dayCheckout=0
 let weekCheckout=0
