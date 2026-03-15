@@ -133,3 +133,7 @@ animation:scanMove 2s linear infinite;
 50%{ transform:translate(-50%,100px); }
 100%{ transform:translate(-50%,-100px); }
 }
+
+#switchCamBtn{
+margin-top:10px;
+}
