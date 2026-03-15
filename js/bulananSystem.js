@@ -316,7 +316,7 @@ const {error}=await supabase
 .update({
 paid_until:nextMonth,
 last_paid_at:new Date(),
-last_paid_amount:Number(nominal)
+last_paid_amount:nominal
 })
 .eq('id',id)
 
