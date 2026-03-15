@@ -48,6 +48,7 @@ scroll-snap-type:x mandatory;
 scroll-behavior:smooth;
 gap:15px;
 -webkit-overflow-scrolling:touch;
+scroll-snap-stop:always;
 }
 
 .slides::-webkit-scrollbar{
@@ -345,7 +346,8 @@ const dots=document.querySelectorAll(".dot")
 
 slides.addEventListener("scroll",()=>{
 
-let index=Math.round(slides.scrollLeft/slides.clientWidth)
+let cardWidth = slides.querySelector(".card").offsetWidth + 15 
+let index = Math.round(slides.scrollLeft / cardWidth)
 
 dots.forEach(d=>d.classList.remove("active"))
 if(dots[index]) dots[index].classList.add("active")
