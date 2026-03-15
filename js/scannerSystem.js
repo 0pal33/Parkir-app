@@ -7,7 +7,9 @@ window.startScan = async function(){
 showScan()
 
 if(window.scanner){
-await window.scanner.stop().catch(()=>{})
+try{
+await window.scanner.stop()
+}catch(e){}
 window.scanner.clear()
 window.scanner=null
 }
@@ -33,7 +35,9 @@ window.onScan
 window.stopScan = async function(){
 
 if(window.scanner){
-await window.scanner.stop().catch(()=>{})
+try{
+await window.scanner.stop()
+}catch(e){}
 window.scanner.clear()
 window.scanner=null
 }
