@@ -191,9 +191,6 @@ Reset Data Test
 
 <script>
 
-const slides=document.querySelector(".slides")
-const dots=document.querySelectorAll(".dot")
-
 slides.addEventListener("scroll",()=>{
 
 let index=Math.round(slides.scrollLeft/slides.clientWidth)
@@ -338,6 +335,9 @@ location.reload()
 loadDashboard()
 
 setInterval(loadDashboard,10000)
+
+const slides=document.querySelector(".slides")
+const dots=document.querySelectorAll(".dot")
 
 </script>
 
