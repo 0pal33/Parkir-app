@@ -297,7 +297,7 @@ return
 
 const {data,error:err1} = await supabase
 .from('bulanan')
-.select('jatuh_tempo')
+.select('jatuh_tempo, paid_until')
 .eq('id',id)
 .single()
 
@@ -308,9 +308,9 @@ return
 
 let tempo = data.jatuh_tempo
 
-let today = new Date()
+let baseDate = data.paid_until ? new Date(data.paid_until) : new Date()
 
-let nextMonth = new Date(today.getFullYear(), today.getMonth()+1, tempo)
+let nextMonth = new Date(baseDate.getFullYear(), baseDate.getMonth()+1, tempo)
 
 /* jika bulan itu tidak punya tanggal tersebut */
 if(nextMonth.getDate() !== tempo){
