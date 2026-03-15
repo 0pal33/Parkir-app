@@ -258,7 +258,7 @@ id="nominalBayar"
 inputmode="numeric"
 pattern="[0-9]*"
 type="tel"
-placeholder="Nominal"
+placeholder="Contoh: 70 = 70rb"
 oninput="this.value=this.value.replace(/[^0-9]/g,'')"
 >
 
@@ -276,7 +276,8 @@ document.getElementById("bottomButtons").innerHTML=`
 
 window.konfirmasiBayar = async function(id){
 
-let nominalInput = document.getElementById("nominalBayar").value.replace(/\D/g,'') let nominal = Number(nominalInput) * 1000
+let nominalInput = document.getElementById("nominalBayar").value.replace(/\D/g,'') 
+let nominal = Number(nominalInput) * 1000
 
 if(!nominal){
 alert("Masukkan nominal")
