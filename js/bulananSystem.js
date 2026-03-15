@@ -310,11 +310,14 @@ if(!confirm("Konfirmasi pembayaran Rp "+Number(nominal).toLocaleString('id-ID')+
 return
 }
 
-const today = new Date()
+let today = new Date()
 
-const nextMonth = new Date(today)
-nextMonth.setMonth(today.getMonth()+1)
-nextMonth.setDate(Math.min(today.getDate(),28))
+let nextMonth = new Date(today.getFullYear(), today.getMonth()+1, p.jatuh_tempo)
+
+// jika tanggal tidak ada di bulan itu
+if(nextMonth.getDate() !== p.jatuh_tempo){
+nextMonth = new Date(today.getFullYear(), today.getMonth()+2, 0)
+}
 
 const {error}=await supabase
 .from('bulanan')
