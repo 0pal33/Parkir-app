@@ -75,7 +75,7 @@ margin:auto;
  
 <div class="titleParkir"> Parkir Aktif </div>
 
-<div class="totalParkir" id="totalParkir>
+<div class="totalParkir" id="totalParkir">
 Total parkir aktif 0
 </div>
 
@@ -92,8 +92,6 @@ Total parkir aktif 0
 </tr>
 
 <tbody id="list"></tbody>
-
-</table>
 
 </table>
 
@@ -133,9 +131,8 @@ html+=`
 })
 
 document.getElementById("list").innerHTML=html
-
 document.getElementById("totalParkir").innerText =
-"Total parkir aktif " + data.length
+"Total parkir aktif: " + data.length
 
 }
 
