@@ -17,7 +17,7 @@ window.scanner=null
 window.scanner = new Html5Qrcode("reader")
 
 await window.scanner.start(
-{ facingMode:"environment" },
+{ facingMode: window.currentCamera },
 {
 fps:15,
 qrbox:{ width:250,height:250 },
@@ -40,6 +40,19 @@ await window.scanner.stop()
 }catch(e){}
 window.scanner.clear()
 window.scanner=null
+}
+
+window.switchCamera = async function(){
+
+if(window.currentCamera === "environment"){
+window.currentCamera = "user"
+}else{
+window.currentCamera = "environment"
+}
+
+await window.stopScan()
+await window.startScan()
+
 }
 
 showHome()
