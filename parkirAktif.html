@@ -37,13 +37,51 @@ background:#3498db;
 color:white;
 }
 
+.headerParkir{
+background:linear-gradient(135deg,#2f80ed,#56ccf2);
+color:white;
+padding:18px;
+text-align:center;
+border-radius:10px 10px 0 0;
+max-width:500px;
+margin:auto;
+}
+
+.titleParkir{
+font-size:22px;
+font-weight:bold;
+}
+
+.totalParkir{
+font-size:15px;
+margin-top:4px;
+opacity:0.95;
+}
+
+.tableWrapper{
+max-height:420px;
+overflow-y:auto;
+max-width:500px;
+margin:auto;
+}
+
 </style>
 
 </head>
 
 <body>
 
-<h3>Parkir Aktif</h3>
+<div class="headerParkir">
+ 
+<div class="titleParkir"> Parkir Aktif </div>
+
+<div class="totalParkir" id="totalParkir>
+Total parkir aktif 0
+</div>
+
+</div>
+
+<div class="tableWrapper">
 
 <table>
 
@@ -56,6 +94,10 @@ color:white;
 <tbody id="list"></tbody>
 
 </table>
+
+</table>
+
+</div>
 
 <br>
 
@@ -91,6 +133,9 @@ html+=`
 })
 
 document.getElementById("list").innerHTML=html
+
+document.getElementById("totalParkir").innerText =
+"Total parkir aktif " + data.length
 
 }
 
