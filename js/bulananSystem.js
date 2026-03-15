@@ -374,10 +374,20 @@ alert("Pilih tanggal")
 return
 }
 
+let today = new Date()
+
+let newDate = new Date(today.getFullYear(), today.getMonth(), tempo)
+
+/* jika bulan ini tidak punya tanggal tersebut */
+if(newDate.getDate() !== tempo){
+newDate = new Date(today.getFullYear(), today.getMonth()+1, 0)
+}
+
 const {error}=await supabase
 .from('bulanan')
 .update({
-jatuh_tempo:tempo
+jatuh_tempo:tempo,
+paid_until:newDate
 })
 .eq('id',id)
 
