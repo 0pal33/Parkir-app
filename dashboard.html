@@ -199,8 +199,6 @@ Reset Data Test
 
 </div>
 
-</div>
-
 <script>
 
 async function loadDashboard(){
@@ -343,18 +341,18 @@ setInterval(loadDashboard,10000)
    SLIDER DOT INDICATOR
 ========================= */
 
-const slides=document.querySelector(".slides")
-const dots=document.querySelectorAll(".dot")
+const slides = document.querySelector(".slides")
+const dots = document.querySelectorAll(".dot")
 
+if(slides && dots.length){
 slides.addEventListener("scroll",()=>{
-
-let cardWidth = slides.querySelector(".card").offsetWidth + 15 
+let cardWidth = slides.querySelector(".card").offsetWidth + 15
 let index = Math.round(slides.scrollLeft / cardWidth)
 
 dots.forEach(d=>d.classList.remove("active"))
 if(dots[index]) dots[index].classList.add("active")
-
 })
+}
 
 </script>
 
