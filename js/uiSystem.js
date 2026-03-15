@@ -10,6 +10,8 @@ window.showHome=function(){
 
 hideAll()
 
+document.getElementById("switchCamBtn").style.display="none"
+
 document.getElementById("bottomButtons").innerHTML=`
 <button class="orange" onclick="startScan()">Start Scanning</button>
 <button class="blue" onclick="showManual()">Ketik Manual</button>
@@ -25,6 +27,7 @@ window.showScan=function(){
 hideAll()
 
 document.getElementById("reader").style.display="block"
+document.getElementById("switchCamBtn").style.display="inline-block"
 
 document.getElementById("bottomButtons").innerHTML=`
 <button class="red" onclick="stopScan()">Stop</button>
