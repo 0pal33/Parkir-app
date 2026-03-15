@@ -279,6 +279,11 @@ window.konfirmasiBayar = async function(id){
 let nominalInput = document.getElementById("nominalBayar").value.replace(/\D/g,'') 
 let nominal = Number(nominalInput) * 1000
 
+if(!nominalInput){
+alert("Masukkan nominal")
+return
+}
+
 if(!nominal){
 alert("Masukkan nominal")
 return
