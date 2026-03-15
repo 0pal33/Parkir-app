@@ -276,14 +276,14 @@ document.getElementById("bottomButtons").innerHTML=`
 
 window.konfirmasiBayar = async function(id){
 
-let nominal = document.getElementById("nominalBayar").value.replace(/\D/g,'')
+let nominalInput = document.getElementById("nominalBayar").value.replace(/\D/g,'') let nominal = Number(nominalInput) * 1000
 
 if(!nominal){
 alert("Masukkan nominal")
 return
 }
 
-if(!confirm("Konfirmasi pembayaran Rp "+Number(nominal).toLocaleString('id-ID')+",- ?")){
+if(!confirm("Konfirmasi pembayaran Rp "+nominal.toLocaleString('id-ID')+",- ?")){
 return
 }
 
