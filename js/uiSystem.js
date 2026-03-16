@@ -15,6 +15,7 @@ window.showHome=function(){
 hideAll()
 
 let powerBtn=document.querySelector(".logout-btn")
+if(!powerBtn) return
 
 if(localStorage.getItem("adminLogin")==="true"){
 
