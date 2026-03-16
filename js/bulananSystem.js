@@ -11,6 +11,9 @@ document.getElementById("bottomButtons").innerHTML=`
 <button class="red" onclick="showHome()">Kembali</button>
 `
 
+let f=document.querySelector(".floatingTambah")
+if(f) f.remove()
+
 /* buat tombol + floating */
 let btn=document.createElement("button")
 btn.innerText="+"
@@ -127,8 +130,6 @@ showBulanan()
 /* ===== LIST BAYAR ===== */
 
 window.listBayar = async function(){
-
-hideAll();
 
 document.getElementById("resultBox").innerHTML="Loading..."
 
