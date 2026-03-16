@@ -159,7 +159,7 @@ document.getElementById("bottomButtons").innerHTML=`
 return;
 }
 
-data.forEach(p=>{
+(data || []).forEach(p=>{
 
 let expired=false
 
