@@ -143,7 +143,7 @@ document.getElementById("resultBox").innerHTML="Gagal mengambil data"
 return
 }
 
-let html="<h3>Daftar Pelanggan ("+(data ? data.length : 0)+")</h3>"
+let html="<h3>Daftar Pelanggan ("+((data||[]).length)+")</h3>"
 
 let now = new Date()
 let year = now.getFullYear()
