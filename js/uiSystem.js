@@ -10,10 +10,26 @@ window.showHome=function(){
 
 hideAll()
 
+let powerBtn=document.querySelector(".logout-btn")
+
 if(localStorage.getItem("adminLogin")==="true"){
+
+/* ADMIN MODE */
+
 document.getElementById("dashboardBtn").style.display="flex"
+
+powerBtn.style.background="#e74c3c"   // merah
+powerBtn.onclick=logoutAdmin
+
 }else{
+
+/* PETUGAS MODE */
+
 document.getElementById("dashboardBtn").style.display="none"
+
+powerBtn.style.background="#28a745"   // hijau
+powerBtn.onclick=goAdmin
+
 }
 
 document.getElementById("switchCamBtn").style.display="none"
@@ -70,4 +86,12 @@ window.location.href="admin.html"
 
 window.goDashboard=function(){
 window.location.href="dashboard.html"
+}
+
+window.logoutAdmin=function(){
+
+localStorage.removeItem("adminLogin")
+
+location.reload()
+
 }
