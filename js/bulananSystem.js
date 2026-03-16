@@ -5,11 +5,10 @@ window.showBulanan = function(){
 hideAll()
 
 listBayar()
-
 document.getElementById("bottomButtons").innerHTML=`
-<button class="blue" onclick="formTambah()" style="font-size:22px;width:60px">+</button>
 <button class="red" onclick="showHome()">Kembali</button>
 `
+
 
 let f=document.querySelector(".floatingTambah")
 if(f) f.remove()
