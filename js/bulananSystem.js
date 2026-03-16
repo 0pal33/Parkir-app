@@ -149,7 +149,7 @@ let now = new Date()
 let year = now.getFullYear()
 let month = now.getMonth()
 
-if(!data || data.length===0){
+if((data || []).length === 0){
 document.getElementById("resultBox").innerHTML="<h3>Belum ada pelanggan</h3>";
 
 document.getElementById("bottomButtons").innerHTML=`
