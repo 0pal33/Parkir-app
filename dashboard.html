@@ -229,6 +229,10 @@ Reset Data Test
 
 <script>
   
+if(localStorage.getItem("adminLogin")!=="true"){
+location.href="admin.html"
+}
+  
 function nowWIB(){
 return new Date(
 new Date().toLocaleString("en-US",{timeZone:"Asia/Jakarta"})
