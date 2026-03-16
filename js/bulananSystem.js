@@ -145,9 +145,9 @@ return
 
 let html="<h3>Daftar Pelanggan ("+((data||[]).length)+")</h3>"
 
-let now = new Date()
-let year = now.getFullYear()
-let month = now.getMonth()
+let today = new Date()
+let year = today.getFullYear()
+let month = today.getMonth()
 
 if((data || []).length === 0){
 document.getElementById("resultBox").innerHTML="<h3>Belum ada pelanggan</h3>";
