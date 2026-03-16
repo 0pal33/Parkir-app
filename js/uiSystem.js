@@ -52,13 +52,6 @@ document.getElementById("bottomButtons").innerHTML=`
 
 }
 
-document.getElementById("bottomButtons").innerHTML=`
-<button class="orange" onclick="scanUlang()">Scan Ulang</button>
-<button class="blue" onclick="manualAgain()">Ketik Lagi</button>
-`
-
-}
-
 window.showManualState=function(){
 
 hideAll()
@@ -76,7 +69,5 @@ window.location.href="admin.html"
 }
 
 window.goDashboard=function(){
-
 window.location.href="dashboard.html"
-
 }
