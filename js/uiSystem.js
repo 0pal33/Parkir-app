@@ -63,6 +63,8 @@ document.getElementById("bottomButtons").innerHTML=`
 }
 
 window.showResult=function(){
+  
+hideAll()
 
 document.getElementById("switchCamBtn").style.display="none"
 
