@@ -2,19 +2,14 @@
 
 window.showBulanan = function(){
 
-hideAll();
+hideAll()
 
-document.getElementById("resultBox").innerHTML=`
-<h3>Layanan Bulanan</h3>
-
-<button class="green" onclick="formTambah()">Tambah</button>
-
-<button class="orange" onclick="listBayar()">Bayar</button>
-`;
+listBayar()
 
 document.getElementById("bottomButtons").innerHTML=`
+<button class="blue" onclick="formTambah()" style="font-size:22px;width:60px">+</button>
 <button class="red" onclick="showHome()">Kembali</button>
-`;
+`
 
 }
 
