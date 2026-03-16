@@ -4,7 +4,7 @@ window.showBulanan = async function(){
 
 hideAll()
 
-listBayar()
+await listBayar()
 document.getElementById("bottomButtons").innerHTML=`
 <button class="red" onclick="showHome()">Kembali</button>
 `
