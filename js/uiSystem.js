@@ -68,6 +68,6 @@ window.location.href="admin.html"
 
 window.goDashboard=function(){
 
-window.location.href="adminDashboard.html"
+window.location.href="dashboard.html"
 
 }
