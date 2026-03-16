@@ -148,7 +148,7 @@ if(!data || data.length===0){
 document.getElementById("resultBox").innerHTML="<h3>Belum ada pelanggan</h3>";
 
 document.getElementById("bottomButtons").innerHTML=`
-<button class="red" onclick="showBulanan()">Kembali</button>
+<button class="red" onclick="showHome()">Kembali</button>
 `;
 
 return;
@@ -236,7 +236,7 @@ Edit
 document.getElementById("resultBox").innerHTML=html
 
 document.getElementById("bottomButtons").innerHTML=`
-<button class="red" onclick="showBulanan()">Kembali</button>
+<button class="red" onclick="showHome()">Kembali</button>
 `
 
 }
