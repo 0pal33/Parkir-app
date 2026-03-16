@@ -298,7 +298,7 @@ let dayBul=0
 let weekBul=0
 let monthBul=0
 
-bulanan.forEach(b=>{
+(bulanan || []).forEach(b=>{
 
 let t=new Date(b.last_paid_at)
 
