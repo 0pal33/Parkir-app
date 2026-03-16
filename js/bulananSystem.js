@@ -1,6 +1,6 @@
 /* ===== BULANAN MENU ===== */
 
-window.showBulanan = function(){
+window.showBulanan = async function(){
 
 hideAll()
 
