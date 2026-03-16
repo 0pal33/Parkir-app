@@ -11,6 +11,13 @@ document.getElementById("bottomButtons").innerHTML=`
 <button class="red" onclick="showHome()">Kembali</button>
 `
 
+/* buat tombol + floating */
+let btn=document.createElement("button")
+btn.innerText="+"
+btn.className="floatingTambah"
+btn.onclick=formTambah
+document.body.appendChild(btn)
+
 }
 
 /* ===== FORM TAMBAH ===== */
