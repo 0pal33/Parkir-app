@@ -47,7 +47,8 @@ cursor:pointer;
 <script>
 
 window.back = function(){
-window.location.href="index.html"
+window.localStorage.setItem("adminLogin","true")
+location.href="index.html"
 }
 
 window.login = async function(){
