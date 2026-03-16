@@ -4,6 +4,10 @@ document.getElementById("reader").style.display="none"
 document.getElementById("manualBox").style.display="none"
 document.getElementById("resultBox").innerHTML=""
 
+/* hapus tombol + floating jika ada */
+let f=document.querySelector(".floatingTambah")
+if(f) f.remove()
+
 }
 
 window.showHome=function(){
