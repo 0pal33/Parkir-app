@@ -43,6 +43,15 @@ document.getElementById("bottomButtons").innerHTML=`
 
 window.showResult=function(){
 
+document.getElementById("switchCamBtn").style.display="none"
+
+document.getElementById("bottomButtons").innerHTML=`
+<button class="orange" onclick="scanUlang()">Scan Ulang</button>
+<button class="blue" onclick="manualAgain()">Ketik Lagi</button>
+`
+
+}
+
 document.getElementById("bottomButtons").innerHTML=`
 <button class="orange" onclick="scanUlang()">Scan Ulang</button>
 <button class="blue" onclick="manualAgain()">Ketik Lagi</button>
