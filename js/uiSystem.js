@@ -10,6 +10,12 @@ window.showHome=function(){
 
 hideAll()
 
+if(localStorage.getItem("adminLogin")==="true"){
+document.getElementById("dashboardBtn").style.display="flex"
+}else{
+document.getElementById("dashboardBtn").style.display="none"
+}
+
 document.getElementById("switchCamBtn").style.display="none"
 
 document.getElementById("bottomButtons").innerHTML=`
@@ -58,4 +64,10 @@ document.getElementById("bottomButtons").innerHTML=`
 
 window.goAdmin=function(){
 window.location.href="admin.html"
+}
+
+window.goDashboard=function(){
+
+window.location.href="adminDashboard.html"
+
 }
