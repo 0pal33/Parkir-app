@@ -132,11 +132,16 @@ window.listBayar = async function(){
 
 document.getElementById("resultBox").innerHTML="Loading..."
 
-const {data}=await supabase
+const {data,error}=await supabase
 .from('bulanan')
 .select('*')
 .eq('status','aktif')
 .order('jatuh_tempo')
+
+if(error){
+document.getElementById("resultBox").innerHTML="Gagal mengambil data"
+return
+}
 
 let html="<h3>Daftar Pelanggan ("+(data ? data.length : 0)+")</h3>"
 
