@@ -35,6 +35,26 @@ border-radius:10px;
 cursor:pointer;
 }
 
+.topButtons{
+display:flex;
+gap:8px;
+}
+
+.petugasBtn{
+background:#95a5a6;
+color:white;
+border:none;
+padding:10px 12px;
+border-radius:10px;
+cursor:pointer;
+font-size:16px;
+opacity:0.6;
+}
+
+.petugasBtn:hover{
+opacity:1;
+}
+
 .slider{
 max-width:520px;
 margin:auto;
@@ -121,7 +141,15 @@ background:#3498db;
 
 <h3>Dashboard Admin</h3>
 
+<div class="topButtons">
+
+<button class="petugasBtn" onclick="goPetugas()" title="Halaman Petugas">
+👨‍🔧
+</button>
+
 <button class="logout" onclick="logout()">Logout</button>
+
+</div>
 
 </div>
 
@@ -338,6 +366,10 @@ alert("Database berhasil direset")
 
 location.reload()
 
+}
+
+function goPetugas(){
+window.location.href="index.html"
 }
 
 loadDashboard()
