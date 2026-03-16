@@ -272,7 +272,7 @@ let dayCheckout=0
 let weekCheckout=0
 let monthCheckout=0
 
-parkir.forEach(p=>{
+(parkir || []).forEach(p=>{
 
 let t=new Date(p.checkout_at)
 
