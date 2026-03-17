@@ -44,6 +44,10 @@ cursor:pointer;
 <button class="blue" onclick="login()">Login</button>
 <button class="red" onclick="back()">Batal</button>
 
+if(localStorage.getItem("adminLogin")==="true"){
+window.location.href="index.html"
+}
+
 <script>
 
 window.back = function(){
@@ -64,8 +68,9 @@ alert("Login gagal")
 return
 }
 
+alert("Login berhasil")
 localStorage.setItem("adminLogin","true");
-window.location.href="dashboard.html";
+window.location.href="index.html";
 }
 
 </script>
