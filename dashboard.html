@@ -21,6 +21,7 @@ background:#f2f2f2;
 margin:0;
 padding:20px;
 text-align:center;
+padding-bottom:100px;
 }
 
 .top{
@@ -151,7 +152,10 @@ font-size:28px;
 box-shadow:0 6px 15px rgba(0,0,0,0.3);
 cursor:pointer;
 z-index:999;
-transform:translateX(-50%) scale(0.95);
+}
+
+#floatingPetugas:active{
+transform:translateX(-50%) scale(0.9);
 }
 
 </style>
@@ -276,8 +280,13 @@ async function loadDashboard(){
 if(document.body.style.display === "none") return
 
 // loading state
-Array.from(document.querySelectorAll("span")).forEach(e=>{
-e.innerText="..."
+[
+"d1","t1","b1","bt1","all1",
+"d2","t2","b2","bt2","all2",
+"d3","t3","b3","bt3","all3"
+].forEach(id=>{
+let el = document.getElementById(id)
+if(el) el.innerText="..."
 })
 
 // ambil data
