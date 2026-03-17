@@ -370,8 +370,8 @@ ${Array.from({length:31},(_,i)=>`
 
 <button class="green" onclick="simpanTempo('${id}')">Simpan</button>
 
-<button class="red" style="margin-top:10px"
-onclick="hapusPelanggan('${id}','${nama}')">
+<button class="red" style="margin-top:10px;opacity:0.8"
+onclick="hapusPelanggan('${id}',\`${nama}\`)">
 Hapus Pelanggan
 </button>
 
@@ -421,6 +421,8 @@ listBayar()
 }
 
 window.hapusPelanggan = async function(id,nama){
+
+if(!id) return
 
 let konfirmasi = confirm(
 "Yakin hapus pelanggan:\n\n"+nama+" ?"
