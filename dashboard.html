@@ -137,6 +137,12 @@ background:#3498db;
 
 <body>
 
+<script>
+if(localStorage.getItem("adminLogin") !== "true"){
+window.location.replace("index.html")
+}
+</script>
+
 <div class="top">
 
 <h3>Dashboard Admin</h3>
