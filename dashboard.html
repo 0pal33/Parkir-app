@@ -149,6 +149,7 @@ const { data } = await supabase.auth.getSession()
 
 if(!data.session){
 window.location.replace("index.html")
+return
 }
 
 })()
