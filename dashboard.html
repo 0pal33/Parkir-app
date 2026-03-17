@@ -270,6 +270,8 @@ Reset Data Test
 
 <script>
   
+let dashboardInterval = null
+  
 function nowWIB(){
 return new Date(
 new Date().toLocaleString("en-US",{timeZone:"Asia/Jakarta"})
@@ -473,8 +475,6 @@ clearInterval(dashboardInterval)
 /* =========================
    SLIDER DOT INDICATOR
 ========================= */
-
-document.addEventListener("DOMContentLoaded",()=>{
 
 const slides = document.querySelector(".slides")
 const dots = document.querySelectorAll(".dot")
