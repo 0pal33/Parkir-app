@@ -56,6 +56,13 @@ window.back = function(){
 location.href="index.html"
 }
 
+// ✅ ENTER = login (dipindah ke sini)
+document.addEventListener("keydown",function(e){
+if(e.key==="Enter"){
+login()
+}
+})
+
 // login function
 window.login = async function(){
 
@@ -70,12 +77,6 @@ return
 
 btn.disabled = true
 btn.innerText = "Loading..."
-
-document.addEventListener("keydown",function(e){
-if(e.key==="Enter"){
-login()
-}
-})
 
 const { error } = await supabase.auth.signInWithPassword({
 email,password
