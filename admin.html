@@ -44,22 +44,30 @@ cursor:pointer;
 <button class="blue" onclick="login()">Login</button>
 <button class="red" onclick="back()">Batal</button>
 
+<script>
+
+// ✅ redirect kalau sudah login
 if(localStorage.getItem("adminLogin")==="true"){
 window.location.href="index.html"
 }
 
-<script>
-
+// tombol kembali
 window.back = function(){
 location.href="index.html"
 }
 
+// login function
 window.login = async function(){
 
-let email=document.getElementById("email").value
+let email=document.getElementById("email").value.trim()
 let password=document.getElementById("password").value
 
-const { data, error } = await supabase.auth.signInWithPassword({
+if(!email || !password){
+alert("Isi email dan password")
+return
+}
+
+const { error } = await supabase.auth.signInWithPassword({
 email,password
 })
 
@@ -69,8 +77,11 @@ return
 }
 
 alert("Login berhasil")
-localStorage.setItem("adminLogin","true");
-window.location.href="index.html";
+
+localStorage.setItem("adminLogin","true")
+
+window.location.href="index.html"
+
 }
 
 </script>
