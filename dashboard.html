@@ -453,16 +453,22 @@ location.reload()
 function goPetugas(){
 window.location.href="index.html"
 }
-
-let dashboardInterval
-
 document.addEventListener("DOMContentLoaded",()=>{
+
+if(dashboardInterval !== null){
+clearInterval(dashboardInterval)
+}
+
 loadDashboard()
 dashboardInterval = setInterval(loadDashboard,10000)
+
 })
 
+
 window.addEventListener("beforeunload",()=>{
+if(dashboardInterval !== null){
 clearInterval(dashboardInterval)
+}
 })
 /* =========================
    SLIDER DOT INDICATOR
