@@ -368,7 +368,12 @@ ${Array.from({length:31},(_,i)=>`
 
 <br><br>
 
-<button class="green" onclick="simpanTempo('${id}')">✓</button>
+<button class="green" onclick="simpanTempo('${id}')">Simpan</button>
+
+<button class="red" style="margin-top:10px"
+onclick="hapusPelanggan('${id}','${nama}')">
+Hapus Pelanggan
+</button>
 
 `
 
@@ -410,6 +415,30 @@ return
 }
 
 alert("Jatuh tempo diperbarui")
+
+listBayar()
+
+}
+
+window.hapusPelanggan = async function(id,nama){
+
+let konfirmasi = confirm(
+"Yakin hapus pelanggan:\n\n"+nama+" ?"
+)
+
+if(!konfirmasi) return
+
+const { error } = await supabase
+.from('bulanan')
+.delete()
+.eq('id',id)
+
+if(error){
+alert("Gagal hapus: "+error.message)
+return
+}
+
+alert("Pelanggan berhasil dihapus")
 
 listBayar()
 
