@@ -138,9 +138,20 @@ background:#3498db;
 <body>
 
 <script>
+(async ()=>{
+
 if(localStorage.getItem("adminLogin") !== "true"){
 window.location.replace("index.html")
+return
 }
+
+const { data } = await supabase.auth.getSession()
+
+if(!data.session){
+window.location.replace("index.html")
+}
+
+})()
 </script>
 
 <div class="top">
@@ -412,45 +423,6 @@ if(dots[index]) dots[index].classList.add("active")
 })
 
 })
-const dots = document.querySelectorAll(".dot")
-
-/* set dot awal */
-
-setTimeout(()=>{
-
-if(slides && dots.length){
-
-let cardWidth = slides.querySelector(".card").offsetWidth + 15
-let index = Math.round(slides.scrollLeft / cardWidth)
-
-dots.forEach(d=>d.classList.remove("active"))
-if(dots[index]) dots[index].classList.add("active")
-
-}
-
-},100)
-
-if(slides && dots.length){
-
-let scrollTimer
-
-slides.addEventListener("scroll",()=>{
-
-clearTimeout(scrollTimer)
-
-scrollTimer = setTimeout(()=>{
-
-let cardWidth = slides.querySelector(".card").offsetWidth + 15
-let index = Math.round(slides.scrollLeft / cardWidth)
-
-dots.forEach(d=>d.classList.remove("active"))
-if(dots[index]) dots[index].classList.add("active")
-
-},50)
-
-})
-
-}
 
 </script>
 
