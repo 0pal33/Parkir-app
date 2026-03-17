@@ -61,11 +61,21 @@ window.login = async function(){
 
 let email=document.getElementById("email").value.trim()
 let password=document.getElementById("password").value
+let btn=document.querySelector(".blue")
 
 if(!email || !password){
 alert("Isi email dan password")
 return
 }
+
+btn.disabled = true
+btn.innerText = "Loading..."
+
+document.addEventListener("keydown",function(e){
+if(e.key==="Enter"){
+login()
+}
+})
 
 const { error } = await supabase.auth.signInWithPassword({
 email,password
@@ -73,6 +83,8 @@ email,password
 
 if(error){
 alert("Login gagal")
+btn.disabled = false
+btn.innerText = "Login"
 return
 }
 
