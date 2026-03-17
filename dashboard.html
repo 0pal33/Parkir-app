@@ -292,23 +292,24 @@ if(el) el.innerText="..."
 })
 
 // ambil data
+try{
+
 const {data:parkir,error:e1}=await supabase
 .from("parkir")
 .select("checkout_at")
 .eq("status","off")
 
-if(e1){
-console.log(e1)
-return
-}
+if(e1) throw e1
 
 const {data:bulanan,error:e2}=await supabase
 .from("bulanan")
 .select("last_paid_at")
 .not("last_paid_at","is",null)
 
-if(e2){
-console.log(e2)
+if(e2) throw e2
+
+}catch(err){
+console.log("ERROR DASHBOARD:",err)
 return
 }
 
@@ -329,7 +330,7 @@ let dayCheckout=0
 let weekCheckout=0
 let monthCheckout=0
 
-(parkir || []).forEach(p=>{
+let listParkir = parkir || [] listParkir.forEach(p=>{
 
 let t = p.checkout_at ? new Date(p.checkout_at) : null
 if(!t || isNaN(t)) return
@@ -354,7 +355,7 @@ let dayBul=0
 let weekBul=0
 let monthBul=0
 
-(bulanan || []).forEach(b=>{
+let listBulanan = bulanan || [] listBulanan.forEach(b=>{
 
 let t = b.last_paid_at ? new Date(b.last_paid_at) : null
 if(!t || isNaN(t)) return
