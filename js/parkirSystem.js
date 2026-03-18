@@ -226,8 +226,11 @@ return
 
 let start=new Date(data.checkin_at)
 let wStart=new Date(start.toLocaleString("en-US",{timeZone:"Asia/Jakarta"}))
+let jam = wStart.getHours()
 
-if(wStart.getHours()<21){
+if(jam >= 21 && jam <= 23){
+alert("Tidak bisa dibatalkan antara jam 21:00 - 00:00")
+}else{
 
 const { error } = await supabase
 .from('parkir')
@@ -240,8 +243,6 @@ alert("Gagal batal parkir")
 return
 }
 
-}else{
-alert("Tidak bisa dibatalkan setelah 21:00")
 }
 
 window.scanLocked=false
