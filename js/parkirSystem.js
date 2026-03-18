@@ -224,29 +224,33 @@ await window.onScan(k)
 return
 }
 
-let start=new Date(data.checkin_at)
-let wStart=new Date(start.toLocaleString("en-US",{timeZone:"Asia/Jakarta"}))
-let jam = wStart.getHours()
+/* ===== AMBIL WAKTU SEKARANG WIB ===== */
+let now = new Date()
+let wNow = new Date(
+now.toLocaleString("en-US",{timeZone:"Asia/Jakarta"})
+)
 
-/* ===== PERBAIKI FUNGSI CANCEL ===== */
+let jam = wNow.getHours()
 
-if(jam >= 21 && jam <= 23){
+/* ===== RULE JAM MALAM ===== */
+if(jam >= 21){
 alert("Tidak bisa dibatalkan antara jam 21:00 - 00:00")
-}else{
+return
+}
 
-const { error } = await supabase
+/* ===== HAPUS DATA ===== */
+const { error:errDelete } = await supabase
 .from('parkir')
 .delete()
 .eq('kode',k)
 .eq('status','on')
 
-if(error){
+if(errDelete){
 alert("Gagal batal parkir")
 return
 }
 
-}
-
+/* ===== REFRESH UI ===== */
 window.scanLocked=false
 await window.onScan(k)
 
