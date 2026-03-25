@@ -342,9 +342,14 @@ let tWeek=0
 let tMonth=0
 
 (parkir || []).forEach(p=>{
+let tOut = p.checkout_at 
+  ? new Date(new Date(p.checkout_at).toLocaleString("en-US",{timeZone:"Asia/Jakarta"}))
+  : null
 
-let tOut = p.checkout_at ? new Date(p.checkout_at) : null
-let tIn  = p.checkin_at ? new Date(p.checkin_at) : null
+let tIn = p.checkin_at 
+  ? new Date(new Date(p.checkin_at).toLocaleString("en-US",{timeZone:"Asia/Jakarta"}))
+  : null
+
 
 if(!tOut || !tIn) return
 
@@ -425,7 +430,7 @@ const all3=document.getElementById("all3")
 
 // hari ini
 d1.innerText = dayCheckout
-t1.innerText = tDay.toLocaleString()
+t1.innerText = "Rp " + tDay.toLocaleString('id-ID')
 
 b1.innerText = dayBul
 bt1.innerText = tbDay.toLocaleString()
