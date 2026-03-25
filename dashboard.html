@@ -299,7 +299,7 @@ try{
 
 const {data:p,error:e1}=await supabase
 .from("parkir")
-.select("checkout_at")
+.select("checkout_at, checkin_at")
 .eq("status","off")
 
 if(e1) throw e1
@@ -337,23 +337,39 @@ let dayCheckout=0
 let weekCheckout=0
 let monthCheckout=0
 
-let listParkir = parkir || []
-listParkir.forEach(p=>{
+let tDay=0
+let tWeek=0
+let tMonth=0
 
-let t = p.checkout_at ? new Date(p.checkout_at) : null
-if(!t || isNaN(t)) return
+(parkir || []).forEach(p=>{
 
-if(t.toDateString()===today.toDateString()) dayCheckout++
-if(t>=week) weekCheckout++
-if(t>=month) monthCheckout++
+let tOut = p.checkout_at ? new Date(p.checkout_at) : null
+let tIn  = p.checkin_at ? new Date(p.checkin_at) : null
+
+if(!tOut || !tIn) return
+
+let durasi = hitungDurasiParkir(tIn, tOut)
+let tarif = hitungTarifParkir(durasi)
+
+/* HARI INI */
+if(tOut.toDateString()===today.toDateString()){
+dayCheckout++
+tDay += tarif
+}
+
+/* MINGGU */
+if(tOut>=week){
+weekCheckout++
+tWeek += tarif
+}
+
+/* BULAN */
+if(tOut>=month){
+monthCheckout++
+tMonth += tarif
+}
 
 })
-
-let tarif=3000
-
-let tDay=dayCheckout*tarif
-let tWeek=weekCheckout*tarif
-let tMonth=monthCheckout*tarif
 
 // =====================
 // BULANAN
