@@ -271,6 +271,16 @@ Reset Data Test
 <script>
   
 let dashboardInterval = null
+
+function rupiah(n){
+return "Rp " + (n || 0).toLocaleString('id-ID')
+}
+
+function isSameDay(a,b){
+return a.getFullYear()===b.getFullYear() &&
+       a.getMonth()===b.getMonth() &&
+       a.getDate()===b.getDate()
+}
   
 function nowWIB(){
 return new Date(
@@ -301,6 +311,8 @@ const {data:p,error:e1}=await supabase
 .from("parkir")
 .select("checkout_at, checkin_at")
 .eq("status","off")
+.gte("checkout_at", month.toISOString())
+
 
 if(e1) throw e1
 
@@ -357,7 +369,7 @@ let durasi = hitungDurasiParkir(tIn, tOut)
 let tarif = hitungTarifParkir(durasi)
 
 /* HARI INI */
-if(tOut.toDateString()===today.toDateString()){
+if(isSameDay(tOut, today)){
 dayCheckout++
 tDay += tarif
 }
@@ -427,33 +439,32 @@ const all3=document.getElementById("all3")
 // =====================
 // UPDATE UI
 // =====================
-
 // hari ini
 d1.innerText = dayCheckout
-t1.innerText = "Rp " + tDay.toLocaleString('id-ID')
+t1.innerText = rupiah(tDay)
 
 b1.innerText = dayBul
-bt1.innerText = tbDay.toLocaleString()
+bt1.innerText = rupiah(tbDay)
 
-all1.innerText = (tDay + tbDay).toLocaleString()
+all1.innerText = rupiah(tDay + tbDay)
 
-// minggu
+
 d2.innerText = weekCheckout
-t2.innerText = tWeek.toLocaleString()
+t2.innerText = rupiah(tWeek)
 
 b2.innerText = weekBul
-bt2.innerText = tbWeek.toLocaleString()
+bt2.innerText = rupiah(tbWeek)
 
-all2.innerText = (tWeek + tbWeek).toLocaleString()
+all2.innerText = rupiah(tWeek + tbWeek)
 
-// bulan
-d3.innerText = monthCheckout
+// buland3.innerText = monthCheckout
 t3.innerText = tMonth.toLocaleString()
 
 b3.innerText = monthBul
 bt3.innerText = tbMonth.toLocaleString()
 
-all3.innerText = (tMonth + tbMonth).toLocaleString()
+all3.innerText = (tMont
+
 
 }
 
