@@ -305,9 +305,7 @@ if(el) el.innerText="..."
 let parkir = []
 let bulanan = []
 
-try{
-
-// waktu (PINDAH KE ATAS)
+// waktu (HARUS DI LUAR TRY)
 let today = nowWIB()
 
 let week = new Date(today)
@@ -316,12 +314,14 @@ week.setDate(today.getDate()-7)
 let month = new Date(today)
 month.setMonth(today.getMonth()-1)
 
-// ambil data (SETELAH month ada)
+try{
+
 const {data:p,error:e1}=await supabase
 .from("parkir")
 .select("checkout_at, checkin_at")
 .eq("status","off")
 .gte("checkout_at", month.toISOString())
+.order("checkout_at", { ascending: false })
 
 
 
@@ -402,7 +402,9 @@ let monthBul=0
 let listBulanan = bulanan || []
 listBulanan.forEach(b=>{
 
-let t = b.last_paid_at ? new Date(b.last_paid_at) : null
+let t = b.last_paid_at 
+  ? new Date(new Date(b.last_paid_at).toLocaleString("en-US",{timeZone:"Asia/Jakarta"}))
+  : null
 if(!t || isNaN(t)) return
 
 if(isSameDay(t, today)) dayBul++
