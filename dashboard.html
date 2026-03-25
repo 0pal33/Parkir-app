@@ -307,11 +307,22 @@ let bulanan = []
 
 try{
 
+// waktu (PINDAH KE ATAS)
+let today = nowWIB()
+
+let week = new Date(today)
+week.setDate(today.getDate()-7)
+
+let month = new Date(today)
+month.setMonth(today.getMonth()-1)
+
+// ambil data (SETELAH month ada)
 const {data:p,error:e1}=await supabase
 .from("parkir")
 .select("checkout_at, checkin_at")
 .eq("status","off")
 .gte("checkout_at", month.toISOString())
+
 
 
 if(e1) throw e1
@@ -332,14 +343,6 @@ console.log("ERROR DASHBOARD:",err)
 return
 }
 
-// waktu
-let today = nowWIB()
-
-let week = new Date(today)
-week.setDate(today.getDate()-7)
-
-let month = new Date(today)
-month.setMonth(today.getMonth()-1)
 
 // =====================
 // PARKIR
@@ -402,7 +405,7 @@ listBulanan.forEach(b=>{
 let t = b.last_paid_at ? new Date(b.last_paid_at) : null
 if(!t || isNaN(t)) return
 
-if(t.toDateString()===today.toDateString()) dayBul++
+if(isSameDay(t, today)) dayBul++
 if(t>=week) weekBul++
 if(t>=month) monthBul++
 
@@ -457,13 +460,14 @@ bt2.innerText = rupiah(tbWeek)
 
 all2.innerText = rupiah(tWeek + tbWeek)
 
-// buland3.innerText = monthCheckout
-t3.innerText = tMonth.toLocaleString()
+// bulan
+d3.innerText = monthCheckout
+t3.innerText = rupiah(tMonth)
 
 b3.innerText = monthBul
-bt3.innerText = tbMonth.toLocaleString()
+bt3.innerText = rupiah(tbMonth)
 
-all3.innerText = (tMont
+all3.innerText = rupiah(tMonth + tbMonth)
 
 
 }
