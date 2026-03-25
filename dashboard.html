@@ -273,7 +273,8 @@ Reset Data Test
 let dashboardInterval = null
 
 function rupiah(n){
-return "Rp " + (n || 0).toLocaleString('id-ID')
+n = Number(n) || 0
+return "Rp " + n.toLocaleString('id-ID')
 }
 
 function isSameDay(a,b){
@@ -443,7 +444,9 @@ const all3=document.getElementById("all3")
 
 // =====================
 // UPDATE UI
-// =====================// hari ini
+// =====================
+
+// hari ini
 d1.innerText = dayCheckout;
 t1.innerText = rupiah(tDay);
 
