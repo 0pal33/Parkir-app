@@ -288,7 +288,10 @@ return new Date(
 new Date().toLocaleString("en-US",{timeZone:"Asia/Jakarta"})
 )
 }
+
 async function loadDashboard(){
+  
+console.log("RUN DASHBOARD")
 
 if(document.body.style.display === "none") return
 
@@ -441,6 +444,9 @@ const t3=document.getElementById("t3")
 const b3=document.getElementById("b3")
 const bt3=document.getElementById("bt3")
 const all3=document.getElementById("all3")
+
+console.log("BEFORE UI UPDATE")
+console.log(tDay, tWeek, tMonth)
 
 // =====================
 // UPDATE UI
