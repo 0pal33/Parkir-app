@@ -293,7 +293,7 @@ async function loadDashboard(){
   
 console.log("RUN DASHBOARD")
 
-if(document.body.style.display === "none") return
+if(getComputedStyle(document.body).display === "none") return
 
 // loading state
 [
@@ -516,7 +516,7 @@ if(dashboardInterval !== null){
 clearInterval(dashboardInterval)
 }
 
-loadDashboard()
+setTimeout(loadDashboard, 300)
 dashboardInterval = setInterval(loadDashboard,10000)
 
 })
