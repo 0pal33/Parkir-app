@@ -449,33 +449,27 @@ console.log("CEK ELEMENT:", d1, t1, all1)
 // =====================
 // UPDATE UI
 // =====================
-
 // hari ini
-d1.innerText = dayCheckout;
-t1.innerText = rupiah(tDay);
-
-b1.innerText = dayBul;
-bt1.innerText = rupiah(tbDay);
-
-all1.innerText = rupiah(tDay + tbDay);
+if(d1) d1.innerText = dayCheckout;
+if(t1) t1.innerText = rupiah(tDay);
+if(b1) b1.innerText = dayBul;
+if(bt1) bt1.innerText = rupiah(tbDay);
+if(all1) all1.innerText = rupiah(tDay + tbDay);
 
 // minggu
-d2.innerText = weekCheckout;
-t2.innerText = rupiah(tWeek);
-
-b2.innerText = weekBul;
-bt2.innerText = rupiah(tbWeek);
-
-all2.innerText = rupiah(tWeek + tbWeek);
+if(d2) d2.innerText = weekCheckout;
+if(t2) t2.innerText = rupiah(tWeek);
+if(b2) b2.innerText = weekBul;
+if(bt2) bt2.innerText = rupiah(tbWeek);
+if(all2) all2.innerText = rupiah(tWeek + tbWeek);
 
 // bulan
-d3.innerText = monthCheckout;
-t3.innerText = rupiah(tMonth);
+if(d3) d3.innerText = monthCheckout;
+if(t3) t3.innerText = rupiah(tMonth);
+if(b3) b3.innerText = monthBul;
+if(bt3) bt3.innerText = rupiah(tbMonth);
+if(all3) all3.innerText = rupiah(tMonth + tbMonth);
 
-b3.innerText = monthBul;
-bt3.innerText = rupiah(tbMonth);
-
-all3.innerText = rupiah(tMonth + tbMonth);
 
 
 }
