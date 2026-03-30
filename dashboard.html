@@ -293,14 +293,30 @@ async function loadDashboard(){
   
 console.log("RUN DASHBOARD")
 
+if(document.readyState !== "complete"){
+  console.log("DOM belum siap")
+  return
+}
+
+if(typeof supabase === "undefined"){
+  console.log("Supabase belum siap")
+  return
+}
+
 // loading state
-[
+const ids = [
 "d1","t1","b1","bt1","all1",
 "d2","t2","b2","bt2","all2",
 "d3","t3","b3","bt3","all3"
-].forEach(id=>{
-let el = document.getElementById(id)
-if(el) el.innerText="..."
+]
+
+ids.forEach(id=>{
+  let el = document.getElementById(id)
+  if(el){
+    el.innerText="..."
+  }else{
+    console.log("ELEMENT TIDAK ADA:", id)
+  }
 })
 
 // ambil data
@@ -506,13 +522,17 @@ window.location.href="index.html"
 window.onload = () => {
 
 if(dashboardInterval !== null){
-clearInterval(dashboardInterval)
+  clearInterval(dashboardInterval)
 }
-setTimeout(()=>{
-  loadDashboard()
-  dashboardInterval = setInterval(loadDashboard,10000)
-}, 300)
 
+setTimeout(()=>{
+  if(typeof loadDashboard === "function"){
+    loadDashboard()
+    dashboardInterval = setInterval(loadDashboard,10000)
+  }else{
+    console.log("loadDashboard belum siap")
+  }
+}, 500)
 
 };
 
