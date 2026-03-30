@@ -360,7 +360,10 @@ let tDay=0
 let tWeek=0
 let tMonth=0
 
-(parkir || []).forEach(p=>{
+let listParkir = parkir || []
+
+listParkir.forEach(p=>{
+
 let tOut = p.checkout_at 
   ? new Date(new Date(p.checkout_at).toLocaleString("en-US",{timeZone:"Asia/Jakarta"}))
   : null
@@ -369,28 +372,24 @@ let tIn = p.checkin_at
   ? new Date(new Date(p.checkin_at).toLocaleString("en-US",{timeZone:"Asia/Jakarta"}))
   : null
 
-
 if(!tOut || !tIn) return
 
 let durasi = hitungDurasiParkir(tIn, tOut)
 let tarif = hitungTarifParkir(durasi)
 
-/* HARI INI */
 if(isSameDay(tOut, today)){
-dayCheckout++
-tDay += tarif
+  dayCheckout++
+  tDay += tarif
 }
 
-/* MINGGU */
 if(tOut>=week){
-weekCheckout++
-tWeek += tarif
+  weekCheckout++
+  tWeek += tarif
 }
 
-/* BULAN */
 if(tOut>=month){
-monthCheckout++
-tMonth += tarif
+  monthCheckout++
+  tMonth += tarif
 }
 
 })
