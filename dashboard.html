@@ -446,6 +446,7 @@ const all3=document.getElementById("all3")
 
 console.log("BEFORE UI UPDATE")
 console.log(tDay, tWeek, tMonth)
+console.log("CEK ELEMENT:", d1, t1, all1)
 
 // =====================
 // UPDATE UI
@@ -510,14 +511,16 @@ location.reload()
 function goPetugas(){
 window.location.href="index.html"
 }
-document.addEventListener("DOMContentLoaded",()=>{
+window.onload = () => {
 
 if(dashboardInterval !== null){
 clearInterval(dashboardInterval)
 }
+setTimeout(()=>{
+  loadDashboard()
+  dashboardInterval = setInterval(loadDashboard,10000)
+}, 300)
 
-setTimeout(loadDashboard, 300)
-dashboardInterval = setInterval(loadDashboard,10000)
 
 })
 
