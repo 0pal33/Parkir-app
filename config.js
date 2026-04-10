@@ -17,3 +17,25 @@ const ENV = window.location.hostname.includes("pages.dev")
       CONFIG[ENV].SUPABASE_URL,
         CONFIG[ENV].SUPABASE_KEY
     )
+const IS_DEV =
+  window.location.hostname.includes("pages.dev") ||
+    window.location.hostname === "localhost" ||
+      window.location.hostname.includes("127.0.0.1");
+
+      if (IS_DEV && !window.__SUGER_LOADED__) {
+        window.__SUGER_LOADED__ = true;
+
+          window.addEventListener("DOMContentLoaded", () => {
+              const script = document.createElement("script");
+                  script.src = "https://suger-cdn.vercel.app/suger-dev.js";
+
+                      script.onload = () => {
+                            if (window.SugerDevtool) {
+                                    window.SugerDevtool.init();
+                                            console.log("✅ Suger Devtool aktif (DEV MODE)");
+                            }
+                      };
+
+                          document.body.appendChild(script);
+          });
+      }
