@@ -584,15 +584,14 @@ if(dots[index]) dots[index].classList.add("active")
 <button id="floatingPetugas" onclick="goPetugas()">👨‍🔧</button>
 
 <script>
-if(location.hostname.includes("pages.dev") 
-  && !location.hostname.startsWith("parkir-webapp.pages.dev")){
-    
-      const script = document.createElement("script")
-        script.src = "https://suger-cdn.vercel.app/suger-dev.js"
-          document.body.appendChild(script)
+if(IS_DEV && !window.__SUGER_LOADED__){
+  window.__SUGER_LOADED__ = true
 
-  }
-  </script>
+    const script = document.createElement("script")
+      script.src = "https://suger-cdn.vercel.app/suger-dev.js"
+        document.body.appendChild(script)
+}
+</script>
 
 </body>
 </html>
