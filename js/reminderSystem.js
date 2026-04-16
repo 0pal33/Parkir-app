@@ -4,7 +4,7 @@ if(!document.getElementById("bottomButtons").innerHTML.includes("Start Scanning"
 return
 }
 
-const {data}=await supabase
+const {data}=await window.supabaseClient
 .from('bulanan')
 .select('*')
 .eq('status','aktif')
