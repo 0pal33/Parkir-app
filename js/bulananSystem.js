@@ -1,5 +1,3 @@
-const supabase = window.supabaseClient
-
 /* ===== BULANAN MENU ===== */
 
 window.showBulanan = async function(){
@@ -104,7 +102,7 @@ alert("Tanggal harus 1 - 31")
 return
 }
 
-const { error } = await supabase.from('bulanan').insert({
+const { error } = await window.supabaseClient.from('bulanan').insert({
 
 nama:nama,
 motor:motor,
