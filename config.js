@@ -1,8 +1,10 @@
 const IS_DEV =
-  location.hostname.includes("pages.dev") &&
+  (
+    location.hostname.includes("pages.dev") &&
     !location.hostname.startsWith("parkir-webapp.pages.dev")
-      || location.hostname === "localhost"
-        || location.hostname.includes("127.0.0.1")
+  ) ||
+  location.hostname === "localhost" ||
+  location.hostname.includes("127.0.0.1")
 
   const CONFIG = {
     DEV: {
