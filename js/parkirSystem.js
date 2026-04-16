@@ -1,5 +1,3 @@
-const supabase = window.supabaseClient
-
 const beep = new Audio("https://actions.google.com/sounds/v1/alarms/beep_short.ogg")
 beep.preload = "auto"
 let lastScanTime = 0
@@ -160,7 +158,7 @@ startScan()
 
 window.checkin = async function(k){
 
-const { error } = await supabase.from('parkir').insert({
+const { error } = await window.supabaseClient.from('parkir').insert({
 kode:k,
 status:'on',
 checkin_at:new Date()
@@ -189,7 +187,7 @@ document.getElementById("bottomButtons").innerHTML=`
 
 window.checkout = async function(k){
 
-const { error } = await supabase.from('parkir')
+const { error } = await window.supabaseClient.from('parkir')
 .update({
 status:'off',
 checkout_at:new Date()
