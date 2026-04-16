@@ -132,7 +132,7 @@ window.listBayar = async function(){
 
 document.getElementById("resultBox").innerHTML="Loading..."
 
-const {data,error}=await supabase
+const {data,error}=await window.supabaseClient
 .from('bulanan')
 .select('*')
 .eq('status','aktif')
@@ -302,7 +302,7 @@ return
 
 /* ambil data pelanggan dulu */
 
-const {data,error:err1} = await supabase
+const {data,error:err1} = await window.supabaseClient
 .from('bulanan')
 .select('jatuh_tempo, paid_until')
 .eq('id',id)
@@ -324,7 +324,7 @@ if(nextMonth.getDate() !== tempo){
 nextMonth = new Date(baseDate.getFullYear(), baseDate.getMonth()+2, 0)
 }
 
-const {error}=await supabase
+const {error}=await window.supabaseClient
 .from('bulanan')
 .update({
 paid_until:nextMonth,
@@ -401,7 +401,7 @@ if(newDate.getDate() !== tempo){
 newDate = new Date(today.getFullYear(), today.getMonth()+1, 0)
 }
 
-const {error}=await supabase
+const {error}=await window.supabaseClient
 .from('bulanan')
 .update({
 jatuh_tempo:tempo,
@@ -430,7 +430,7 @@ let konfirmasi = confirm(
 
 if(!konfirmasi) return
 
-const { error } = await supabase
+const { error } = await window.supabaseClient
 .from('bulanan')
 .delete()
 .eq('id',id)
