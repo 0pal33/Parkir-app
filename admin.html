@@ -46,7 +46,7 @@ cursor:pointer;
 
 <script>
 
-const supabase = window.supabaseClient
+const { error } = await window.supabaseClient.auth.signInWithPassword({
 
 // ✅ redirect kalau sudah login
 if(localStorage.getItem("adminLogin")==="true"){
