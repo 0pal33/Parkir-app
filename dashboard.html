@@ -586,10 +586,13 @@ if(dots[index]) dots[index].classList.add("active")
 if(IS_DEV && !window.__SUGER_LOADED__){
   window.__SUGER_LOADED__ = true
 
+  window.addEventListener("DOMContentLoaded", ()=>{
     const script = document.createElement("script")
-      script.src = "https://suger-cdn.vercel.app/suger-dev.js"
-        document.body.appendChild(script)
+    script.src = "https://suger-cdn.vercel.app/suger-dev.js"
+    document.body.appendChild(script)
+  })
 }
+
 </script>
 
 </body>
