@@ -88,6 +88,8 @@ document.getElementById("bottomButtons").innerHTML=`
 
 window.simpanBulanan = async function(){
 
+const supabase = window.supabaseClient
+
 let nama=document.getElementById("namaBulanan").value.trim()
 let motor=document.getElementById("motorBulanan").value
 let tempo=parseInt(document.getElementById("tempoBulanan").value)
