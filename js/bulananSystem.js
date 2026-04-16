@@ -1,3 +1,5 @@
+const supabase = window.supabaseClient
+
 /* ===== BULANAN MENU ===== */
 
 window.showBulanan = async function(){
@@ -87,8 +89,6 @@ document.getElementById("bottomButtons").innerHTML=`
 /* ===== SIMPAN ===== */
 
 window.simpanBulanan = async function(){
-
-const supabase = window.supabaseClient
 
 let nama=document.getElementById("namaBulanan").value.trim()
 let motor=document.getElementById("motorBulanan").value
