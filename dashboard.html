@@ -263,14 +263,18 @@ Lihat Parkir Aktif
 </button>
 
 <script>
-if(IS_DEV){
-  document.write(`
-      <button class="red btn" onclick="resetData()">
-          Reset Data Test
-              </button>
-                `)
+if(IS_DEV){<div class="menu" id="menuContainer">
 }
 </script>
+
+if(IS_DEV){
+  const btn = document.createElement("button")
+  btn.className = "red btn"
+  btn.innerText = "Reset Data Test"
+  btn.onclick = resetData
+
+  document.getElementById("menuContainer").appendChild(btn)
+}
 
 </div>
 
