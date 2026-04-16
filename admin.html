@@ -46,54 +46,59 @@ cursor:pointer;
 
 <script>
 
-const { error } = await window.supabaseClient.auth.signInWithPassword({
+window.addEventListener("DOMContentLoaded", ()=>{
 
-// ✅ redirect kalau sudah login
-if(localStorage.getItem("adminLogin")==="true"){
-window.location.href="index.html"
-}
+  // redirect kalau sudah login
+  if(localStorage.getItem("adminLogin")==="true"){
+    window.location.href="index.html"
+  }
 
-// tombol kembali
-window.back = function(){
-location.href="index.html"
-}
+  // tombol kembali
+  window.back = function(){
+    location.href="index.html"
+  }
 
-// ✅ ENTER = login (dipindah ke sini)
-window.login()
+  // login function
+  window.login = async function(){
 
-// login function
-window.login = async function(){
+    let email=document.getElementById("email").value.trim()
+    let password=document.getElementById("password").value
+    let btn=document.querySelector(".blue")
 
-let email=document.getElementById("email").value.trim()
-let password=document.getElementById("password").value
-let btn=document.querySelector(".blue")
+    if(!email || !password){
+      alert("Isi email dan password")
+      return
+    }
 
-if(!email || !password){
-alert("Isi email dan password")
-return
-}
+    btn.disabled = true
+    btn.innerText = "Loading..."
 
-btn.disabled = true
-btn.innerText = "Loading..."
+    const { error } = await window.supabaseClient.auth.signInWithPassword({
+      email,password
+    })
 
-const { error } = await supabase.auth.signInWithPassword({
-email,password
+    if(error){
+      alert("Login gagal")
+      btn.disabled = false
+      btn.innerText = "Login"
+      return
+    }
+
+    alert("Login berhasil")
+
+    localStorage.setItem("adminLogin","true")
+
+    window.location.href="index.html"
+  }
+
+  // ENTER = login
+  document.addEventListener("keydown",function(e){
+    if(e.key==="Enter"){
+      window.login()
+    }
+  })
+
 })
-
-if(error){
-alert("Login gagal")
-btn.disabled = false
-btn.innerText = "Login"
-return
-}
-
-alert("Login berhasil")
-
-localStorage.setItem("adminLogin","true")
-
-window.location.href="index.html"
-
-}
 
 </script>
 
