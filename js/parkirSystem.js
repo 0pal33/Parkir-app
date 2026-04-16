@@ -59,7 +59,7 @@ document.getElementById("resultBox").innerHTML="Memproses..."
 
 let kode=text
 
-const {data,error}=await supabase
+const {data,error}=await window.supabaseClient
 .from('parkir')
 .select('*')
 .eq('kode',kode)
