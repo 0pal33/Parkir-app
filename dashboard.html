@@ -171,7 +171,7 @@ window.location.replace("index.html")
 return
 }
 
-const { data } = await supabase.auth.getSession()
+const { data } = await window.supabaseClient.auth.getSession()
 
 if(!data.session){
 window.location.replace("index.html")
@@ -502,9 +502,9 @@ let konfirmasi=prompt("Ketik RESET")
 
 if(konfirmasi!=="RESET") return
 
-await supabase.from("parkir").delete().neq("kode","")
+await window.supabaseClient.from("parkir").delete().neq("kode","")
 
-await supabase.from("bulanan").delete().neq("nama","")
+await window.supabaseClient.from("bulanan").delete().neq("nama","")
 
 alert("Database berhasil direset")
 
