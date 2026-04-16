@@ -256,25 +256,11 @@ TOTAL Rp <span id="all3">0</span>
 
 </div> <!-- slider -->
 
-<div class="menu">
+<div class="menu" id="menuContainer">
 
 <button class="blue btn" onclick="window.location='parkirAktif.html'">
 Lihat Parkir Aktif
 </button>
-
-<script>
-if(IS_DEV){<div class="menu" id="menuContainer">
-}
-</script>
-
-if(IS_DEV){
-  const btn = document.createElement("button")
-  btn.className = "red btn"
-  btn.innerText = "Reset Data Test"
-  btn.onclick = resetData
-
-  document.getElementById("menuContainer").appendChild(btn)
-}
 
 </div>
 
@@ -543,6 +529,15 @@ setTimeout(()=>{
     console.log("loadDashboard belum siap")
   }
 }, 500)
+
+if(IS_DEV){
+  const btn = document.createElement("button")
+  btn.className = "red btn"
+  btn.innerText = "Reset Data Test"
+  btn.onclick = resetData
+
+  document.getElementById("menuContainer").appendChild(btn)
+}
 
 };
 
