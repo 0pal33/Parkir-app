@@ -19,9 +19,9 @@ const IS_DEV =
 
   const CURRENT = IS_DEV ? CONFIG.DEV : CONFIG.PROD
 
-  const supabase = window.supabase.createClient(
-    CURRENT.URL,
-      CURRENT.KEY
-  )
+  window.supabaseClient = window.supabase.createClient(
+  CURRENT.URL,
+  CURRENT.KEY
+)
 
   console.log("MODE:", IS_DEV ? "DEV" : "PROD")
