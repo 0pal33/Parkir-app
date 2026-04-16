@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stok Barang</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+
+<style>
+body{
+font-family:Arial;
+background:#f2f2f2;
+margin:0;
+padding:20px;
+padding-bottom:120px;
+}
+
+h3{
+text-align:center;
+}
+
+.item{
+background:white;
+padding:12px;
+border-radius:10px;
+margin-bottom:10px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+}
+
+.nama{
+font-weight:bold;
+}
+
+.qty{
+font-size:18px;
+}
+
+.edit{
+background:#3498db;
+color:white;
+border:none;
+padding:8px 10px;
+border-radius:8px;
+cursor:pointer;
+}
+
+.floating{
+position:fixed;
+bottom:20px;
+right:20px;
+display:flex;
+flex-direction:column;
+gap:10px;
+}
+
+.floating button{
+width:60px;
+height:60px;
+border:none;
+border-radius:50%;
+color:white;
+font-size:22px;
+cursor:pointer;
+}
+
+.tambah{background:#2ecc71}
+.pesan{background:#3498db}
+
+</style>
+
+</head>
+
+<body>
+
+<h3>Stok Barang</h3>
+
+<div id="list"></div>
+
+<div class="floating">
+<button class="pesan" onclick="pesanWA()">🛒</button>
+<button class="tambah" onclick="formTambah()">+</button>
+</div>
+
+<script>
+
+async function loadStok(){
+
+const {data,error} = await window.supabaseClient
+.from("stok_barang")
+.select("*")
+.order("nama")
+
+if(error){
+alert("Gagal load")
+return
+}
+
+let html=""
+
+data.forEach(item=>{
+
+html+=`
+<div class="item">
+
+<div>
+<div class="nama">${item.nama}</div>
+<div>Rp ${item.harga_beli.toLocaleString('id-ID')}</div>
+</div>
+
+<div class="qty">${item.qty}</div>
+
+<button class="edit"
+onclick="editQty('${item.id}',${item.qty})">
+✏️
+</button>
+
+</div>
+`
+})
+
+document.getElementById("list").innerHTML = html
+
+}
+
+async function editQty(id,oldQty){
+
+let qty = prompt("Update qty:",oldQty)
+
+if(qty===null) return
+
+qty = parseInt(qty)
+
+if(isNaN(qty)) return
+
+await window.supabaseClient
+.from("stok_barang")
+.update({qty})
+.eq("id",id)
+
+loadStok()
+
+}
+
+function formTambah(){
+
+let nama = prompt("Nama barang")
+if(!nama) return
+
+let beli = parseInt(prompt("Harga beli") || 0)
+let jual = parseInt(prompt("Harga jual") || 0)
+
+window.supabaseClient
+.from("stok_barang")
+.insert({
+nama,
+qty:0,
+harga_beli:beli,
+harga_jual:jual,
+dihitung:true
+})
+
+.then(()=> loadStok())
+
+}
+
+async function pesanWA(){
+
+const {data} = await window.supabaseClient
+.from("stok_barang")
+.select("*")
+
+let text=""
+
+let total=0
+
+data.forEach(i=>{
+
+if(i.qty < 5){
+
+text += i.nama + "%0A"
+total += i.harga_beli
+
+}
+
+})
+
+let url = `https://wa.me/6282132517947?text=${text}%0A%0ASediakan uang: Rp ${total}`
+
+window.open(url)
+
+}
+
+loadStok()
+
+</script>
+
+</body>
+</html>
