@@ -46,6 +46,8 @@ cursor:pointer;
 
 <script>
 
+const supabase = window.supabaseClient
+
 // ✅ redirect kalau sudah login
 if(localStorage.getItem("adminLogin")==="true"){
 window.location.href="index.html"
