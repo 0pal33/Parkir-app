@@ -207,7 +207,7 @@ await window.onScan(k)
 
 window.cancelParkir = async function(k){
 
-const {data,error}=await supabase
+const {data,error}=await window.supabaseClient
 .from('parkir')
 .select('*')
 .eq('kode',k)
@@ -239,7 +239,7 @@ return
 }
 
 /* ===== HAPUS DATA ===== */
-const { error:errDelete } = await supabase
+const { error:errDelete } = await window.supabaseClient
 .from('parkir')
 .delete()
 .eq('kode',k)
