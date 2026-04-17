@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Barang Titipan</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+
+<style>
+body{
+font-family:Arial;
+background:#f2f2f2;
+padding:20px;
+padding-bottom:120px;
+}
+
+.item{
+background:white;
+padding:12px;
+border-radius:10px;
+margin-bottom:10px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+}
+
+.btn{
+background:#3498db;
+color:white;
+border:none;
+padding:8px;
+border-radius:8px;
+}
+
+.floating{
+position:fixed;
+bottom:20px;
+right:20px;
+width:60px;
+height:60px;
+border-radius:50%;
+background:#3498db;
+color:white;
+font-size:22px;
+border:none;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h3>Barang Titipan</h3>
+
+<div id="list"></div>
+
+<button class="floating" onclick="formTambah()">+</button>
+
+<script>
+
+async function load(){
+
+const {data} = await window.supabaseClient
+.from("titipan")
+.select("*")
+.order("nama")
+
+let html=""
+
+data.forEach(i=>{
+
+html+=`
+<div class="item">
+
+<div>
+<b>${i.nama}</b><br>
+${i.penitip}<br>
+Qty: ${i.qty}<br>
+Rp ${i.harga_jual}
+</div>
+
+<button class="btn" onclick="datang('${i.id}')">🚗</button>
+
+</div>
+`
+})
+
+document.getElementById("list").innerHTML=html
+
+}
+
+function formTambah(){
+
+let nama = prompt("Nama barang")
+let penitip = prompt("Nama penitip")
+let qty = parseInt(prompt("Jumlah titip")||0)
+let jual = parseInt(prompt("Harga jual")||0)
+let modal = parseInt(prompt("Harga penitip")||0)
+
+window.supabaseClient.from("titipan").insert({
+nama,
+penitip,
+qty,
+harga_jual:jual,
+harga_modal:modal
+}).then(load)
+
+}
+
+/* =========================
+FORM DATANG (ambil/update/nitip)
+========================= */
+
+async function datang(id){
+
+let aksi = prompt("ketik: ambil / harga / nitip")
+
+if(aksi==="ambil"){
+
+let sisa = parseInt(prompt("Sisa barang"))
+let {data} = await window.supabaseClient.from("titipan").select("*").eq("id",id).single()
+
+let terjual = data.qty - sisa
+let total = terjual * data.harga_modal
+
+alert("Terjual: "+terjual+"\nBayar: "+total)
+
+await window.supabaseClient
+.from("titipan")
+.update({qty:sisa})
+.eq("id",id)
+
+}
+
+if(aksi==="harga"){
+
+let jual = parseInt(prompt("Harga jual"))
+let modal = parseInt(prompt("Harga penitip"))
+
+await window.supabaseClient
+.from("titipan")
+.update({
+harga_jual:jual,
+harga_modal:modal
+})
+.eq("id",id)
+
+}
+
+if(aksi==="nitip"){
+
+let tambah = parseInt(prompt("Tambah qty"))
+
+await window.supabaseClient.rpc("increment_qty",{
+row_id:id,
+val:tambah
+})
+
+}
+
+load()
+
+}
+
+load()
+
+</script>
+
+</body>
+</html>
