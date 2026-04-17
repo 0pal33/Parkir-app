@@ -86,5 +86,15 @@ showHome()
 
 </script>
 
+<script>
+if(IS_DEV && !window.__SUGER_LOADED__){
+  window.__SUGER_LOADED__ = true
+
+  const script = document.createElement("script")
+  script.src = "https://suger-cdn.vercel.app/suger-dev.js"
+  document.body.appendChild(script)
+}
+</script>
+
 </body>
 </html>
