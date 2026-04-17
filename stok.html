@@ -17,9 +17,7 @@ padding:20px;
 padding-bottom:120px;
 }
 
-h3{
-text-align:center;
-}
+h3{text-align:center;}
 
 .item{
 background:white;
@@ -31,13 +29,8 @@ justify-content:space-between;
 align-items:center;
 }
 
-.nama{
-font-weight:bold;
-}
-
-.qty{
-font-size:18px;
-}
+.nama{font-weight:bold;}
+.qty{font-size:18px;}
 
 .edit{
 background:#3498db;
@@ -69,7 +62,6 @@ cursor:pointer;
 
 .tambah{background:#2ecc71}
 .pesan{background:#3498db}
-
 </style>
 
 </head>
@@ -92,9 +84,10 @@ async function loadStok(){
 const {data,error} = await window.supabaseClient
 .from("stok_barang")
 .select("*")
-.order("nama")
+.order("nama_item", { ascending: true })
 
 if(error){
+console.log(error)
 alert("Gagal load")
 return
 }
@@ -107,14 +100,14 @@ html+=`
 <div class="item">
 
 <div>
-<div class="nama">${item.nama}</div>
-<div>Rp ${item.harga_beli.toLocaleString('id-ID')}</div>
+<div class="nama">${item.nama_item}</div>
+<div>Rp ${(item.harga_beli || 0).toLocaleString('id-ID')}</div>
 </div>
 
-<div class="qty">${item.qty}</div>
+<div class="qty">${item.qty || 0}</div>
 
 <button class="edit"
-onclick="editQty('${item.id}',${item.qty})">
+onclick="editQty('${item.id}',${item.qty || 0})">
 ✏️
 </button>
 
@@ -129,11 +122,9 @@ document.getElementById("list").innerHTML = html
 async function editQty(id,oldQty){
 
 let qty = prompt("Update qty:",oldQty)
-
 if(qty===null) return
 
 qty = parseInt(qty)
-
 if(isNaN(qty)) return
 
 await window.supabaseClient
@@ -142,27 +133,25 @@ await window.supabaseClient
 .eq("id",id)
 
 loadStok()
-
 }
 
 function formTambah(){
 
-let nama = prompt("Nama barang")
-if(!nama) return
+let nama_item = prompt("Nama barang")
+if(!nama_item) return
 
-let beli = parseInt(prompt("Harga beli") || 0)
-let jual = parseInt(prompt("Harga jual") || 0)
+let harga_beli = parseInt(prompt("Harga beli") || 0)
+let harga_jual = parseInt(prompt("Harga jual") || 0)
 
 window.supabaseClient
 .from("stok_barang")
 .insert({
-nama,
+nama_item,
 qty:0,
-harga_beli:beli,
-harga_jual:jual,
-dihitung:true
+harga_beli,
+harga_jual,
+barang_dihitung:true
 })
-
 .then(()=> loadStok())
 
 }
@@ -174,21 +163,20 @@ const {data} = await window.supabaseClient
 .select("*")
 
 let text=""
-
 let total=0
 
 data.forEach(i=>{
 
-if(i.qty < 5){
+if(i.barang_dihitung && i.qty < 5){
 
-text += i.nama + "%0A"
-total += i.harga_beli
+text += i.nama_item + "%0A"
+total += (i.harga_beli || 0)
 
 }
 
 })
 
-let url = `https://wa.me/6282132517947?text=${text}%0A%0ASediakan uang: Rp ${total}`
+let url = `https://wa.me/6282132517947?text=${text}%0A%0ASediakan uang: Rp ${total.toLocaleString('id-ID')}`
 
 window.open(url)
 
@@ -202,9 +190,9 @@ loadStok()
 if(IS_DEV && !window.__SUGER_LOADED__){
   window.__SUGER_LOADED__ = true
 
-  const script = document.createElement("script")
-  script.src = "https://suger-cdn.vercel.app/suger-dev.js"
-  document.body.appendChild(script)
+    const script = document.createElement("script")
+    script.src = "https://suger-cdn.vercel.app/suger-dev.js"
+    document.body.appendChild(script)
 }
 </script>
 
