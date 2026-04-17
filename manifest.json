@@ -7,7 +7,7 @@
   "theme_color": "#2ecc71",
   "icons": [
     {
-      "src": "/wayahe parkir icon.png",
+      "src": "/icon.png",
       "sizes": "192x192",
       "type": "image/png"
     }
