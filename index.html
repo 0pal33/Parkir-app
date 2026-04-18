@@ -3,6 +3,8 @@
 <head>
 
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="manifest" href="manifest.json">
+
 <title>WAHAYE PARKIR</title>
 
 <link rel="stylesheet" href="css/style.css">
@@ -93,6 +95,12 @@ if(IS_DEV && !window.__SUGER_LOADED__){
   const script = document.createElement("script")
   script.src = "https://suger-cdn.vercel.app/suger-dev.js"
   document.body.appendChild(script)
+}
+</script>
+
+<script>
+if('serviceWorker' in navigator){
+navigator.serviceWorker.register('sw.js')
 }
 </script>
 
