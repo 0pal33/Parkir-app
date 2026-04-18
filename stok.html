@@ -3,6 +3,8 @@
 <head>
 
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="manifest" href="manifest.json">
+
 <title>Stok Barang</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -316,6 +318,12 @@ window.__SUGER_LOADED__=true
 const s=document.createElement("script")
 s.src="https://suger-cdn.vercel.app/suger-dev.js"
 document.body.appendChild(s)
+}
+</script>
+
+<script>
+if('serviceWorker' in navigator){
+navigator.serviceWorker.register('sw.js')
 }
 </script>
 
