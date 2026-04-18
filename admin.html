@@ -2,9 +2,9 @@
 <html>
 <head>
 
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="manifest" href="manifest.json">
 
-<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Login Admin</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -51,17 +51,14 @@ cursor:pointer;
 
 window.addEventListener("DOMContentLoaded", ()=>{
 
-  // redirect kalau sudah login
   if(localStorage.getItem("adminLogin")==="true"){
     window.location.href="index.html"
   }
 
-  // tombol kembali
   window.back = function(){
     location.href="index.html"
   }
 
-  // login function
   window.login = async function(){
 
     let email=document.getElementById("email").value.trim()
@@ -94,7 +91,6 @@ window.addEventListener("DOMContentLoaded", ()=>{
     window.location.href="index.html"
   }
 
-  // ENTER = login
   document.addEventListener("keydown",function(e){
     if(e.key==="Enter"){
       window.login()
@@ -103,6 +99,9 @@ window.addEventListener("DOMContentLoaded", ()=>{
 
 })
 
+</script>
+
+<!-- SUGER DEVTOOL -->
 <script>
 if(IS_DEV && !window.__SUGER_LOADED__){
   window.__SUGER_LOADED__ = true
@@ -113,11 +112,10 @@ if(IS_DEV && !window.__SUGER_LOADED__){
 }
 </script>
 
-</script>
-
+<!-- SERVICE WORKER -->
 <script>
 if('serviceWorker' in navigator){
-navigator.serviceWorker.register('sw.js')
+  navigator.serviceWorker.register('sw.js')
 }
 </script>
 
