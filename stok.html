@@ -144,7 +144,7 @@ async function loadStok(){
 const {data,error} = await window.supabaseClient
 .from("stok_barang")
 .select("*")
-.order("nama")
+.order("nama_item")
 
 if(error){
 alert("Gagal load")
@@ -169,7 +169,7 @@ html+=`
 <div class="left">
 <input type="checkbox" disabled>
 <div>
-<div class="nama">${i.nama}</div>
+<div class="nama">${i.nama_item}</div>
 <div>Rp ${Number(i.harga_beli||0).toLocaleString('id-ID')}</div>
 </div>
 </div>
@@ -205,8 +205,8 @@ loadStok()
 
 function formTambah(){
 
-let nama = prompt("Nama barang")
-if(!nama) return
+let nama_item = prompt("Nama barang")
+if(!nama_item) return
 
 let beli = parseInt(prompt("Harga beli")||0)
 
@@ -220,7 +220,7 @@ jual = parseInt(prompt("Harga jual")||0)
 window.supabaseClient
 .from("stok_barang")
 .insert({
-nama,
+nama_item,
 qty:0,
 harga_beli:beli,
 harga_jual:dihitung?jual:0,
@@ -255,7 +255,7 @@ data-index="${idx}"
 >
 
 <div>
-<div class="nama">${i.nama}</div>
+<div class="nama">${i.nama_item}</div>
 <div>Rp ${Number(i.harga_beli||0).toLocaleString('id-ID')}</div>
 </div>
 </div>
@@ -297,7 +297,7 @@ document.querySelectorAll("#listPesan input").forEach(el=>{
 
 if(el.checked){
 let i = DATA[el.dataset.index]
-text += i.nama + "%0A"
+text += i.nama_item + "%0A"
 }
 
 })
