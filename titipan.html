@@ -139,7 +139,8 @@ const {data,error}=await window.supabaseClient
 .order("nama_item")
 
 if(error){
-alert("Gagal load data")
+alert(error.message)
+console.log(error)
 return
 }
 
@@ -239,7 +240,8 @@ harga_penitip:pen
 })
 
 if(error){
-alert("Gagal simpan")
+alert(error.message)
+console.log(error)
 return
 }
 
@@ -393,7 +395,8 @@ const {error}=await window.supabaseClient
 .eq("id",window.CURRENT.id)
 
 if(error){
-alert("Gagal update")
+alert(error.message)
+console.log(error)
 return
 }
 
