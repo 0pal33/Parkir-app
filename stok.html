@@ -135,6 +135,25 @@ Sediakan uang : Rp <span id="total">0</span>
 <button class="kirim" onclick="kirimWA()">➤</button>
 </div>
 
+<div id="formTambah" style="display:none; padding:20px;">
+
+<h3>Tambah Barang</h3>
+
+<input id="f_nama" placeholder="Nama barang"><br><br>
+<input id="f_beli" type="number" placeholder="Harga beli"><br><br>
+
+<label>
+<input type="checkbox" id="f_dihitung" checked onchange="toggleJual()">
+Barang dihitung
+</label><br><br>
+
+<input id="f_jual" type="number" placeholder="Harga jual"><br><br>
+
+<button onclick="simpanBarang()">Simpan</button>
+<button onclick="closeForm()">Batal</button>
+
+</div>
+
 <script>
 
 let DATA = []
@@ -204,17 +223,65 @@ loadStok()
 }
 
 function formTambah(){
+  document.getElementById("list").style.display = "none"
+  document.querySelector(".floating").style.display = "none"
+  document.getElementById("formTambah").style.display = "block"
+}
 
-let nama_item = prompt("Nama barang")
-if(!nama_item) return
+function closeForm(){
+  document.getElementById("formTambah").style.display = "none"
+  document.getElementById("list").style.display = "block"
+  document.querySelector(".floating").style.display = "flex"
+}
 
-let beli = parseInt(prompt("Harga beli")||0)
+function toggleJual(){
+  const check = document.getElementById("f_dihitung").checked
+  const jual = document.getElementById("f_jual")
 
-let dihitung = confirm("Barang dihitung? (OK = YA)")
+  if(check){
+    jual.disabled = false
+  }else{
+    jual.value = 0
+    jual.disabled = true
+  }
+}
 
-let jual = 0
-if(dihitung){
-jual = parseInt(prompt("Harga jual")||0)
+async function simpanBarang(){
+
+let nama_item = document.getElementById("f_nama").value.trim()
+let harga_beli = parseInt(document.getElementById("f_beli").value || 0)
+let barang_dihitung = document.getElementById("f_dihitung").checked
+let harga_jual = parseInt(document.getElementById("f_jual").value || 0)
+
+if(!nama_item){
+  alert("Nama barang wajib")
+  return
+}
+
+if(!barang_dihitung){
+  harga_jual = 0
+}
+
+const { error } = await window.supabaseClient
+.from("stok_barang")
+.insert({
+  nama_item,
+  qty:0,
+  harga_beli,
+  harga_jual,
+  barang_dihitung
+})
+
+if(error){
+  alert("Nama barang sudah ada / gagal simpan")
+  return
+}
+
+alert("Berhasil ditambahkan")
+
+closeForm()
+loadStok()
+
 }
 
 window.supabaseClient
