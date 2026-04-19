@@ -4,14 +4,12 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="manifest" href="manifest.json">
-
-<title>Barang Titipan</title>
+<title>Titip Jajan</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
 
 <style>
-
 body{
 font-family:Arial;
 background:#f2f2f2;
@@ -25,229 +23,108 @@ text-align:center;
 margin-top:0;
 }
 
-.card{
-background:white;
-padding:14px;
-border-radius:14px;
+.item{
+background:#fff;
+padding:12px;
+border-radius:12px;
 margin-bottom:10px;
 display:flex;
 justify-content:space-between;
 align-items:center;
-box-shadow:0 4px 10px rgba(0,0,0,.08);
+gap:10px;
 }
 
-.nama{
-font-weight:bold;
-font-size:17px;
-}
+.nama{font-weight:bold;font-size:16px}
+.kecil{font-size:13px;color:#666}
+.qty{font-size:20px;font-weight:bold}
 
-.small{
-font-size:13px;
-color:#666;
-margin-top:2px;
-}
-
-.qty{
-font-size:20px;
-font-weight:bold;
-}
-
-.btnDatang{
-background:#3498db;
-color:white;
+button{
 border:none;
-width:56px;
-height:56px;
-border-radius:50%;
-font-size:24px;
+border-radius:10px;
+padding:10px 14px;
+font-size:15px;
 cursor:pointer;
 }
 
-.fab{
+.blue{background:#3498db;color:#fff}
+.green{background:#2ecc71;color:#fff}
+.red{background:#e74c3c;color:#fff}
+
+.floatingTambah{
 position:fixed;
 right:20px;
 bottom:20px;
-width:68px;
-height:68px;
-border:none;
+width:60px;
+height:60px;
 border-radius:50%;
-background:#2ecc71;
-color:white;
-font-size:32px;
-box-shadow:0 6px 15px rgba(0,0,0,.25);
-cursor:pointer;
-}
-
-.layer{
-position:fixed;
-top:0;
-left:0;
-right:0;
-bottom:0;
-background:white;
-padding:20px;
-overflow:auto;
-display:none;
-z-index:999;
+font-size:30px;
+padding:0;
 }
 
 input{
 width:100%;
 padding:12px;
 margin-bottom:10px;
-border:1px solid #ccc;
-border-radius:10px;
 box-sizing:border-box;
+border-radius:10px;
+border:1px solid #ccc;
 font-size:16px;
+}
+
+.box{
+background:#fff;
+padding:15px;
+border-radius:12px;
+margin-bottom:12px;
 }
 
 .row{
 display:flex;
 gap:10px;
-align-items:center;
-margin-bottom:10px;
+}
+
+.row > div{
+flex:1;
 }
 
 .check{
-width:22px;
-height:22px;
-}
-
-.section{
-background:#f7f7f7;
-padding:12px;
-border-radius:12px;
-margin-bottom:12px;
-}
-
-.oke{
-position:fixed;
-right:20px;
-bottom:20px;
-width:68px;
-height:68px;
-border:none;
-border-radius:50%;
-background:#2ecc71;
-color:white;
-font-size:30px;
-box-shadow:0 6px 15px rgba(0,0,0,.25);
-}
-
-.back{
-position:fixed;
-left:20px;
-bottom:20px;
-width:68px;
-height:68px;
-border:none;
-border-radius:50%;
-background:#e74c3c;
-color:white;
-font-size:28px;
-box-shadow:0 6px 15px rgba(0,0,0,.25);
-}
-
-.total{
+display:flex;
+align-items:center;
+gap:8px;
+margin-bottom:10px;
 font-weight:bold;
-font-size:18px;
-text-align:center;
-padding:8px;
 }
 
-</style>
-</head>
+#formArea{
+display:none;
+}
 
+#aksiArea{
+display:none;
+}
+</style>
+
+</head>
 <body>
 
-<h3>Barang Titipan</h3>
+<h3 id="judul">Titip Jajan</h3>
 
-<div id="list"></div>
+<div id="listArea"></div>
 
-<button class="fab" onclick="openTambah()">+</button>
+<div id="formArea"></div>
 
-<!-- =======================
-TAMBAH
-======================= -->
-<div class="layer" id="boxTambah">
+<div id="aksiArea"></div>
 
-<h3>Tambah Barang Titipan</h3>
-
-<input id="t_nama" placeholder="Nama barang">
-<input id="t_penitip" placeholder="Nama penitip">
-<input id="t_qty" type="number" placeholder="Jumlah titip">
-<input id="t_jual" type="number" placeholder="Harga jual">
-<input id="t_modal" type="number" placeholder="Harga dari penitip">
-
-<button class="back" onclick="closeTambah()">✕</button>
-<button class="oke" onclick="saveTambah()">✓</button>
-
-</div>
-
-<!-- =======================
-DATANG
-======================= -->
-<div class="layer" id="boxDatang">
-
-<h3 id="judulDatang">Kedatangan Penitip</h3>
-
-<!-- AMBIL -->
-<div class="section">
-
-<div class="row">
-<input class="check" type="checkbox" id="cbAmbil">
-<b>Ambil</b>
-</div>
-
-<input id="sisa" type="number" placeholder="Sisa barang" oninput="hitungDariSisa()">
-<input id="terjual" type="number" placeholder="Barang terjual" oninput="hitungDariLaku()">
-
-<div class="total" id="bayar">Total dibayar : Rp 0</div>
-
-</div>
-
-<!-- HARGA -->
-<div class="section">
-
-<div class="row">
-<input class="check" type="checkbox" id="cbHarga">
-<b>Update Harga</b>
-</div>
-
-<input id="u_jual" type="number" placeholder="Harga jual">
-<input id="u_modal" type="number" placeholder="Harga penitip">
-
-</div>
-
-<!-- NITIP -->
-<div class="section">
-
-<div class="row">
-<input class="check" type="checkbox" id="cbNitip">
-<b>Nitip</b>
-</div>
-
-<input id="qtyBaru" type="number" placeholder="Qty baru">
-
-</div>
-
-<button class="back" onclick="closeDatang()">✕</button>
-<button class="oke" onclick="saveDatang()">✓</button>
-
-</div>
+<button class="floatingTambah green" onclick="formTambah()">+</button>
 
 <script>
 
 let DATA=[]
 let CURRENT=null
 
-function rupiah(n){
-return Number(n||0).toLocaleString("id-ID")
-}
-
-/* ======================
-LOAD
-====================== */
+/* ===========================
+LOAD DATA
+=========================== */
 
 async function loadData(){
 
@@ -257,202 +134,260 @@ const {data,error}=await window.supabaseClient
 .order("nama_item")
 
 if(error){
-alert("Gagal load")
+alert("Gagal load data")
 return
 }
 
 DATA=data||[]
-render()
+renderList()
 
 }
 
-function render(){
+function renderList(){
+
+document.getElementById("judul").style.display="block"
+document.getElementById("listArea").style.display="block"
+document.getElementById("formArea").style.display="none"
+document.getElementById("aksiArea").style.display="none"
 
 let html=""
+
+if(DATA.length===0){
+html="<div class='box'>Belum ada barang titipan</div>"
+}
 
 DATA.forEach(i=>{
 
 html+=`
-<div class="card">
+<div class="item">
 
-<div>
+<div style="flex:1">
 <div class="nama">${i.nama_item}</div>
-<div class="small">${i.nama_penitip}</div>
-<div class="small">Harga jual Rp ${rupiah(i.harga_jual)}</div>
+<div class="kecil">${i.nama_penitip}</div>
+<div class="kecil">Harga jual Rp ${Number(i.harga_jual).toLocaleString('id-ID')}</div>
 </div>
 
-<div style="text-align:center">
 <div class="qty">${i.qty}</div>
-<button class="btnDatang"
-onclick="openDatang('${i.id}')">🧺</button>
-</div>
+
+<button class="blue" onclick="formAksi('${i.id}')">🚘</button>
 
 </div>
 `
 
 })
 
-document.getElementById("list").innerHTML=html
+document.getElementById("listArea").innerHTML=html
 
 }
 
-/* ======================
-TAMBAH
-====================== */
+/* ===========================
+FORM TAMBAH
+=========================== */
 
-function openTambah(){
-document.getElementById("boxTambah").style.display="block"
+function formTambah(){
+
+document.getElementById("judul").style.display="none"
+document.getElementById("listArea").style.display="none"
+document.getElementById("formArea").style.display="block"
+
+document.getElementById("formArea").innerHTML=`
+
+<div class="box">
+
+<h3>Tambah Barang</h3>
+
+<input id="t_nama" placeholder="Nama barang">
+<input id="t_penitip" placeholder="Nama penitip">
+<input id="t_qty" type="number" placeholder="Jumlah titip">
+<input id="t_jual" type="number" placeholder="Harga jual">
+<input id="t_pen" type="number" placeholder="Harga dari penitip">
+
+<button class="green" onclick="simpanTambah()">Simpan</button>
+<button class="red" onclick="renderList()">Batal</button>
+
+</div>
+`
+
 }
 
-function closeTambah(){
-document.getElementById("boxTambah").style.display="none"
-}
+async function simpanTambah(){
 
-async function saveTambah(){
-
-let nama_item=document.getElementById("t_nama").value.trim()
-let nama_penitip=document.getElementById("t_penitip").value.trim()
+let nama=document.getElementById("t_nama").value.trim()
+let penitip=document.getElementById("t_penitip").value.trim()
 let qty=parseInt(document.getElementById("t_qty").value||0)
-let harga_jual=parseInt(document.getElementById("t_jual").value||0)
-let harga_penitip=parseInt(document.getElementById("t_modal").value||0)
+let jual=parseInt(document.getElementById("t_jual").value||0)
+let pen=parseInt(document.getElementById("t_pen").value||0)
 
-if(!nama_item || !nama_penitip){
+if(!nama || !penitip || qty<=0){
 alert("Lengkapi data")
 return
 }
 
-await window.supabaseClient
+const {error}=await window.supabaseClient
 .from("barang_titipan")
 .insert({
-nama_item,
-nama_penitip,
-qty,
-harga_jual,
-harga_penitip
+nama_item:nama,
+nama_penitip:penitip,
+qty:qty,
+harga_jual:jual,
+harga_penitip:pen
 })
 
-closeTambah()
+if(error){
+alert("Gagal simpan")
+return
+}
+
 loadData()
 
 }
 
-/* ======================
-DATANG
-====================== */
+/* ===========================
+FORM AKSI
+=========================== */
 
-function openDatang(id){
+function formAksi(id){
 
-CURRENT=DATA.find(x=>x.id===id)
+CURRENT=DATA.find(x=>x.id==id)
+if(!CURRENT) return
 
-document.getElementById("judulDatang").innerText=
-CURRENT.nama_item+" - "+CURRENT.nama_penitip
+document.getElementById("judul").style.display="none"
+document.getElementById("listArea").style.display="none"
+document.getElementById("aksiArea").style.display="block"
 
-document.getElementById("u_jual").value=CURRENT.harga_jual
-document.getElementById("u_modal").value=CURRENT.harga_penitip
+document.getElementById("aksiArea").innerHTML=`
 
-document.getElementById("sisa").value=""
-document.getElementById("terjual").value=""
-document.getElementById("qtyBaru").value=""
+<div class="box">
 
-document.getElementById("bayar").innerText="Total dibayar : Rp 0"
+<h3>${CURRENT.nama_item}</h3>
 
-document.getElementById("cbAmbil").checked=false
-document.getElementById("cbHarga").checked=false
-document.getElementById("cbNitip").checked=false
+<div class="check">
+<input type="checkbox" id="c_ambil" onchange="toggleAksi()"> Ambil
+</div>
 
-document.getElementById("boxDatang").style.display="block"
+<div id="boxAmbil" style="display:none">
+
+<input id="sisa" type="number" placeholder="Sisa barang" oninput="hitungDariSisa()">
+<input id="jualLaku" type="number" placeholder="Barang terjual" oninput="hitungDariJual()">
+<input id="bayar" placeholder="Total dibayar" readonly>
+
+</div>
+
+<div class="check">
+<input type="checkbox" id="c_harga" onchange="toggleAksi()"> Update Harga
+</div>
+
+<div id="boxHarga" style="display:none">
+
+<input id="u_jual" type="number" value="${CURRENT.harga_jual}">
+<input id="u_pen" type="number" value="${CURRENT.harga_penitip}">
+
+</div>
+
+<div class="check">
+<input type="checkbox" id="c_nitip" onchange="toggleAksi()"> Nitip
+</div>
+
+<div id="boxNitip" style="display:none">
+
+<input id="n_qty" type="number" placeholder="Qty baru">
+
+</div>
+
+<button class="green" onclick="prosesAksi()">✓</button>
+<button class="red" onclick="renderList()">Batal</button>
+
+</div>
+`
 
 }
 
-function closeDatang(){
-document.getElementById("boxDatang").style.display="none"
+/* ===========================
+SHOW HIDE
+=========================== */
+
+function toggleAksi(){
+
+document.getElementById("boxAmbil").style.display=
+document.getElementById("c_ambil").checked?"block":"none"
+
+document.getElementById("boxHarga").style.display=
+document.getElementById("c_harga").checked?"block":"none"
+
+document.getElementById("boxNitip").style.display=
+document.getElementById("c_nitip").checked?"block":"none"
+
 }
+
+/* ===========================
+REALTIME HITUNG
+=========================== */
 
 function hitungDariSisa(){
 
-let sisa=parseInt(document.getElementById("sisa").value||0)
-
-let laku=CURRENT.qty-sisa
+let s=parseInt(document.getElementById("sisa").value||0)
+let laku=CURRENT.qty-s
 if(laku<0) laku=0
 
-document.getElementById("terjual").value=laku
-document.getElementById("bayar").innerText=
-"Total dibayar : Rp "+rupiah(laku*CURRENT.harga_penitip)
+document.getElementById("jualLaku").value=laku
+document.getElementById("bayar").value=
+"Rp "+(laku*CURRENT.harga_penitip).toLocaleString('id-ID')
 
 }
 
-function hitungDariLaku(){
+function hitungDariJual(){
 
-let laku=parseInt(document.getElementById("terjual").value||0)
-
+let laku=parseInt(document.getElementById("jualLaku").value||0)
 let sisa=CURRENT.qty-laku
 if(sisa<0) sisa=0
 
 document.getElementById("sisa").value=sisa
-document.getElementById("bayar").innerText=
-"Total dibayar : Rp "+rupiah(laku*CURRENT.harga_penitip)
+document.getElementById("bayar").value=
+"Rp "+(laku*CURRENT.harga_penitip).toLocaleString('id-ID')
 
 }
 
-async function saveDatang(){
+/* ===========================
+PROSES
+=========================== */
 
-let ambil=document.getElementById("cbAmbil").checked
-let harga=document.getElementById("cbHarga").checked
-let nitip=document.getElementById("cbNitip").checked
+async function prosesAksi(){
 
-let qtyBaru=CURRENT.qty
+let updateData={}
 
-if(ambil) qtyBaru=0
-if(nitip) qtyBaru=parseInt(document.getElementById("qtyBaru").value||0)
+let ambil=document.getElementById("c_ambil").checked
+let harga=document.getElementById("c_harga").checked
+let nitip=document.getElementById("c_nitip").checked
 
-let harga_jual=CURRENT.harga_jual
-let harga_penitip=CURRENT.harga_penitip
+/* qty */
+
+if(ambil && !nitip){
+updateData.qty=0
+}
+
+if(nitip){
+updateData.qty=parseInt(document.getElementById("n_qty").value||0)
+}
+
+/* harga */
 
 if(harga){
-harga_jual=parseInt(document.getElementById("u_jual").value||0)
-harga_penitip=parseInt(document.getElementById("u_modal").value||0)
+updateData.harga_jual=parseInt(document.getElementById("u_jual").value||0)
+updateData.harga_penitip=parseInt(document.getElementById("u_pen").value||0)
 }
 
-await window.supabaseClient
+updateData.updated_at=new Date()
+
+const {error}=await window.supabaseClient
 .from("barang_titipan")
-.update({
-qty:qtyBaru,
-harga_jual,
-harga_penitip,
-updated_at:new Date().toISOString()
-})
+.update(updateData)
 .eq("id",CURRENT.id)
 
-await window.supabaseClient
-.from("titipan_log")
-.insert({
+if(error){
+alert("Gagal update")
+return
+}
 
-item_id:CURRENT.id,
-nama_item:CURRENT.nama_item,
-nama_penitip:CURRENT.nama_penitip,
-
-aksi:
-(ambil?"ambil ":"")+
-(harga?"harga ":"")+
-(nitip?"nitip":""),
-
-qty_lama:CURRENT.qty,
-qty_baru:qtyBaru,
-
-terjual:parseInt(document.getElementById("terjual").value||0),
-sisa:parseInt(document.getElementById("sisa").value||0),
-
-total_bayar:
-parseInt(document.getElementById("terjual").value||0)
-*
-CURRENT.harga_penitip,
-
-harga_jual,
-harga_penitip
-
-})
-
-closeDatang()
 loadData()
 
 }
@@ -471,8 +406,8 @@ document.body.appendChild(s)
 </script>
 
 <script>
-if("serviceWorker" in navigator){
-navigator.serviceWorker.register("sw.js")
+if('serviceWorker' in navigator){
+navigator.serviceWorker.register('sw.js')
 }
 </script>
 
