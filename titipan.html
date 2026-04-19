@@ -124,8 +124,8 @@ onclick="formTambah()"
 
 <script>
 
-var DATA=[]
-var CURRENT=null
+if(!window.DATA) window.DATA=[]
+if(window.CURRENT===undefined) window.CURRENT=null
 
 /* ===========================
 LOAD DATA
@@ -143,7 +143,7 @@ alert("Gagal load data")
 return
 }
 
-DATA=data||[]
+window.DATA=data||[]
 renderList()
 
 }
@@ -157,11 +157,11 @@ document.getElementById("aksiArea").style.display="none"
 
 let html=""
 
-if(DATA.length===0){
+if(window.DATA.length===0){
 html="<div class='box'>Belum ada barang titipan</div>"
 }
 
-DATA.forEach(i=>{
+window.DATA.forEach(i=>{
 
 html+=`
 <div class="item">
@@ -253,8 +253,8 @@ FORM AKSI
 
 function formAksi(id){
 
-CURRENT=DATA.find(x=>x.id==id)
-if(!CURRENT) return
+window.CURRENT=window.DATA.find(x=>x.id==id)
+if(!window.CURRENT) return
 
 document.getElementById("judul").style.display="none"
 document.getElementById("listArea").style.display="none"
@@ -264,7 +264,7 @@ document.getElementById("aksiArea").innerHTML=`
 
 <div class="box">
 
-<h3>${CURRENT.nama_item}</h3>
+<h3>${window.CURRENT.nama_item}</h3>
 
 <div class="check">
 <input type="checkbox" id="c_ambil" onchange="toggleAksi()"> Ambil
@@ -284,8 +284,8 @@ document.getElementById("aksiArea").innerHTML=`
 
 <div id="boxHarga" style="display:none">
 
-<input id="u_jual" type="number" value="${CURRENT.harga_jual}">
-<input id="u_pen" type="number" value="${CURRENT.harga_penitip}">
+<input id="u_jual" type="number" value="${window.CURRENT.harga_jual}">
+<input id="u_pen" type="number" value="${window.CURRENT.harga_penitip}">
 
 </div>
 
@@ -331,24 +331,24 @@ REALTIME HITUNG
 function hitungDariSisa(){
 
 let s=parseInt(document.getElementById("sisa").value||0)
-let laku=CURRENT.qty-s
+let laku=window.CURRENT.qty-s
 if(laku<0) laku=0
 
 document.getElementById("jualLaku").value=laku
 document.getElementById("bayar").value=
-"Rp "+(laku*CURRENT.harga_penitip).toLocaleString('id-ID')
+"Rp "+(laku*window.CURRENT.harga_penitip).toLocaleString('id-ID')
 
 }
 
 function hitungDariJual(){
 
 let laku=parseInt(document.getElementById("jualLaku").value||0)
-let sisa=CURRENT.qty-laku
+let sisa=window.CURRENT.qty-laku
 if(sisa<0) sisa=0
 
 document.getElementById("sisa").value=sisa
 document.getElementById("bayar").value=
-"Rp "+(laku*CURRENT.harga_penitip).toLocaleString('id-ID')
+"Rp "+(laku*window.CURRENT.harga_penitip).toLocaleString('id-ID')
 
 }
 
@@ -364,8 +364,6 @@ let ambil=document.getElementById("c_ambil").checked
 let harga=document.getElementById("c_harga").checked
 let nitip=document.getElementById("c_nitip").checked
 
-/* qty */
-
 if(ambil && !nitip){
 updateData.qty=0
 }
@@ -380,10 +378,7 @@ return
 }
 
 updateData.qty=q
-
 }
-
-/* harga */
 
 if(harga){
 updateData.harga_jual=parseInt(document.getElementById("u_jual").value||0)
@@ -395,7 +390,7 @@ updateData.updated_at=new Date()
 const {error}=await window.supabaseClient
 .from("barang_titipan")
 .update(updateData)
-.eq("id",CURRENT.id)
+.eq("id",window.CURRENT.id)
 
 if(error){
 alert("Gagal update")
