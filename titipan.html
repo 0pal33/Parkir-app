@@ -169,7 +169,7 @@ html+=`
 
 <div class="qty">${i.qty}</div>
 
-<button class="blue" onclick="formAksi('${i.id}')">🚘</button>
+<button class="blue" onclick="formAksi('${i.id}')">📥</button>
 
 </div>
 `
@@ -366,7 +366,14 @@ updateData.qty=0
 }
 
 if(nitip){
-updateData.qty=parseInt(document.getElementById("n_qty").value||0)
+let q=parseInt(document.getElementById("n_qty").value||0)
+
+if(q<=0){
+alert("Isi qty baru")
+return
+}
+
+updateData.qty=q
 }
 
 /* harga */
