@@ -245,6 +245,23 @@ console.log(error)
 return
 }
 
+const {data:newItem}=await window.supabaseClient
+.from("barang_titipan")
+.select("*")
+.eq("nama_item",nama)
+.order("created_at",{ascending:false})
+.limit(1)
+.single()
+
+await window.supabaseClient
+.from("titipan_log")
+.insert({
+item_id:newItem.id,
+jenis:"masuk",
+qty:qty,
+total:0
+})
+
 loadData()
 
 }
@@ -367,7 +384,21 @@ let harga=document.getElementById("c_harga").checked
 let nitip=document.getElementById("c_nitip").checked
 
 if(ambil && !nitip){
+
+let terjual=parseInt(document.getElementById("jualLaku").value||0)
+let total=terjual * window.CURRENT.harga_penitip
+
 updateData.qty=0
+
+await window.supabaseClient
+.from("titipan_log")
+.insert({
+item_id:window.CURRENT.id,
+jenis:"ambil",
+qty:terjual,
+total:total
+})
+
 }
 
 if(nitip){
@@ -380,11 +411,30 @@ return
 }
 
 updateData.qty=q
+
+await window.supabaseClient
+.from("titipan_log")
+.insert({
+item_id:window.CURRENT.id,
+jenis:"masuk",
+qty:q,
+total:0
+})
+
 }
 
 if(harga){
 updateData.harga_jual=parseInt(document.getElementById("u_jual").value||0)
 updateData.harga_penitip=parseInt(document.getElementById("u_pen").value||0)
+
+await window.supabaseClient
+.from("titipan_log")
+.insert({
+item_id:window.CURRENT.id,
+jenis:"harga",
+qty:0,
+total:0
+})
 }
 
 updateData.updated_at=new Date()
