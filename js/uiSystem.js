@@ -23,7 +23,7 @@ if(localStorage.getItem("adminLogin")==="true"){
 
 document.getElementById("dashboardBtn").style.display="flex"
 
-powerBtn.style.background="#e74c3c"   // merah
+powerBtn.style.background="#e74c3c"
 powerBtn.onclick=logoutAdmin
 
 }else{
@@ -32,7 +32,7 @@ powerBtn.onclick=logoutAdmin
 
 document.getElementById("dashboardBtn").style.display="none"
 
-powerBtn.style.background="#28a745"   // hijau
+powerBtn.style.background="#28a745"
 powerBtn.onclick=goAdmin
 
 }
@@ -42,11 +42,36 @@ document.getElementById("switchCamBtn").style.display="none"
 document.getElementById("bottomButtons").innerHTML=`
 <button class="orange" onclick="startScan()">Start Scanning</button>
 <button class="blue" onclick="showManual()">Ketik Manual</button>
-<button class="green" onclick="showBulanan()">Bulanan</button>
+<button class="green" onclick="showMenuLain()">Menu Lainnya</button>
 `
 
 loadReminder()
 
+}
+
+window.showMenuLain=function(){
+
+hideAll()
+
+document.getElementById("middle").innerHTML=`
+<div style="display:flex;flex-direction:column;gap:15px;width:100%;max-width:280px;">
+<button class="green" onclick="showBulanan()">Bulanan</button>
+<button class="blue" onclick="goTitipan()">Titip Jajan</button>
+</div>
+`
+
+document.getElementById("bottomButtons").innerHTML=`
+<button class="red" onclick="reloadPage()">Kembali</button>
+`
+
+}
+
+window.reloadPage=function(){
+location.reload()
+}
+
+window.goTitipan=function(){
+window.location.href="titipan.html"
 }
 
 window.showScan=function(){
