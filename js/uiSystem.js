@@ -37,7 +37,8 @@ powerBtn.onclick=goAdmin
 
 }
 
-document.getElementById("switchCamBtn").style.display="none"
+let sw=document.getElementById("switchCamBtn")
+if(sw) sw.style.display="none"
 
 document.getElementById("middleBox").innerHTML=""
 
