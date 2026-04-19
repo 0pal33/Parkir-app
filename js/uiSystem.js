@@ -8,7 +8,6 @@ if(reader) reader.style.display="none"
 if(manual) manual.style.display="none"
 if(result) result.innerHTML=""
 
-/* hapus tombol floating */
 let f=document.querySelector(".floatingTambah")
 if(f) f.remove()
 
@@ -19,28 +18,30 @@ window.showHome=function(){
 hideAll()
 
 let powerBtn=document.querySelector(".logout-btn")
+let dash=document.getElementById("dashboardBtn")
+let mid=document.getElementById("middleBox")
+let sw=document.getElementById("switchCamBtn")
+
 if(!powerBtn) return
 
 if(localStorage.getItem("adminLogin")==="true"){
 
-document.getElementById("dashboardBtn").style.display="flex"
+if(dash) dash.style.display="flex"
 
 powerBtn.style.background="#e74c3c"
 powerBtn.onclick=logoutAdmin
 
 }else{
 
-document.getElementById("dashboardBtn").style.display="none"
+if(dash) dash.style.display="none"
 
 powerBtn.style.background="#28a745"
 powerBtn.onclick=goAdmin
 
 }
 
-let sw=document.getElementById("switchCamBtn")
 if(sw) sw.style.display="none"
-
-document.getElementById("middleBox").innerHTML=""
+if(mid) mid.innerHTML=""
 
 document.getElementById("bottomButtons").innerHTML=`
 <button class="orange" onclick="startScan()">Start Scanning</button>
@@ -56,12 +57,16 @@ window.showMenuLain=function(){
 
 hideAll()
 
-document.getElementById("middleBox").innerHTML=`
+let mid=document.getElementById("middleBox")
+
+if(mid){
+mid.innerHTML=`
 <div style="display:flex;flex-direction:column;gap:15px;width:100%;max-width:280px;margin:auto;">
 <button class="green" onclick="showBulanan()">Bulanan</button>
 <button class="blue" onclick="goTitipan()">Titip Jajan</button>
 </div>
 `
+}
 
 document.getElementById("bottomButtons").innerHTML=`
 <button class="red" onclick="showHome()">Kembali</button>
@@ -70,7 +75,7 @@ document.getElementById("bottomButtons").innerHTML=`
 }
 
 window.goTitipan=function(){
-window.location.href="titipan.html"
+location.href="titipan.html"
 }
 
 window.showScan=function(){
@@ -91,7 +96,8 @@ document.getElementById("bottomButtons").innerHTML=`
 
 window.showResult=function(){
 
-document.getElementById("switchCamBtn").style.display="none"
+let sw=document.getElementById("switchCamBtn")
+if(sw) sw.style.display="none"
 
 document.getElementById("bottomButtons").innerHTML=`
 <button class="orange" onclick="scanUlang()">Scan Ulang</button>
@@ -115,17 +121,14 @@ document.getElementById("bottomButtons").innerHTML=`
 }
 
 window.goAdmin=function(){
-window.location.href="admin.html"
+location.href="admin.html"
 }
 
 window.goDashboard=function(){
-window.location.href="dashboard.html"
+location.href="dashboard.html"
 }
 
 window.logoutAdmin=function(){
-
 localStorage.removeItem("adminLogin")
-
 location.reload()
-
 }
