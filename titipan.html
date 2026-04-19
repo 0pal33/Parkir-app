@@ -371,16 +371,19 @@ let nitip=c_nitip.checked
 
 let updateData={}
 
-/* AMBIL */
+/* ====================
+AMBIL (jalan walau nitip juga)
+==================== */
 
-if(ambil && !nitip){
+if(ambil){
 
 let terjual=parseInt(laku.value||0)
-let total=terjual*window.CURRENT.harga_penitip
 
-updateData.qty=0
+if(terjual<0) terjual=0
 
-await window.supabaseClient
+let total=terjual * window.CURRENT.harga_penitip
+
+const {error:e1}=await window.supabaseClient
 .from("titipan_log")
 .insert({
 item_id:window.CURRENT.id,
@@ -389,9 +392,21 @@ qty:terjual,
 total:total
 })
 
+if(e1){
+alert("Log ambil gagal: "+e1.message)
+return
 }
 
-/* NITIP */
+/* kalau ambil tanpa nitip */
+if(!nitip){
+updateData.qty=0
+}
+
+}
+
+/* ====================
+NITIP LAGI
+==================== */
 
 if(nitip){
 
@@ -404,7 +419,7 @@ return
 
 updateData.qty=q
 
-await window.supabaseClient
+const {error:e2}=await window.supabaseClient
 .from("titipan_log")
 .insert({
 item_id:window.CURRENT.id,
@@ -413,16 +428,23 @@ qty:q,
 total:0
 })
 
+if(e2){
+alert("Log masuk gagal: "+e2.message)
+return
 }
 
-/* HARGA */
+}
+
+/* ====================
+UPDATE HARGA
+==================== */
 
 if(harga){
 
 updateData.harga_jual=parseInt(u_jual.value||0)
 updateData.harga_penitip=parseInt(u_pen.value||0)
 
-await window.supabaseClient
+const {error:e3}=await window.supabaseClient
 .from("titipan_log")
 .insert({
 item_id:window.CURRENT.id,
@@ -430,6 +452,11 @@ jenis:"harga",
 qty:0,
 total:0
 })
+
+if(e3){
+alert("Log harga gagal: "+e3.message)
+return
+}
 
 }
 
@@ -441,7 +468,7 @@ const {error}=await window.supabaseClient
 .eq("id",window.CURRENT.id)
 
 if(error){
-alert(error.message)
+alert("Update gagal: "+error.message)
 return
 }
 
