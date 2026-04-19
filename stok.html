@@ -139,7 +139,7 @@ color:white;
 
 <body>
 
-<h3>Stok Barang</h3>
+<h3 id="judulPage">Stok Barang</h3>
 
 <div id="list"></div>
 
@@ -213,7 +213,6 @@ html+=`
 <div class="item">
 
 <div class="left">
-<input type="checkbox" disabled>
 <div>
 <div class="nama">${i.nama_item}</div>
 <div>Rp ${Number(i.harga_beli||0).toLocaleString('id-ID')}</div>
@@ -250,15 +249,17 @@ loadStok()
 }
 
 function formTambah(){
-  document.getElementById("list").style.display = "none"
-  document.querySelector(".floating").style.display = "none"
-  document.getElementById("formTambah").style.display = "block"
+  document.getElementById("judulPage").style.display="none"
+  document.getElementById("list").style.display="none"
+  document.querySelector(".floating").style.display="none"
+  document.getElementById("formTambah").style.display="block"
 }
 
 function closeForm(){
-  document.getElementById("formTambah").style.display = "none"
-  document.getElementById("list").style.display = "block"
-  document.querySelector(".floating").style.display = "flex"
+  document.getElementById("judulPage").style.display="block"
+  document.getElementById("formTambah").style.display="none"
+  document.getElementById("list").style.display="block"
+  document.querySelector(".floating").style.display="flex"
 }
 
 function toggleJual(){
