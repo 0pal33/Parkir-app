@@ -19,16 +19,12 @@ if(!powerBtn) return
 
 if(localStorage.getItem("adminLogin")==="true"){
 
-/* ADMIN MODE */
-
 document.getElementById("dashboardBtn").style.display="flex"
 
 powerBtn.style.background="#e74c3c"
 powerBtn.onclick=logoutAdmin
 
 }else{
-
-/* PETUGAS MODE */
 
 document.getElementById("dashboardBtn").style.display="none"
 
@@ -38,6 +34,8 @@ powerBtn.onclick=goAdmin
 }
 
 document.getElementById("switchCamBtn").style.display="none"
+
+document.getElementById("middleBox").innerHTML=""
 
 document.getElementById("bottomButtons").innerHTML=`
 <button class="orange" onclick="startScan()">Start Scanning</button>
@@ -53,21 +51,17 @@ window.showMenuLain=function(){
 
 hideAll()
 
-document.getElementById("middle").innerHTML=`
-<div style="display:flex;flex-direction:column;gap:15px;width:100%;max-width:280px;">
+document.getElementById("middleBox").innerHTML=`
+<div style="display:flex;flex-direction:column;gap:15px;width:100%;max-width:280px;margin:auto;">
 <button class="green" onclick="showBulanan()">Bulanan</button>
 <button class="blue" onclick="goTitipan()">Titip Jajan</button>
 </div>
 `
 
 document.getElementById("bottomButtons").innerHTML=`
-<button class="red" onclick="reloadPage()">Kembali</button>
+<button class="red" onclick="showHome()">Kembali</button>
 `
 
-}
-
-window.reloadPage=function(){
-location.reload()
 }
 
 window.goTitipan=function(){
