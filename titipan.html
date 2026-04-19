@@ -4,6 +4,7 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="manifest" href="manifest.json">
+
 <title>Barang Titipan</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -19,42 +20,62 @@ padding:20px;
 padding-bottom:120px;
 }
 
-h3{text-align:center}
+h3{
+text-align:center;
+margin-top:0;
+}
 
 .card{
 background:white;
-padding:12px;
-border-radius:12px;
+padding:14px;
+border-radius:14px;
 margin-bottom:10px;
 display:flex;
 justify-content:space-between;
 align-items:center;
+box-shadow:0 4px 10px rgba(0,0,0,.08);
 }
 
-.nama{font-weight:bold}
-.small{font-size:13px;color:#666}
+.nama{
+font-weight:bold;
+font-size:17px;
+}
+
+.small{
+font-size:13px;
+color:#666;
+margin-top:2px;
+}
+
+.qty{
+font-size:20px;
+font-weight:bold;
+}
 
 .btnDatang{
 background:#3498db;
 color:white;
 border:none;
-width:50px;
-height:50px;
+width:56px;
+height:56px;
 border-radius:50%;
-font-size:22px;
+font-size:24px;
+cursor:pointer;
 }
 
 .fab{
 position:fixed;
 right:20px;
 bottom:20px;
-width:65px;
-height:65px;
+width:68px;
+height:68px;
 border:none;
 border-radius:50%;
 background:#2ecc71;
 color:white;
-font-size:30px;
+font-size:32px;
+box-shadow:0 6px 15px rgba(0,0,0,.25);
+cursor:pointer;
 }
 
 .layer{
@@ -67,6 +88,7 @@ background:white;
 padding:20px;
 overflow:auto;
 display:none;
+z-index:999;
 }
 
 input{
@@ -86,17 +108,51 @@ align-items:center;
 margin-bottom:10px;
 }
 
+.check{
+width:22px;
+height:22px;
+}
+
+.section{
+background:#f7f7f7;
+padding:12px;
+border-radius:12px;
+margin-bottom:12px;
+}
+
 .oke{
 position:fixed;
 right:20px;
 bottom:20px;
-width:65px;
-height:65px;
+width:68px;
+height:68px;
 border:none;
 border-radius:50%;
 background:#2ecc71;
 color:white;
+font-size:30px;
+box-shadow:0 6px 15px rgba(0,0,0,.25);
+}
+
+.back{
+position:fixed;
+left:20px;
+bottom:20px;
+width:68px;
+height:68px;
+border:none;
+border-radius:50%;
+background:#e74c3c;
+color:white;
 font-size:28px;
+box-shadow:0 6px 15px rgba(0,0,0,.25);
+}
+
+.total{
+font-weight:bold;
+font-size:18px;
+text-align:center;
+padding:8px;
 }
 
 </style>
@@ -110,68 +166,72 @@ font-size:28px;
 
 <button class="fab" onclick="openTambah()">+</button>
 
-<!-- tambah -->
-<div class="layer" id="tambahBox">
+<!-- =======================
+TAMBAH
+======================= -->
+<div class="layer" id="boxTambah">
 
-<h3>Tambah Barang</h3>
+<h3>Tambah Barang Titipan</h3>
 
 <input id="t_nama" placeholder="Nama barang">
 <input id="t_penitip" placeholder="Nama penitip">
 <input id="t_qty" type="number" placeholder="Jumlah titip">
 <input id="t_jual" type="number" placeholder="Harga jual">
-<input id="t_pen" type="number" placeholder="Harga penitip">
+<input id="t_modal" type="number" placeholder="Harga dari penitip">
 
+<button class="back" onclick="closeTambah()">✕</button>
 <button class="oke" onclick="saveTambah()">✓</button>
 
 </div>
 
-<!-- datang -->
-<div class="layer" id="datangBox">
+<!-- =======================
+DATANG
+======================= -->
+<div class="layer" id="boxDatang">
 
-<h3>Kedatangan Penitip</h3>
+<h3 id="judulDatang">Kedatangan Penitip</h3>
+
+<!-- AMBIL -->
+<div class="section">
 
 <div class="row">
-<input type="checkbox" id="cbAmbil">
+<input class="check" type="checkbox" id="cbAmbil">
 <b>Ambil</b>
 </div>
 
-<div id="boxAmbil">
+<input id="sisa" type="number" placeholder="Sisa barang" oninput="hitungDariSisa()">
+<input id="terjual" type="number" placeholder="Barang terjual" oninput="hitungDariLaku()">
 
-<input id="sisa" type="number" placeholder="Sisa barang"
-oninput="isiSisa()">
-
-<input id="jualLaku" type="number" placeholder="Barang terjual"
-oninput="isiLaku()">
-
-<input id="bayar" placeholder="Total dibayar" readonly>
+<div class="total" id="bayar">Total dibayar : Rp 0</div>
 
 </div>
 
-<hr>
+<!-- HARGA -->
+<div class="section">
 
 <div class="row">
-<input type="checkbox" id="cbHarga">
+<input class="check" type="checkbox" id="cbHarga">
 <b>Update Harga</b>
 </div>
 
-<div id="boxHarga">
-
-<input id="upJual" type="number" placeholder="Harga jual">
-<input id="upPen" type="number" placeholder="Harga penitip">
+<input id="u_jual" type="number" placeholder="Harga jual">
+<input id="u_modal" type="number" placeholder="Harga penitip">
 
 </div>
 
-<hr>
+<!-- NITIP -->
+<div class="section">
 
 <div class="row">
-<input type="checkbox" id="cbNitip">
+<input class="check" type="checkbox" id="cbNitip">
 <b>Nitip</b>
 </div>
 
-<div id="boxNitip">
 <input id="qtyBaru" type="number" placeholder="Qty baru">
+
 </div>
 
+<button class="back" onclick="closeDatang()">✕</button>
 <button class="oke" onclick="saveDatang()">✓</button>
 
 </div>
@@ -182,8 +242,12 @@ let DATA=[]
 let CURRENT=null
 
 function rupiah(n){
-return "Rp "+Number(n||0).toLocaleString('id-ID')
+return Number(n||0).toLocaleString("id-ID")
 }
+
+/* ======================
+LOAD
+====================== */
 
 async function loadData(){
 
@@ -214,12 +278,14 @@ html+=`
 <div>
 <div class="nama">${i.nama_item}</div>
 <div class="small">${i.nama_penitip}</div>
-<div class="small">Qty : ${i.qty}</div>
-<div class="small">${rupiah(i.harga_jual)}</div>
+<div class="small">Harga jual Rp ${rupiah(i.harga_jual)}</div>
 </div>
 
+<div style="text-align:center">
+<div class="qty">${i.qty}</div>
 <button class="btnDatang"
-onclick="openDatang('${i.id}')">🚘</button>
+onclick="openDatang('${i.id}')">🧺</button>
+</div>
 
 </div>
 `
@@ -230,8 +296,16 @@ document.getElementById("list").innerHTML=html
 
 }
 
+/* ======================
+TAMBAH
+====================== */
+
 function openTambah(){
-document.getElementById("tambahBox").style.display="block"
+document.getElementById("boxTambah").style.display="block"
+}
+
+function closeTambah(){
+document.getElementById("boxTambah").style.display="none"
 }
 
 async function saveTambah(){
@@ -240,77 +314,109 @@ let nama_item=document.getElementById("t_nama").value.trim()
 let nama_penitip=document.getElementById("t_penitip").value.trim()
 let qty=parseInt(document.getElementById("t_qty").value||0)
 let harga_jual=parseInt(document.getElementById("t_jual").value||0)
-let harga_penitip=parseInt(document.getElementById("t_pen").value||0)
+let harga_penitip=parseInt(document.getElementById("t_modal").value||0)
+
+if(!nama_item || !nama_penitip){
+alert("Lengkapi data")
+return
+}
 
 await window.supabaseClient
 .from("barang_titipan")
 .insert({
-nama_item,nama_penitip,qty,harga_jual,harga_penitip
+nama_item,
+nama_penitip,
+qty,
+harga_jual,
+harga_penitip
 })
 
-document.getElementById("tambahBox").style.display="none"
+closeTambah()
 loadData()
 
 }
+
+/* ======================
+DATANG
+====================== */
 
 function openDatang(id){
 
 CURRENT=DATA.find(x=>x.id===id)
 
-document.getElementById("datangBox").style.display="block"
+document.getElementById("judulDatang").innerText=
+CURRENT.nama_item+" - "+CURRENT.nama_penitip
 
-document.getElementById("upJual").value=CURRENT.harga_jual
-document.getElementById("upPen").value=CURRENT.harga_penitip
+document.getElementById("u_jual").value=CURRENT.harga_jual
+document.getElementById("u_modal").value=CURRENT.harga_penitip
+
+document.getElementById("sisa").value=""
+document.getElementById("terjual").value=""
+document.getElementById("qtyBaru").value=""
+
+document.getElementById("bayar").innerText="Total dibayar : Rp 0"
+
+document.getElementById("cbAmbil").checked=false
+document.getElementById("cbHarga").checked=false
+document.getElementById("cbNitip").checked=false
+
+document.getElementById("boxDatang").style.display="block"
 
 }
 
-function isiSisa(){
+function closeDatang(){
+document.getElementById("boxDatang").style.display="none"
+}
+
+function hitungDariSisa(){
 
 let sisa=parseInt(document.getElementById("sisa").value||0)
+
 let laku=CURRENT.qty-sisa
+if(laku<0) laku=0
 
-if(laku<0)laku=0
-
-document.getElementById("jualLaku").value=laku
-document.getElementById("bayar").value=rupiah(laku*CURRENT.harga_penitip)
+document.getElementById("terjual").value=laku
+document.getElementById("bayar").innerText=
+"Total dibayar : Rp "+rupiah(laku*CURRENT.harga_penitip)
 
 }
 
-function isiLaku(){
+function hitungDariLaku(){
 
-let laku=parseInt(document.getElementById("jualLaku").value||0)
+let laku=parseInt(document.getElementById("terjual").value||0)
+
 let sisa=CURRENT.qty-laku
-
-if(sisa<0)sisa=0
+if(sisa<0) sisa=0
 
 document.getElementById("sisa").value=sisa
-document.getElementById("bayar").value=rupiah(laku*CURRENT.harga_penitip)
+document.getElementById("bayar").innerText=
+"Total dibayar : Rp "+rupiah(laku*CURRENT.harga_penitip)
 
 }
 
 async function saveDatang(){
 
-let cbAmbil=document.getElementById("cbAmbil").checked
-let cbHarga=document.getElementById("cbHarga").checked
-let cbNitip=document.getElementById("cbNitip").checked
+let ambil=document.getElementById("cbAmbil").checked
+let harga=document.getElementById("cbHarga").checked
+let nitip=document.getElementById("cbNitip").checked
 
-let qtyFinal=CURRENT.qty
+let qtyBaru=CURRENT.qty
 
-if(cbAmbil) qtyFinal=0
-if(cbNitip) qtyFinal=parseInt(document.getElementById("qtyBaru").value||0)
+if(ambil) qtyBaru=0
+if(nitip) qtyBaru=parseInt(document.getElementById("qtyBaru").value||0)
 
 let harga_jual=CURRENT.harga_jual
 let harga_penitip=CURRENT.harga_penitip
 
-if(cbHarga){
-harga_jual=parseInt(document.getElementById("upJual").value||0)
-harga_penitip=parseInt(document.getElementById("upPen").value||0)
+if(harga){
+harga_jual=parseInt(document.getElementById("u_jual").value||0)
+harga_penitip=parseInt(document.getElementById("u_modal").value||0)
 }
 
 await window.supabaseClient
 .from("barang_titipan")
 .update({
-qty:qtyFinal,
+qty:qtyBaru,
 harga_jual,
 harga_penitip,
 updated_at:new Date().toISOString()
@@ -320,30 +426,33 @@ updated_at:new Date().toISOString()
 await window.supabaseClient
 .from("titipan_log")
 .insert({
+
 item_id:CURRENT.id,
 nama_item:CURRENT.nama_item,
 nama_penitip:CURRENT.nama_penitip,
+
 aksi:
-(cbAmbil?'ambil ':'')+
-(cbHarga?'harga ':'')+
-(cbNitip?'nitip':''),
+(ambil?"ambil ":"")+
+(harga?"harga ":"")+
+(nitip?"nitip":""),
 
 qty_lama:CURRENT.qty,
-qty_baru:qtyFinal,
+qty_baru:qtyBaru,
 
-terjual:parseInt(document.getElementById("jualLaku").value||0),
+terjual:parseInt(document.getElementById("terjual").value||0),
 sisa:parseInt(document.getElementById("sisa").value||0),
+
 total_bayar:
-parseInt(document.getElementById("jualLaku").value||0)
+parseInt(document.getElementById("terjual").value||0)
 *
 CURRENT.harga_penitip,
 
 harga_jual,
 harga_penitip
+
 })
 
-document.getElementById("datangBox").style.display="none"
-
+closeDatang()
 loadData()
 
 }
@@ -353,8 +462,17 @@ loadData()
 </script>
 
 <script>
-if('serviceWorker' in navigator){
-navigator.serviceWorker.register('sw.js')
+if(IS_DEV && !window.__SUGER_LOADED__){
+window.__SUGER_LOADED__=true
+const s=document.createElement("script")
+s.src="https://suger-cdn.vercel.app/suger-dev.js"
+document.body.appendChild(s)
+}
+</script>
+
+<script>
+if("serviceWorker" in navigator){
+navigator.serviceWorker.register("sw.js")
 }
 </script>
 
