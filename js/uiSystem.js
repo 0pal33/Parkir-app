@@ -1,10 +1,14 @@
 window.hideAll=function(){
 
-document.getElementById("reader").style.display="none"
-document.getElementById("manualBox").style.display="none"
-document.getElementById("resultBox").innerHTML=""
+let reader=document.getElementById("reader")
+let manual=document.getElementById("manualBox")
+let result=document.getElementById("resultBox")
 
-/* hapus tombol + floating jika ada */
+if(reader) reader.style.display="none"
+if(manual) manual.style.display="none"
+if(result) result.innerHTML=""
+
+/* hapus tombol floating */
 let f=document.querySelector(".floatingTambah")
 if(f) f.remove()
 
