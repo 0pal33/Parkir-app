@@ -2,18 +2,48 @@
 
 window.showBulanan = async function(){
 
+document.getElementById("middleBox").innerHTML = `
+<div id="reader" style="display:none">
+<div class="scan-line"></div>
+</div>
+
+<button id="switchCamBtn" class="blue"
+onclick="switchCamera()"
+style="display:none">
+📷 Tukar Kamera
+</button>
+
+<div id="manualBox" style="display:none">
+
+Parkir-<br><br>
+
+<input
+id="manualInput"
+maxlength="3"
+inputmode="numeric"
+pattern="[0-9]*"
+type="tel">
+
+<br><br>
+
+<button class="green" onclick="manualOK()">✓</button>
+
+</div>
+
+<div id="resultBox"></div>
+`
+
 hideAll()
 
 await listBayar()
+
 document.getElementById("bottomButtons").innerHTML=`
 <button class="red" onclick="showHome()">Kembali</button>
 `
 
-
 let f=document.querySelector(".floatingTambah")
 if(f) f.remove()
 
-/* buat tombol + floating */
 let btn=document.createElement("button")
 btn.innerText="+"
 btn.className="floatingTambah"
