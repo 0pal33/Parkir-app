@@ -4,53 +4,102 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="manifest" href="manifest.json">
-
 <title>Barang Titipan</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
 
 <style>
+
 body{
 font-family:Arial;
 background:#f2f2f2;
+margin:0;
 padding:20px;
 padding-bottom:120px;
 }
 
-.item{
+h3{text-align:center}
+
+.card{
 background:white;
 padding:12px;
-border-radius:10px;
+border-radius:12px;
 margin-bottom:10px;
 display:flex;
 justify-content:space-between;
 align-items:center;
 }
 
-.btn{
+.nama{font-weight:bold}
+.small{font-size:13px;color:#666}
+
+.btnDatang{
 background:#3498db;
 color:white;
 border:none;
-padding:8px;
-border-radius:8px;
+width:50px;
+height:50px;
+border-radius:50%;
+font-size:22px;
 }
 
-.floating{
+.fab{
 position:fixed;
-bottom:20px;
 right:20px;
-width:60px;
-height:60px;
-border-radius:50%;
-background:#3498db;
-color:white;
-font-size:22px;
+bottom:20px;
+width:65px;
+height:65px;
 border:none;
+border-radius:50%;
+background:#2ecc71;
+color:white;
+font-size:30px;
+}
+
+.layer{
+position:fixed;
+top:0;
+left:0;
+right:0;
+bottom:0;
+background:white;
+padding:20px;
+overflow:auto;
+display:none;
+}
+
+input{
+width:100%;
+padding:12px;
+margin-bottom:10px;
+border:1px solid #ccc;
+border-radius:10px;
+box-sizing:border-box;
+font-size:16px;
+}
+
+.row{
+display:flex;
+gap:10px;
+align-items:center;
+margin-bottom:10px;
+}
+
+.oke{
+position:fixed;
+right:20px;
+bottom:20px;
+width:65px;
+height:65px;
+border:none;
+border-radius:50%;
+background:#2ecc71;
+color:white;
+font-size:28px;
 }
 
 </style>
-
 </head>
 
 <body>
@@ -59,115 +108,247 @@ border:none;
 
 <div id="list"></div>
 
-<button class="floating" onclick="formTambah()">+</button>
+<button class="fab" onclick="openTambah()">+</button>
+
+<!-- tambah -->
+<div class="layer" id="tambahBox">
+
+<h3>Tambah Barang</h3>
+
+<input id="t_nama" placeholder="Nama barang">
+<input id="t_penitip" placeholder="Nama penitip">
+<input id="t_qty" type="number" placeholder="Jumlah titip">
+<input id="t_jual" type="number" placeholder="Harga jual">
+<input id="t_pen" type="number" placeholder="Harga penitip">
+
+<button class="oke" onclick="saveTambah()">✓</button>
+
+</div>
+
+<!-- datang -->
+<div class="layer" id="datangBox">
+
+<h3>Kedatangan Penitip</h3>
+
+<div class="row">
+<input type="checkbox" id="cbAmbil">
+<b>Ambil</b>
+</div>
+
+<div id="boxAmbil">
+
+<input id="sisa" type="number" placeholder="Sisa barang"
+oninput="isiSisa()">
+
+<input id="jualLaku" type="number" placeholder="Barang terjual"
+oninput="isiLaku()">
+
+<input id="bayar" placeholder="Total dibayar" readonly>
+
+</div>
+
+<hr>
+
+<div class="row">
+<input type="checkbox" id="cbHarga">
+<b>Update Harga</b>
+</div>
+
+<div id="boxHarga">
+
+<input id="upJual" type="number" placeholder="Harga jual">
+<input id="upPen" type="number" placeholder="Harga penitip">
+
+</div>
+
+<hr>
+
+<div class="row">
+<input type="checkbox" id="cbNitip">
+<b>Nitip</b>
+</div>
+
+<div id="boxNitip">
+<input id="qtyBaru" type="number" placeholder="Qty baru">
+</div>
+
+<button class="oke" onclick="saveDatang()">✓</button>
+
+</div>
 
 <script>
 
-async function load(){
+let DATA=[]
+let CURRENT=null
 
-const {data} = await window.supabaseClient
-.from("titipan")
+function rupiah(n){
+return "Rp "+Number(n||0).toLocaleString('id-ID')
+}
+
+async function loadData(){
+
+const {data,error}=await window.supabaseClient
+.from("barang_titipan")
 .select("*")
-.order("nama")
+.order("nama_item")
+
+if(error){
+alert("Gagal load")
+return
+}
+
+DATA=data||[]
+render()
+
+}
+
+function render(){
 
 let html=""
 
-data.forEach(i=>{
+DATA.forEach(i=>{
 
 html+=`
-<div class="item">
+<div class="card">
 
 <div>
-<b>${i.nama}</b><br>
-${i.penitip}<br>
-Qty: ${i.qty}<br>
-Rp ${i.harga_jual}
+<div class="nama">${i.nama_item}</div>
+<div class="small">${i.nama_penitip}</div>
+<div class="small">Qty : ${i.qty}</div>
+<div class="small">${rupiah(i.harga_jual)}</div>
 </div>
 
-<button class="btn" onclick="datang('${i.id}')">🚗</button>
+<button class="btnDatang"
+onclick="openDatang('${i.id}')">🚘</button>
 
 </div>
 `
+
 })
 
 document.getElementById("list").innerHTML=html
 
 }
 
-function formTambah(){
+function openTambah(){
+document.getElementById("tambahBox").style.display="block"
+}
 
-let nama = prompt("Nama barang")
-let penitip = prompt("Nama penitip")
-let qty = parseInt(prompt("Jumlah titip")||0)
-let jual = parseInt(prompt("Harga jual")||0)
-let modal = parseInt(prompt("Harga penitip")||0)
+async function saveTambah(){
 
-window.supabaseClient.from("titipan").insert({
-nama,
-penitip,
-qty,
-harga_jual:jual,
-harga_modal:modal
-}).then(load)
+let nama_item=document.getElementById("t_nama").value.trim()
+let nama_penitip=document.getElementById("t_penitip").value.trim()
+let qty=parseInt(document.getElementById("t_qty").value||0)
+let harga_jual=parseInt(document.getElementById("t_jual").value||0)
+let harga_penitip=parseInt(document.getElementById("t_pen").value||0)
+
+await window.supabaseClient
+.from("barang_titipan")
+.insert({
+nama_item,nama_penitip,qty,harga_jual,harga_penitip
+})
+
+document.getElementById("tambahBox").style.display="none"
+loadData()
 
 }
 
-/* =========================
-FORM DATANG (ambil/update/nitip)
-========================= */
+function openDatang(id){
 
-async function datang(id){
+CURRENT=DATA.find(x=>x.id===id)
 
-let aksi = prompt("ketik: ambil / harga / nitip")
+document.getElementById("datangBox").style.display="block"
 
-if(aksi==="ambil"){
-
-let sisa = parseInt(prompt("Sisa barang"))
-let {data} = await window.supabaseClient.from("titipan").select("*").eq("id",id).single()
-
-let terjual = data.qty - sisa
-let total = terjual * data.harga_modal
-
-alert("Terjual: "+terjual+"\nBayar: "+total)
-
-await window.supabaseClient
-.from("titipan")
-.update({qty:sisa})
-.eq("id",id)
+document.getElementById("upJual").value=CURRENT.harga_jual
+document.getElementById("upPen").value=CURRENT.harga_penitip
 
 }
 
-if(aksi==="harga"){
+function isiSisa(){
 
-let jual = parseInt(prompt("Harga jual"))
-let modal = parseInt(prompt("Harga penitip"))
+let sisa=parseInt(document.getElementById("sisa").value||0)
+let laku=CURRENT.qty-sisa
+
+if(laku<0)laku=0
+
+document.getElementById("jualLaku").value=laku
+document.getElementById("bayar").value=rupiah(laku*CURRENT.harga_penitip)
+
+}
+
+function isiLaku(){
+
+let laku=parseInt(document.getElementById("jualLaku").value||0)
+let sisa=CURRENT.qty-laku
+
+if(sisa<0)sisa=0
+
+document.getElementById("sisa").value=sisa
+document.getElementById("bayar").value=rupiah(laku*CURRENT.harga_penitip)
+
+}
+
+async function saveDatang(){
+
+let cbAmbil=document.getElementById("cbAmbil").checked
+let cbHarga=document.getElementById("cbHarga").checked
+let cbNitip=document.getElementById("cbNitip").checked
+
+let qtyFinal=CURRENT.qty
+
+if(cbAmbil) qtyFinal=0
+if(cbNitip) qtyFinal=parseInt(document.getElementById("qtyBaru").value||0)
+
+let harga_jual=CURRENT.harga_jual
+let harga_penitip=CURRENT.harga_penitip
+
+if(cbHarga){
+harga_jual=parseInt(document.getElementById("upJual").value||0)
+harga_penitip=parseInt(document.getElementById("upPen").value||0)
+}
 
 await window.supabaseClient
-.from("titipan")
+.from("barang_titipan")
 .update({
-harga_jual:jual,
-harga_modal:modal
+qty:qtyFinal,
+harga_jual,
+harga_penitip,
+updated_at:new Date().toISOString()
 })
-.eq("id",id)
+.eq("id",CURRENT.id)
 
-}
+await window.supabaseClient
+.from("titipan_log")
+.insert({
+item_id:CURRENT.id,
+nama_item:CURRENT.nama_item,
+nama_penitip:CURRENT.nama_penitip,
+aksi:
+(cbAmbil?'ambil ':'')+
+(cbHarga?'harga ':'')+
+(cbNitip?'nitip':''),
 
-if(aksi==="nitip"){
+qty_lama:CURRENT.qty,
+qty_baru:qtyFinal,
 
-let tambah = parseInt(prompt("Tambah qty"))
+terjual:parseInt(document.getElementById("jualLaku").value||0),
+sisa:parseInt(document.getElementById("sisa").value||0),
+total_bayar:
+parseInt(document.getElementById("jualLaku").value||0)
+*
+CURRENT.harga_penitip,
 
-await window.supabaseClient.rpc("increment_qty",{
-row_id:id,
-val:tambah
+harga_jual,
+harga_penitip
 })
 
+document.getElementById("datangBox").style.display="none"
+
+loadData()
+
 }
 
-load()
-
-}
-
-load()
+loadData()
 
 </script>
 
