@@ -77,8 +77,11 @@ window.showScan=function(){
 
 hideAll()
 
-document.getElementById("reader").style.display="block"
-document.getElementById("switchCamBtn").style.display="inline-block"
+let reader=document.getElementById("reader")
+let sw=document.getElementById("switchCamBtn")
+
+if(reader) reader.style.display="block"
+if(sw) sw.style.display="inline-block"
 
 document.getElementById("bottomButtons").innerHTML=`
 <button class="red" onclick="stopScan()">Stop</button>
@@ -101,7 +104,9 @@ window.showManualState=function(){
 
 hideAll()
 
-document.getElementById("manualBox").style.display="block"
+let manual=document.getElementById("manualBox")
+
+if(manual) manual.style.display="block"
 
 document.getElementById("bottomButtons").innerHTML=`
 <button class="red" onclick="cancelManual()">Batal</button>
