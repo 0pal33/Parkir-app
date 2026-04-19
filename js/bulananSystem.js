@@ -2,12 +2,19 @@
 
 window.showBulanan = async function(){
 
-document.getElementById("middleBox").innerHTML = `
+hideAll()
+
+let mid=document.getElementById("middleBox")
+if(!mid) return
+
+mid.innerHTML=`
+
 <div id="reader" style="display:none">
 <div class="scan-line"></div>
 </div>
 
-<button id="switchCamBtn" class="blue"
+<button id="switchCamBtn"
+class="blue"
 onclick="switchCamera()"
 style="display:none">
 📷 Tukar Kamera
@@ -31,14 +38,13 @@ type="tel">
 </div>
 
 <div id="resultBox"></div>
-`
 
-hideAll()
+`
 
 await listBayar()
 
 document.getElementById("bottomButtons").innerHTML=`
-<button class="red" onclick="showHome()">Kembali</button>
+<button class="red" onclick="showMenuLain()">Kembali</button>
 `
 
 let f=document.querySelector(".floatingTambah")
@@ -183,7 +189,7 @@ if((data || []).length === 0){
 document.getElementById("resultBox").innerHTML="<h3>Belum ada pelanggan</h3>";
 
 document.getElementById("bottomButtons").innerHTML=`
-<button class="red" onclick="showHome()">Kembali</button>
+<button class="red" onclick="showMenuLain()">Kembali</button>
 `;
 
 return;
@@ -271,7 +277,7 @@ Edit
 document.getElementById("resultBox").innerHTML=html
 
 document.getElementById("bottomButtons").innerHTML=`
-<button class="red" onclick="showHome()">Kembali</button>
+<button class="red" onclick="showMenuLain()">Kembali</button>
 `
 
 }
