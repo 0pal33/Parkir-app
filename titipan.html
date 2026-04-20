@@ -46,6 +46,7 @@ cursor:pointer;
 .green{background:#2ecc71;color:#fff;}
 .blue{background:#3498db;color:#fff;}
 .red{background:#e74c3c;color:#fff;}
+.orange{background:#f39c12;color:#fff;}
 
 .item{
 background:#fff;
@@ -102,6 +103,20 @@ border-radius:50%;
 font-size:24px;
 padding:0;
 }
+
+.logMasuk{border-left:5px solid #2ecc71;}
+.logAmbil{border-left:5px solid #e74c3c;}
+.logHarga{border-left:5px solid #f1c40f;}
+
+.rowBtn{
+display:flex;
+gap:8px;
+margin-bottom:10px;
+}
+
+.rowBtn button{
+flex:1;
+}
 </style>
 
 </head>
@@ -122,6 +137,8 @@ padding:0;
 
 if(!window.DATA) window.DATA=[]
 if(window.CURRENT===undefined) window.CURRENT=null
+
+let saveLock=false
 
 /* =======================
 LOAD DATA
@@ -229,6 +246,9 @@ formArea.innerHTML=`
 
 async function simpanTambah(){
 
+if(saveLock) return
+saveLock=true
+
 let nama=t_nama.value.trim()
 let penitip=t_penitip.value.trim()
 let qty=parseInt(t_qty.value||0)
@@ -237,6 +257,7 @@ let pen=parseInt(t_pen.value||0)
 
 if(!nama || !penitip || qty<=0){
 alert("Lengkapi data")
+saveLock=false
 return
 }
 
@@ -254,6 +275,7 @@ harga_penitip:pen
 
 if(error){
 alert(error.message)
+saveLock=false
 return
 }
 
@@ -266,6 +288,7 @@ qty:qty,
 total:0
 })
 
+saveLock=false
 loadData()
 
 }
@@ -295,11 +318,8 @@ aksiArea.innerHTML=`
 </div>
 
 <div id="boxAmbil" style="display:none">
-
-<input id="sisa" type="number" placeholder="Sisa barang" oninput="hitungSisa()">
-<input id="laku" type="number" placeholder="Terjual" oninput="hitungLaku()">
+<input id="laku" type="number" placeholder="Barang terjual">
 <input id="bayar" readonly placeholder="Bayar penitip">
-
 </div>
 
 <div class="check">
@@ -307,10 +327,8 @@ aksiArea.innerHTML=`
 </div>
 
 <div id="boxHarga" style="display:none">
-
 <input id="u_jual" type="number" value="${window.CURRENT.harga_jual}">
 <input id="u_pen" type="number" value="${window.CURRENT.harga_penitip}">
-
 </div>
 
 <div class="check">
@@ -327,6 +345,11 @@ aksiArea.innerHTML=`
 </div>
 `
 
+laku.oninput=function(){
+let val=parseInt(laku.value||0)
+bayar.value="Rp "+(val*window.CURRENT.harga_penitip).toLocaleString('id-ID')
+}
+
 }
 
 function toggleAksi(){
@@ -337,64 +360,42 @@ boxNitip.style.display=c_nitip.checked?"block":"none"
 
 }
 
-function hitungSisa(){
-
-let s=parseInt(sisa.value||0)
-let l=window.CURRENT.qty-s
-if(l<0) l=0
-
-laku.value=l
-bayar.value="Rp "+(l*window.CURRENT.harga_penitip).toLocaleString('id-ID')
-
-}
-
-function hitungLaku(){
-
-let l=parseInt(laku.value||0)
-let s=window.CURRENT.qty-l
-if(s<0) s=0
-
-sisa.value=s
-bayar.value="Rp "+(l*window.CURRENT.harga_penitip).toLocaleString('id-ID')
-
-}
-
 /* =======================
 PROSES
 ======================= */
 
 async function prosesAksi(){
 
+if(saveLock) return
+saveLock=true
+
 let ambil=c_ambil.checked
 let harga=c_harga.checked
 let nitip=c_nitip.checked
 
-let updateData={}
-let logs=[]
-
 if(!ambil && !harga && !nitip){
 alert("Pilih aksi dulu")
+saveLock=false
 return
 }
 
-/* ====================
-AMBIL
-==================== */
-
-let terjual=0
+let updateData={}
+let logs=[]
 
 if(ambil){
 
-terjual=parseInt(laku.value || 0)
+let terjual=parseInt(laku.value||0)
 
-if(terjual <= 0){
-alert("Isi jumlah barang terjual");
-return;
+if(terjual<=0){
+alert("Isi jumlah terjual")
+saveLock=false
+return
 }
 
-if(terjual > window.CURRENT.qty){
-alert("Jumlah terjual melebihi stok");
-return;
+if(terjual>window.CURRENT.qty){
+alert("Melebihi stok")
+saveLock=false
+return
 }
 
 let total=terjual * window.CURRENT.harga_penitip
@@ -407,14 +408,10 @@ total:total
 })
 
 if(!nitip){
-updateData.qty = window.CURRENT.qty - terjual
+updateData.qty=window.CURRENT.qty-terjual
 }
 
 }
-
-/* ====================
-NITIP
-==================== */
 
 if(nitip){
 
@@ -422,6 +419,7 @@ let q=parseInt(n_qty.value||0)
 
 if(q<=0){
 alert("Isi qty baru")
+saveLock=false
 return
 }
 
@@ -435,10 +433,6 @@ total:0
 })
 
 }
-
-/* ====================
-HARGA
-==================== */
 
 if(harga){
 
@@ -454,50 +448,37 @@ total:0
 
 }
 
-/* ====================
-UPDATE DULU
-==================== */
-
 updateData.updated_at=new Date()
 
-const {error:updateError}=await window.supabaseClient
+const {error}=await window.supabaseClient
 .from("barang_titipan")
 .update(updateData)
 .eq("id",window.CURRENT.id)
 
-if(updateError){
-alert("Update gagal: "+updateError.message)
+if(error){
+alert(error.message)
+saveLock=false
 return
 }
-
-/* ====================
-INSERT LOG
-==================== */
 
 for(let log of logs){
 
-console.log("LOG:", log)
-
-const {error}=await window.supabaseClient
+await window.supabaseClient
 .from("titipan_log")
 .insert(log)
 
-if(error){
-alert("Log gagal: "+error.message)
-return
 }
 
-}
-
+saveLock=false
 loadData()
 
 }
 
 /* =======================
-LOG
+LOG PREMIUM
 ======================= */
 
-async function showLog(){
+async function showLog(mode="today"){
 
 judul.style.display="none"
 searchBox.style.display="none"
@@ -507,34 +488,93 @@ aksiArea.style.display="block"
 
 aksiArea.innerHTML="<div class='box'>Loading...</div>"
 
-const {data,error}=await window.supabaseClient
+let q=window.supabaseClient
 .from("titipan_log")
 .select("*")
 .order("created_at",{ascending:false})
-.limit(50)
+.limit(100)
+
+const {data,error}=await q
 
 if(error){
 aksiArea.innerHTML="<div class='box'>Gagal load log</div>"
 return
 }
 
-let html=`<div class="box"><h3>Riwayat Transaksi</h3>`
+let now=new Date()
+let totalHari=0
+let trxHari=0
+
+let html=`
+<div class="box">
+
+<h3>Riwayat</h3>
+
+<div class="rowBtn">
+<button class="blue" onclick="showLog('today')">Hari Ini</button>
+<button class="orange" onclick="showLog('week')">7 Hari</button>
+<button class="green" onclick="showLog('all')">Semua</button>
+</div>
+`
 
 data.forEach(i=>{
 
+let t=new Date(i.created_at)
+let diff=(now-t)/86400000
+
+if(mode==="today" && t.toDateString()!==now.toDateString()) return
+if(mode==="week" && diff>7) return
+
+if(t.toDateString()===now.toDateString()){
+trxHari++
+if(i.jenis==="ambil"){
+totalHari+=Number(i.total||0)
+}
+}
+
+let item=window.DATA.find(x=>x.id==i.item_id)
+
+let nama=item ? item.nama_item : "-"
+let penitip=item ? item.nama_penitip : "-"
+
+let cls="logMasuk"
+let icon="🟢"
+
+if(i.jenis==="ambil"){
+cls="logAmbil"
+icon="🔴"
+}
+
+if(i.jenis==="harga"){
+cls="logHarga"
+icon="🟡"
+}
+
 html+=`
-<div style="padding:8px 0;border-bottom:1px solid #eee">
-<b>${i.jenis}</b><br>
+<div class="box ${cls}">
+<b>${icon} ${i.jenis}</b><br>
+${nama} - ${penitip}<br>
 Qty: ${i.qty} |
-Rp ${Number(i.total||0).toLocaleString('id-ID')}
+Rp ${Number(i.total||0).toLocaleString('id-ID')}<br>
+<span class="kecil">
+${t.toLocaleString('id-ID')}
+</span>
 </div>
 `
 
 })
 
 html+=`
-<br>
+<div class="box">
+<b>Total bayar penitip hari ini</b><br>
+Rp ${totalHari.toLocaleString('id-ID')}<br><br>
+
+<b>Total transaksi hari ini</b><br>
+${trxHari}
+</div>
+
 <button class="red" onclick="renderList()">Kembali</button>
+
 </div>
 `
 
