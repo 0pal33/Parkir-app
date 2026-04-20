@@ -163,7 +163,7 @@ padding:0;
 <div id="formArea"></div>
 <div id="pesanArea"></div>
 
-<button class="topBack gray" onclick="location.href='index.html'">⌂</button>
+<button class="topBack red" onclick="location.href='dashboard.html'">⌂</button>
 
 <div class="floating">
 <button class="blue" onclick="openPesan()">🛒</button>
@@ -293,14 +293,15 @@ return
 }
 
 let terjual=item.qty-sisa
-let total=terjual * Number(item.harga_jual||0)
 
 await window.supabaseClient
 .from("stok_barang")
 .update({qty:sisa})
 .eq("id",id)
 
-if(terjual>0){
+if(terjual>0 && item.barang_dihitung){
+  
+let total=terjual * Number(item.harga_jual||0)
 
 await window.supabaseClient
 .from("stok_log")
@@ -336,12 +337,15 @@ formArea.innerHTML=`
 
 <input id="f_nama" placeholder="Nama barang">
 <input id="f_beli" type="number" placeholder="Harga beli">
-<input id="f_jual" type="number" placeholder="Harga jual">
-<input id="f_qtypesan" type="number" placeholder="Qty tiap pesan">
 
 <div class="checkLine">
-<input type="checkbox" id="f_dihitung" checked>
+<input type="checkbox" id="f_dihitung" checked onchange="toggleHitung()">
 <span>Barang dihitung</span>
+</div>
+
+<div id="boxHitung">
+<input id="f_jual" type="number" placeholder="Harga jual">
+<input id="f_qtypesan" type="number" placeholder="Jumlah tiap restok">
 </div>
 
 <button class="green" onclick="simpanBarang()">Simpan</button>
@@ -349,6 +353,16 @@ formArea.innerHTML=`
 
 </div>
 `
+
+toggleHitung()
+}
+
+function toggleHitung(){
+
+let cek=f_dihitung.checked
+
+boxHitung.style.display = cek ? "block" : "none"
+
 }
 
 async function simpanBarang(){
@@ -358,9 +372,15 @@ saveLock=true
 
 let nama=f_nama.value.trim()
 let beli=parseInt(f_beli.value||0)
-let jual=parseInt(f_jual.value||0)
-let qtypesan=parseInt(f_qtypesan.value||1)
 let dihitung=f_dihitung.checked
+
+let jual=0
+let qtypesan=1
+
+if(dihitung){
+jual=parseInt(f_jual.value||0)
+qtypesan=parseInt(f_qtypesan.value||1)
+}
 
 if(!nama){
 alert("Nama wajib diisi")
