@@ -116,6 +116,19 @@ box-sizing:border-box;
 font-size:16px;
 }
 
+.checkLine{
+display:flex;
+align-items:center;
+gap:10px;
+font-size:16px;
+}
+
+.checkLine input{
+width:20px;
+height:20px;
+margin:0;
+}
+
 #formTambah button{
 padding:12px;
 border:none;
@@ -169,9 +182,9 @@ Sediakan uang : Rp <span id="total">0</span>
 <input id="f_nama" placeholder="Nama barang"><br><br>
 <input id="f_beli" type="number" placeholder="Harga beli"><br><br>
 
-<label>
+<label class="checkLine">
 <input type="checkbox" id="f_dihitung" checked onchange="toggleJual()">
-Barang dihitung
+<span>Barang dihitung</span>
 </label><br><br>
 
 <input id="f_jual" type="number" placeholder="Harga jual"><br><br>
@@ -238,6 +251,11 @@ if(qty===null) return
 
 qty = parseInt(qty)
 if(isNaN(qty)) return
+
+if(qty > oldQty){
+alert("Tidak boleh melebihi stok saat ini")
+return
+}
 
 await window.supabaseClient
 .from("stok_barang")
@@ -371,22 +389,43 @@ document.getElementById("total").innerText = total.toLocaleString('id-ID')
 
 }
 
-function kirimWA(){
+async function kirimWA(){
 
 let text=""
 
-document.querySelectorAll("#listPesan input").forEach(el=>{
+for(let el of document.querySelectorAll("#listPesan input")){
 
 if(el.checked){
+
 let i = DATA[el.dataset.index]
+
 text += i.nama_item + "%0A"
+
+/* =====================
+UPDATE STOK OTOMATIS
+===================== */
+
+let tambah = 1
+
+if(i.barang_dihitung){
+tambah = i.harga_jual || 1   // ← qty per pesan
 }
 
+await window.supabaseClient
+.from("stok_barang")
+.update({
+qty: i.qty + tambah
 })
+.eq("id", i.id)
+
+}
+
+}
 
 let url = `https://wa.me/6282132517947?text=${text}`
-
 window.open(url)
+
+setTimeout(loadStok,500)
 
 }
 
