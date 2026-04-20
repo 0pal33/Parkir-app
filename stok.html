@@ -1,8 +1,9 @@
+<!-- GANTI FILE stok.html FULL dengan ini -->
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
-
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="manifest" href="manifest.json">
 
 <title>Stok Barang</title>
@@ -16,42 +17,88 @@ font-family:Arial;
 background:#f2f2f2;
 margin:0;
 padding:20px;
-padding-bottom:140px;
+padding-bottom:130px;
+}
+
+h3{
+text-align:center;
+margin-top:0;
+}
+
+.box{
+background:#fff;
+padding:14px;
+border-radius:14px;
+margin-bottom:12px;
+}
+
+.row2{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:10px;
+margin-bottom:12px;
+}
+
+.card{
+background:#fff;
+padding:14px;
+border-radius:14px;
+text-align:center;
+}
+
+.card small{
+display:block;
+color:#777;
+margin-bottom:6px;
+}
+
+.card b{
+font-size:28px;
+color:#27ae60;
 }
 
 .item{
-background:white;
+background:#fff;
 padding:12px;
-border-radius:10px;
+border-radius:14px;
 margin-bottom:10px;
 display:flex;
 align-items:center;
 justify-content:space-between;
-}
-
-.left{
-display:flex;
-align-items:center;
 gap:10px;
 }
 
-.nama{font-weight:bold}
-.qty{font-size:18px}
+.nama{font-weight:bold;font-size:18px}
+.kecil{font-size:13px;color:#666}
+.qty{font-size:28px;font-weight:bold}
 
-.edit{
-background:#3498db;
-color:white;
+button{
 border:none;
-padding:6px 10px;
-border-radius:8px;
+border-radius:12px;
+padding:10px 14px;
+font-size:15px;
 cursor:pointer;
 }
 
-/* FLOATING */
+.green{background:#2ecc71;color:#fff}
+.blue{background:#3498db;color:#fff}
+.red{background:#e74c3c;color:#fff}
+.gray{background:#95a5a6;color:#fff}
+
+input{
+width:100%;
+padding:12px;
+border:1px solid #ccc;
+border-radius:12px;
+font-size:16px;
+box-sizing:border-box;
+margin-bottom:10px;
+}
+
 .floating{
 position:fixed;
-bottom:20px;
 right:20px;
+bottom:20px;
 display:flex;
 flex-direction:column;
 gap:10px;
@@ -60,387 +107,376 @@ gap:10px;
 .floating button{
 width:60px;
 height:60px;
-border:none;
 border-radius:50%;
-color:white;
-font-size:22px;
+font-size:24px;
+padding:0;
 }
 
-.pesan{background:#3498db}
-.tambah{background:#2ecc71}
-
-/* MODE PESAN */
-#modePesan{
-position:fixed;
-top:0;
-left:0;
-right:0;
-bottom:0;
-background:#fff;
-padding:20px;
-overflow:auto;
+#formArea,#pesanArea{
 display:none;
-}
-
-.total{
-position:fixed;
-bottom:90px;
-left:0;
-right:0;
-text-align:center;
-font-weight:bold;
-font-size:18px;
-}
-
-.kirim{
-position:fixed;
-bottom:20px;
-left:50%;
-transform:translateX(-50%);
-width:70px;
-height:70px;
-border-radius:50%;
-background:#2ecc71;
-color:white;
-font-size:26px;
-border:none;
-}
-
-input{
-width:100%;
-padding:12px;
-margin-bottom:10px;
-border:1px solid #ccc;
-border-radius:10px;
-box-sizing:border-box;
-font-size:16px;
 }
 
 .checkLine{
 display:flex;
 align-items:center;
 gap:10px;
-font-size:16px;
+margin-bottom:10px;
 }
 
 .checkLine input{
-width:20px;
-height:20px;
+width:22px;
+height:22px;
 margin:0;
 }
 
-#formTambah button{
-padding:12px;
-border:none;
-border-radius:10px;
-margin-right:10px;
+.topBack{
+position:fixed;
+left:20px;
+bottom:20px;
+width:60px;
+height:60px;
+border-radius:50%;
+font-size:24px;
+padding:0;
 }
-
-#formTambah button:first-child{
-background:#2ecc71;
-color:white;
-}
-
-#formTambah button:last-child{
-background:#e74c3c;
-color:white;
-}
-
 </style>
-
 </head>
-
 <body>
 
-<h3 id="judulPage">Stok Barang</h3>
+<h3 id="judul">Stok Barang</h3>
 
-<div id="list"></div>
+<div class="row2">
+<div class="card">
+<small>Pendapatan Hari Ini</small>
+<b id="pendapatan">0</b>
+</div>
 
-<!-- FLOATING -->
+<div class="card">
+<small>Pengeluaran Hari Ini</small>
+<b id="pengeluaran">0</b>
+</div>
+</div>
+
+<input id="searchBox" placeholder="Cari barang..." oninput="renderList()">
+
+<div id="listArea"></div>
+<div id="formArea"></div>
+<div id="pesanArea"></div>
+
+<button class="topBack gray" onclick="location.href='index.html'">⌂</button>
+
 <div class="floating">
-<button class="pesan" onclick="openPesan()">🛒</button>
-<button class="tambah" onclick="formTambah()">+</button>
-</div>
-
-<!-- MODE PESAN -->
-<div id="modePesan">
-<h3>Pesan Barang</h3>
-
-<div id="listPesan"></div>
-
-<div class="total">
-Sediakan uang : Rp <span id="total">0</span>
-</div>
-
-<button class="kirim" onclick="kirimWA()">➤</button>
-</div>
-
-<div id="formTambah" style="display:none; padding:20px;">
-
-<h3>Tambah Barang</h3>
-
-<input id="f_nama" placeholder="Nama barang"><br><br>
-<input id="f_beli" type="number" placeholder="Harga beli"><br><br>
-
-<label class="checkLine">
-<input type="checkbox" id="f_dihitung" checked onchange="toggleJual()">
-<span>Barang dihitung</span>
-</label><br><br>
-
-<input id="f_jual" type="number" placeholder="Harga jual"><br><br>
-
-<button onclick="simpanBarang()">Simpan</button>
-<button onclick="closeForm()">Batal</button>
-
+<button class="blue" onclick="openPesan()">🛒</button>
+<button class="green" onclick="formTambah()">＋</button>
 </div>
 
 <script>
+let DATA=[]
+let saveLock=false
 
-let DATA = []
+async function loadData(){
 
-async function loadStok(){
-
-const {data,error} = await window.supabaseClient
+const {data,error}=await window.supabaseClient
 .from("stok_barang")
 .select("*")
 .order("nama_item")
 
 if(error){
-alert("Gagal load")
+alert(error.message)
 return
 }
 
-DATA = data
+DATA=data||[]
 
 renderList()
-
+loadDashboard()
 }
+
+/* =======================
+DASHBOARD
+======================= */
+
+async function loadDashboard(){
+
+let now=new Date().toDateString()
+
+const {data}=await window.supabaseClient
+.from("stok_log")
+.select("*")
+.order("created_at",{ascending:false})
+.limit(200)
+
+let masuk=0
+let keluar=0
+
+;(data||[]).forEach(i=>{
+
+if(new Date(i.created_at).toDateString()!==now) return
+
+if(i.jenis==="jual"){
+masuk += Number(i.total||0)
+}
+
+if(i.jenis==="pesan"){
+keluar += Number(i.total||0)
+}
+
+})
+
+pendapatan.innerText="Rp "+masuk.toLocaleString("id-ID")
+pengeluaran.innerText="Rp "+keluar.toLocaleString("id-ID")
+}
+
+/* =======================
+LIST
+======================= */
 
 function renderList(){
 
+formArea.style.display="none"
+pesanArea.style.display="none"
+listArea.style.display="block"
+judul.style.display="block"
+searchBox.style.display="block"
+
+let cari=searchBox.value.toLowerCase()
 let html=""
 
-DATA.forEach(i=>{
+let rows=DATA.filter(i=>
+(i.nama_item||"").toLowerCase().includes(cari)
+)
+
+if(rows.length===0){
+html="<div class='box'>Tidak ada data</div>"
+}
+
+rows.forEach(i=>{
 
 html+=`
 <div class="item">
 
-<div class="left">
-<div>
+<div style="flex:1">
 <div class="nama">${i.nama_item}</div>
-<div>Rp ${Number(i.harga_beli||0).toLocaleString('id-ID')}</div>
-</div>
+<div class="kecil">Modal Rp ${Number(i.harga_beli||0).toLocaleString('id-ID')}</div>
+<div class="kecil">Jual Rp ${Number(i.harga_jual||0).toLocaleString('id-ID')}</div>
 </div>
 
 <div class="qty">${i.qty}</div>
 
-<button class="edit" onclick="editQty('${i.id}',${i.qty})">✏️</button>
+<button class="blue" onclick="auditItem('${i.id}')">✏️</button>
 
 </div>
 `
 })
 
-document.getElementById("list").innerHTML = html
-
+listArea.innerHTML=html
 }
 
-async function editQty(id,oldQty){
+/* =======================
+AUDIT
+======================= */
 
-let qty = prompt("Update qty:",oldQty)
-if(qty===null) return
+async function auditItem(id){
 
-qty = parseInt(qty)
-if(isNaN(qty)) return
+let item=DATA.find(x=>x.id==id)
+if(!item) return
 
-if(qty > oldQty){
-alert("Tidak boleh melebihi stok saat ini")
+let sisa=prompt("Stok sisa sekarang:",item.qty)
+if(sisa===null) return
+
+sisa=parseInt(sisa)
+if(isNaN(sisa)) return
+
+if(sisa>item.qty){
+alert("Tidak boleh melebihi stok sekarang")
 return
 }
 
+let terjual=item.qty-sisa
+let total=terjual * Number(item.harga_jual||0)
+
 await window.supabaseClient
 .from("stok_barang")
-.update({qty})
+.update({qty:sisa})
 .eq("id",id)
 
-loadStok()
+if(terjual>0){
+
+await window.supabaseClient
+.from("stok_log")
+.insert({
+item_id:id,
+jenis:"jual",
+qty:terjual,
+total:total
+})
 
 }
+
+loadData()
+}
+
+/* =======================
+FORM TAMBAH
+======================= */
 
 function formTambah(){
-  document.getElementById("judulPage").style.display="none"
-  document.getElementById("list").style.display="none"
-  document.querySelector(".floating").style.display="none"
-  document.getElementById("formTambah").style.display="block"
-}
 
-function closeForm(){
-  document.getElementById("judulPage").style.display="block"
-  document.getElementById("formTambah").style.display="none"
-  document.getElementById("list").style.display="block"
-  document.querySelector(".floating").style.display="flex"
-}
+judul.style.display="none"
+searchBox.style.display="none"
+listArea.style.display="none"
+pesanArea.style.display="none"
+formArea.style.display="block"
 
-function toggleJual(){
-  const check = document.getElementById("f_dihitung").checked
-  const jual = document.getElementById("f_jual")
+formArea.innerHTML=`
 
-  if(check){
-    jual.disabled = false
-  }else{
-    jual.value = 0
-    jual.disabled = true
-  }
+<div class="box">
+
+<h3>Tambah Barang</h3>
+
+<input id="f_nama" placeholder="Nama barang">
+<input id="f_beli" type="number" placeholder="Harga beli">
+<input id="f_jual" type="number" placeholder="Harga jual">
+<input id="f_qtypesan" type="number" placeholder="Qty tiap pesan">
+
+<div class="checkLine">
+<input type="checkbox" id="f_dihitung" checked>
+<span>Barang dihitung</span>
+</div>
+
+<button class="green" onclick="simpanBarang()">Simpan</button>
+<button class="red" onclick="renderList()">Batal</button>
+
+</div>
+`
 }
 
 async function simpanBarang(){
 
-let nama_item = document.getElementById("f_nama").value.trim()
-let harga_beli = parseInt(document.getElementById("f_beli").value || 0)
-let barang_dihitung = document.getElementById("f_dihitung").checked
-let harga_jual = parseInt(document.getElementById("f_jual").value || 0)
+if(saveLock) return
+saveLock=true
 
-if(!nama_item){
-  alert("Nama barang wajib")
-  return
+let nama=f_nama.value.trim()
+let beli=parseInt(f_beli.value||0)
+let jual=parseInt(f_jual.value||0)
+let qtypesan=parseInt(f_qtypesan.value||1)
+let dihitung=f_dihitung.checked
+
+if(!nama){
+alert("Nama wajib diisi")
+saveLock=false
+return
 }
 
-if(!barang_dihitung){
-  harga_jual = 0
-}
-
-const { error } = await window.supabaseClient
+const {error}=await window.supabaseClient
 .from("stok_barang")
 .insert({
-  nama_item,
-  qty:0,
-  harga_beli,
-  harga_jual,
-  barang_dihitung
+nama_item:nama,
+qty:0,
+harga_beli:beli,
+harga_jual:jual,
+qty_pesan:qtypesan,
+barang_dihitung:dihitung
 })
 
+saveLock=false
+
 if(error){
-  alert("Nama barang sudah ada / gagal simpan")
-  return
+alert(error.message)
+return
 }
 
-alert("Berhasil ditambahkan")
-
-closeForm()
-loadStok()
-
+loadData()
 }
 
-/* ======================
-MODE PESAN
-====================== */
+/* =======================
+PESAN BARANG
+======================= */
 
 function openPesan(){
 
-document.getElementById("modePesan").style.display="block"
+judul.style.display="none"
+searchBox.style.display="none"
+listArea.style.display="none"
+formArea.style.display="none"
+pesanArea.style.display="block"
 
-let html=""
+let html=`<div class="box"><h3>Pesan Barang</h3>`
 
 DATA.forEach((i,idx)=>{
 
-let auto = i.barang_dihitung && i.qty < 5
+let cek=i.qty<5 ? "checked" : ""
 
 html+=`
 <div class="item">
 
-<div class="left">
-<input type="checkbox" 
-${auto?'checked':''}
-onchange="updateTotal()"
-data-index="${idx}"
->
-
-<div>
-<div class="nama">${i.nama_item}</div>
-<div>Rp ${Number(i.harga_beli||0).toLocaleString('id-ID')}</div>
-</div>
+<div style="flex:1">
+<label>
+<input type="checkbox" data-index="${idx}" ${cek}>
+ ${i.nama_item}
+</label>
+<div class="kecil">Tambah ${i.qty_pesan||1}</div>
 </div>
 
-<div class="qty">${i.qty}</div>
+<div>${i.qty}</div>
 
 </div>
 `
 })
 
-document.getElementById("listPesan").innerHTML = html
+html+=`
+<button class="green" onclick="kirimPesan()">Kirim WA</button>
+<button class="red" onclick="renderList()">Batal</button>
+</div>
+`
 
-updateTotal()
-
+pesanArea.innerHTML=html
 }
 
-function updateTotal(){
+async function kirimPesan(){
 
-let total = 0
+let text="Pesan barang:%0A"
+let total=0
 
-document.querySelectorAll("#listPesan input").forEach(el=>{
+let checks=pesanArea.querySelectorAll("input[type=checkbox]")
 
-if(el.checked){
-let i = DATA[el.dataset.index]
-total += Number(i.harga_beli||0)
-}
+for(let el of checks){
 
-})
+if(!el.checked) continue
 
-document.getElementById("total").innerText = total.toLocaleString('id-ID')
+let i=DATA[el.dataset.index]
 
-}
+text += "- "+i.nama_item+"%0A"
 
-async function kirimWA(){
-
-let text=""
-
-for(let el of document.querySelectorAll("#listPesan input")){
-
-if(el.checked){
-
-let i = DATA[el.dataset.index]
-
-text += i.nama_item + "%0A"
-
-/* =====================
-UPDATE STOK OTOMATIS
-===================== */
-
-let tambah = 1
-
-if(i.barang_dihitung){
-tambah = i.harga_jual || 1   // ← qty per pesan
-}
+let tambah=parseInt(i.qty_pesan||1)
 
 await window.supabaseClient
 .from("stok_barang")
 .update({
-qty: i.qty + tambah
+qty:i.qty+tambah
 })
-.eq("id", i.id)
+.eq("id",i.id)
+
+let biaya=Number(i.harga_beli||0)
+
+total += biaya
+
+await window.supabaseClient
+.from("stok_log")
+.insert({
+item_id:i.id,
+jenis:"pesan",
+qty:tambah,
+total:biaya
+})
 
 }
 
+window.open("https://wa.me/6282132517947?text="+text)
+
+loadData()
 }
-
-let url = `https://wa.me/6282132517947?text=${text}`
-window.open(url)
-
-setTimeout(loadStok,500)
-
-}
-
-loadStok()
-toggleJual()
-
-</script>
-
-<script>
-if(IS_DEV && !window.__SUGER_LOADED__){
-window.__SUGER_LOADED__=true
-const s=document.createElement("script")
-s.src="https://suger-cdn.vercel.app/suger-dev.js"
-document.body.appendChild(s)
-}
+loadData()
 </script>
 
 <script>
