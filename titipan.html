@@ -143,6 +143,17 @@ font-size:22px;
 font-weight:bold;
 color:#27ae60;
 }
+
+.floatingBack{
+position:fixed;
+left:20px;
+bottom:20px;
+width:60px;
+height:60px;
+border-radius:50%;
+font-size:24px;
+padding:0;
+}
 </style>
 
 </head>
@@ -170,7 +181,8 @@ color:#27ae60;
 <div id="formArea"></div>
 <div id="aksiArea"></div>
 
-<button class="floatingLog blue" onclick="showLog()">📜</button>
+<button class="floatingBack red" onclick="location.href='index.html'">🏠</button>
+
 <button class="floatingTambah green" onclick="formTambah()">+</button>
 
 <script>
