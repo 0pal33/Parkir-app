@@ -19,7 +19,6 @@ hideAll()
 
 let powerBtn=document.querySelector(".logout-btn")
 let dash=document.getElementById("dashboardBtn")
-let mid=document.getElementById("middleBox")
 let sw=document.getElementById("switchCamBtn")
 
 if(!powerBtn) return
@@ -27,21 +26,18 @@ if(!powerBtn) return
 if(localStorage.getItem("adminLogin")==="true"){
 
 if(dash) dash.style.display="flex"
-
 powerBtn.style.background="#e74c3c"
 powerBtn.onclick=logoutAdmin
 
 }else{
 
 if(dash) dash.style.display="none"
-
 powerBtn.style.background="#28a745"
 powerBtn.onclick=goAdmin
 
 }
 
 if(sw) sw.style.display="none"
-if(mid) mid.innerHTML=""
 
 document.getElementById("bottomButtons").innerHTML=`
 <button class="orange" onclick="startScan()">Start Scanning</button>
