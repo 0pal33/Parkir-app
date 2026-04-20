@@ -117,12 +117,52 @@ margin-bottom:10px;
 .rowBtn button{
 flex:1;
 }
+
+.dashboard{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:10px;
+margin-bottom:12px;
+}
+
+.card{
+background:#fff;
+padding:14px;
+border-radius:12px;
+text-align:center;
+}
+
+.cardTitle{
+font-size:13px;
+color:#666;
+margin-bottom:6px;
+}
+
+.cardValue{
+font-size:22px;
+font-weight:bold;
+color:#27ae60;
+}
 </style>
 
 </head>
 <body>
 
 <h3 id="judul">Titip Jajan</h3>
+
+<div class="dashboard">
+
+<div class="card">
+<div class="cardTitle">Terjual Hari Ini</div>
+<div class="cardValue" id="dashQty">0 pcs</div>
+</div>
+
+<div class="card">
+<div class="cardTitle">Bayar Penitip</div>
+<div class="cardValue" id="dashTotal">Rp 0</div>
+</div>
+
+</div>
 
 <input id="searchBox" placeholder="Cari barang / penitip..." oninput="renderList()">
 
@@ -140,11 +180,39 @@ if(window.CURRENT===undefined) window.CURRENT=null
 
 let saveLock=false
 
+async function loadDashboard(){
+
+let today=new Date()
+today.setHours(0,0,0,0)
+
+const {data,error}=await window.supabaseClient
+.from("titipan_log")
+.select("*")
+.eq("jenis","ambil")
+.gte("created_at",today.toISOString())
+
+if(error) return
+
+let qty=0
+let total=0
+
+data.forEach(i=>{
+qty += Number(i.qty||0)
+total += Number(i.total||0)
+})
+
+dashQty.innerText=qty+" pcs"
+dashTotal.innerText="Rp "+total.toLocaleString("id-ID")
+
+}
+
 /* =======================
 LOAD DATA
 ======================= */
 
 async function loadData(){
+
+await loadDashboard()
 
 const {data,error}=await window.supabaseClient
 .from("barang_titipan")
