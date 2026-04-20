@@ -128,3 +128,7 @@ window.logoutAdmin=function(){
 localStorage.removeItem("adminLogin")
 location.reload()
 }
+
+window.showManual=function(){
+showManualState()
+}
