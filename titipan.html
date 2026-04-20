@@ -370,42 +370,50 @@ let harga=c_harga.checked
 let nitip=c_nitip.checked
 
 let updateData={}
+let logs=[]
+
+if(!ambil && !harga && !nitip){
+alert("Pilih aksi dulu")
+return
+}
 
 /* ====================
-AMBIL (jalan walau nitip juga)
+AMBIL
 ==================== */
+
+let terjual=0
 
 if(ambil){
 
-let terjual=parseInt(laku.value||0)
+terjual=parseInt(laku.value || 0)
 
-if(terjual<0) terjual=0
+if(terjual <= 0){
+alert("Isi jumlah barang terjual");
+return;
+}
+
+if(terjual > window.CURRENT.qty){
+alert("Jumlah terjual melebihi stok");
+return;
+}
 
 let total=terjual * window.CURRENT.harga_penitip
 
-const {error:e1}=await window.supabaseClient
-.from("titipan_log")
-.insert({
+logs.push({
 item_id:window.CURRENT.id,
 jenis:"ambil",
 qty:terjual,
 total:total
 })
 
-if(e1){
-alert("Log ambil gagal: "+e1.message)
-return
-}
-
-/* kalau ambil tanpa nitip */
 if(!nitip){
-updateData.qty=0
+updateData.qty = window.CURRENT.qty - terjual
 }
 
 }
 
 /* ====================
-NITIP LAGI
+NITIP
 ==================== */
 
 if(nitip){
@@ -419,24 +427,17 @@ return
 
 updateData.qty=q
 
-const {error:e2}=await window.supabaseClient
-.from("titipan_log")
-.insert({
+logs.push({
 item_id:window.CURRENT.id,
 jenis:"masuk",
 qty:q,
 total:0
 })
 
-if(e2){
-alert("Log masuk gagal: "+e2.message)
-return
-}
-
 }
 
 /* ====================
-UPDATE HARGA
+HARGA
 ==================== */
 
 if(harga){
@@ -444,32 +445,48 @@ if(harga){
 updateData.harga_jual=parseInt(u_jual.value||0)
 updateData.harga_penitip=parseInt(u_pen.value||0)
 
-const {error:e3}=await window.supabaseClient
-.from("titipan_log")
-.insert({
+logs.push({
 item_id:window.CURRENT.id,
 jenis:"harga",
 qty:0,
 total:0
 })
 
-if(e3){
-alert("Log harga gagal: "+e3.message)
-return
 }
 
-}
+/* ====================
+UPDATE DULU
+==================== */
 
 updateData.updated_at=new Date()
 
-const {error}=await window.supabaseClient
+const {error:updateError}=await window.supabaseClient
 .from("barang_titipan")
 .update(updateData)
 .eq("id",window.CURRENT.id)
 
-if(error){
-alert("Update gagal: "+error.message)
+if(updateError){
+alert("Update gagal: "+updateError.message)
 return
+}
+
+/* ====================
+INSERT LOG
+==================== */
+
+for(let log of logs){
+
+console.log("LOG:", log)
+
+const {error}=await window.supabaseClient
+.from("titipan_log")
+.insert(log)
+
+if(error){
+alert("Log gagal: "+error.message)
+return
+}
+
 }
 
 loadData()
