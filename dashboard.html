@@ -504,17 +504,58 @@ window.location.replace("admin.html")
 
 async function resetData(){
 
-let konfirmasi=prompt("Ketik RESET")
+let konfirmasi = prompt("Ketik RESET")
 
-if(konfirmasi!=="RESET") return
+if(konfirmasi !== "RESET") return
 
-await window.supabaseClient.from("parkir").delete().neq("kode","")
+try{
 
-await window.supabaseClient.from("bulanan").delete().neq("nama","")
+/* parkir */
+await window.supabaseClient
+.from("parkir")
+.delete()
+.neq("kode","")
 
-alert("Database berhasil direset")
+/* bulanan */
+await window.supabaseClient
+.from("bulanan")
+.delete()
+.neq("nama","")
+
+/* stok barang */
+await window.supabaseClient
+.from("stok_barang")
+.delete()
+.neq("nama_item","")
+
+/* log stok */
+await window.supabaseClient
+.from("stok_log")
+.delete()
+.gt("qty",-1)
+
+/* barang titipan */
+await window.supabaseClient
+.from("barang_titipan")
+.delete()
+.neq("nama_item","")
+
+/* log titipan */
+await window.supabaseClient
+.from("titipan_log")
+.delete()
+.gt("qty",-1)
+
+alert("SEMUA DATA TEST BERHASIL DIRESET")
 
 location.reload()
+
+}catch(err){
+
+alert("Gagal reset: " + err.message)
+console.log(err)
+
+}
 
 }
 
