@@ -1,4 +1,3 @@
-<!-- GANTI FILE stok.html FULL dengan ini -->
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -17,7 +16,7 @@ font-family:Arial;
 background:#f2f2f2;
 margin:0;
 padding:20px;
-padding-bottom:130px;
+padding-bottom:140px;
 }
 
 h3{
@@ -68,9 +67,26 @@ justify-content:space-between;
 gap:10px;
 }
 
-.nama{font-weight:bold;font-size:18px}
-.kecil{font-size:13px;color:#666}
-.qty{font-size:28px;font-weight:bold}
+.item.redbg{
+background:#ffd6d6;
+}
+
+.nama{
+font-weight:bold;
+font-size:18px;
+}
+
+.kecil{
+font-size:13px;
+color:#666;
+}
+
+.qty{
+font-size:28px;
+font-weight:bold;
+min-width:45px;
+text-align:center;
+}
 
 button{
 border:none;
@@ -80,10 +96,11 @@ font-size:15px;
 cursor:pointer;
 }
 
-.green{background:#2ecc71;color:#fff}
-.blue{background:#3498db;color:#fff}
-.red{background:#e74c3c;color:#fff}
-.gray{background:#95a5a6;color:#fff}
+.green{background:#2ecc71;color:#fff;}
+.blue{background:#3498db;color:#fff;}
+.red{background:#e74c3c;color:#fff;}
+.gray{background:#95a5a6;color:#fff;}
+.orange{background:#f39c12;color:#fff;}
 
 input{
 width:100%;
@@ -93,6 +110,13 @@ border-radius:12px;
 font-size:16px;
 box-sizing:border-box;
 margin-bottom:10px;
+}
+
+.smallInput{
+width:90px;
+margin:0;
+padding:8px;
+font-size:15px;
 }
 
 .floating{
@@ -112,7 +136,18 @@ font-size:24px;
 padding:0;
 }
 
-#formArea,#pesanArea{
+.topBack{
+position:fixed;
+left:20px;
+bottom:20px;
+width:60px;
+height:60px;
+border-radius:50%;
+font-size:24px;
+padding:0;
+}
+
+#formArea,#pesanArea,#auditArea{
 display:none;
 }
 
@@ -129,18 +164,24 @@ height:22px;
 margin:0;
 }
 
-.topBack{
-position:fixed;
-left:20px;
-bottom:20px;
-width:60px;
-height:60px;
-border-radius:50%;
-font-size:24px;
-padding:0;
+.rowBtn{
+display:flex;
+gap:8px;
+flex-wrap:wrap;
+}
+
+.rowBtn button{
+flex:1;
+}
+
+.rightBtn{
+display:flex;
+gap:6px;
+align-items:center;
 }
 </style>
 </head>
+
 <body>
 
 <h3 id="judul">Stok Barang</h3>
@@ -148,20 +189,25 @@ padding:0;
 <div class="row2">
 <div class="card">
 <small>Pendapatan Hari Ini</small>
-<b id="pendapatan">0</b>
+<b id="pendapatan">Rp 0</b>
 </div>
 
 <div class="card">
 <small>Pengeluaran Hari Ini</small>
-<b id="pengeluaran">0</b>
+<b id="pengeluaran">Rp 0</b>
 </div>
 </div>
 
 <input id="searchBox" placeholder="Cari barang..." oninput="renderList()">
 
+<div class="rowBtn" style="margin-bottom:12px;">
+<button class="orange" onclick="showAuditRestok()">Audit Restok</button>
+</div>
+
 <div id="listArea"></div>
 <div id="formArea"></div>
 <div id="pesanArea"></div>
+<div id="auditArea"></div>
 
 <button class="topBack red" onclick="location.href='dashboard.html'">⌂</button>
 
@@ -172,7 +218,24 @@ padding:0;
 
 <script>
 let DATA=[]
-let saveLock=false
+let LAST_UNDO=null
+let LAST_ORDER=[]
+
+function rupiah(n){
+return "Rp " + Number(n||0).toLocaleString("id-ID")
+}
+
+function nowWIB(){
+return new Date(
+new Date().toLocaleString("en-US",{timeZone:"Asia/Jakarta"})
+)
+}
+
+function sameDay(a,b){
+return a.getFullYear()===b.getFullYear() &&
+a.getMonth()===b.getMonth() &&
+a.getDate()===b.getDate()
+}
 
 async function loadData(){
 
@@ -192,54 +255,51 @@ renderList()
 loadDashboard()
 }
 
-/* =======================
+/* ======================
 DASHBOARD
-======================= */
+====================== */
 
 async function loadDashboard(){
-
-let now=new Date().toDateString()
 
 const {data}=await window.supabaseClient
 .from("stok_log")
 .select("*")
 .order("created_at",{ascending:false})
-.limit(200)
+.limit(500)
 
 let masuk=0
 let keluar=0
+let now=nowWIB()
 
 ;(data||[]).forEach(i=>{
 
-if(new Date(i.created_at).toDateString()!==now) return
+let t=new Date(i.created_at)
+if(!sameDay(now,new Date(t.toLocaleString("en-US",{timeZone:"Asia/Jakarta"})))) return
 
-if(i.jenis==="jual"){
-masuk += Number(i.total||0)
-}
-
-if(i.jenis==="pesan"){
-keluar += Number(i.total||0)
-}
+if(i.jenis==="jual") masuk+=Number(i.total||0)
+if(i.jenis==="pesan") keluar+=Number(i.total||0)
 
 })
 
-pendapatan.innerText="Rp "+masuk.toLocaleString("id-ID")
-pengeluaran.innerText="Rp "+keluar.toLocaleString("id-ID")
+pendapatan.innerText=rupiah(masuk)
+pengeluaran.innerText=rupiah(keluar)
 }
 
-/* =======================
+/* ======================
 LIST
-======================= */
+====================== */
 
 function renderList(){
 
 formArea.style.display="none"
 pesanArea.style.display="none"
+auditArea.style.display="none"
 listArea.style.display="block"
 judul.style.display="block"
 searchBox.style.display="block"
 
 let cari=searchBox.value.toLowerCase()
+let now=nowWIB()
 let html=""
 
 let rows=DATA.filter(i=>
@@ -252,18 +312,29 @@ html="<div class='box'>Tidak ada data</div>"
 
 rows.forEach(i=>{
 
+let merah=true
+
+if(i.updated_at){
+let t=new Date(i.updated_at)
+t=new Date(t.toLocaleString("en-US",{timeZone:"Asia/Jakarta"}))
+if(sameDay(now,t)) merah=false
+}
+
 html+=`
-<div class="item">
+<div class="item ${merah?'redbg':''}">
 
 <div style="flex:1">
 <div class="nama">${i.nama_item}</div>
-<div class="kecil">Modal Rp ${Number(i.harga_beli||0).toLocaleString('id-ID')}</div>
-<div class="kecil">Jual Rp ${Number(i.harga_jual||0).toLocaleString('id-ID')}</div>
+<div class="kecil">Qty ${i.qty}</div>
+<div class="kecil">Jual ${rupiah(i.harga_jual)}</div>
 </div>
 
 <div class="qty">${i.qty}</div>
 
+<div class="rightBtn">
 <button class="blue" onclick="auditItem('${i.id}')">✏️</button>
+<button class="gray" onclick="undoItem('${i.id}')">↩</button>
+</div>
 
 </div>
 `
@@ -272,9 +343,9 @@ html+=`
 listArea.innerHTML=html
 }
 
-/* =======================
-AUDIT
-======================= */
+/* ======================
+AUDIT STOK
+====================== */
 
 async function auditItem(id){
 
@@ -287,21 +358,35 @@ if(sisa===null) return
 sisa=parseInt(sisa)
 if(isNaN(sisa)) return
 
-if(sisa>item.qty){
-alert("Tidak boleh melebihi stok sekarang")
-return
-}
+let jualBaru=prompt("Harga jual:",item.harga_jual)
+if(jualBaru===null) return
+jualBaru=parseInt(jualBaru||0)
+
+let beliBaru=prompt("Harga beli:",item.harga_beli)
+if(beliBaru===null) return
+beliBaru=parseInt(beliBaru||0)
 
 let terjual=item.qty-sisa
+if(terjual<0) terjual=0
+
+LAST_UNDO={
+id:item.id,
+qty:item.qty,
+harga_jual:item.harga_jual,
+harga_beli:item.harga_beli
+}
 
 await window.supabaseClient
 .from("stok_barang")
-.update({qty:sisa})
+.update({
+qty:sisa,
+harga_jual:jualBaru,
+harga_beli:beliBaru,
+updated_at:new Date().toISOString()
+})
 .eq("id",id)
 
 if(terjual>0 && item.barang_dihitung){
-  
-let total=terjual * Number(item.harga_jual||0)
 
 await window.supabaseClient
 .from("stok_log")
@@ -309,7 +394,7 @@ await window.supabaseClient
 item_id:id,
 jenis:"jual",
 qty:terjual,
-total:total
+total:terjual*jualBaru
 })
 
 }
@@ -317,9 +402,34 @@ total:total
 loadData()
 }
 
-/* =======================
+/* ======================
+UNDO
+====================== */
+
+async function undoItem(id){
+
+if(!LAST_UNDO || LAST_UNDO.id!==id){
+alert("Tidak ada undo terakhir")
+return
+}
+
+await window.supabaseClient
+.from("stok_barang")
+.update({
+qty:LAST_UNDO.qty,
+harga_jual:LAST_UNDO.harga_jual,
+harga_beli:LAST_UNDO.harga_beli,
+updated_at:new Date().toISOString()
+})
+.eq("id",id)
+
+LAST_UNDO=null
+loadData()
+}
+
+/* ======================
 FORM TAMBAH
-======================= */
+====================== */
 
 function formTambah(){
 
@@ -327,6 +437,7 @@ judul.style.display="none"
 searchBox.style.display="none"
 listArea.style.display="none"
 pesanArea.style.display="none"
+auditArea.style.display="none"
 formArea.style.display="block"
 
 formArea.innerHTML=`
@@ -337,6 +448,7 @@ formArea.innerHTML=`
 
 <input id="f_nama" placeholder="Nama barang">
 <input id="f_beli" type="number" placeholder="Harga beli">
+<input id="f_awal" type="number" placeholder="Masukkan stok barang saat ini">
 
 <div class="checkLine">
 <input type="checkbox" id="f_dihitung" checked onchange="toggleHitung()">
@@ -348,8 +460,10 @@ formArea.innerHTML=`
 <input id="f_qtypesan" type="number" placeholder="Jumlah tiap restok">
 </div>
 
+<div class="rowBtn">
 <button class="green" onclick="simpanBarang()">Simpan</button>
 <button class="red" onclick="renderList()">Batal</button>
+</div>
 
 </div>
 `
@@ -358,20 +472,14 @@ toggleHitung()
 }
 
 function toggleHitung(){
-
-let cek=f_dihitung.checked
-
-boxHitung.style.display = cek ? "block" : "none"
-
+boxHitung.style.display=f_dihitung.checked?"block":"none"
 }
 
 async function simpanBarang(){
 
-if(saveLock) return
-saveLock=true
-
 let nama=f_nama.value.trim()
 let beli=parseInt(f_beli.value||0)
+let awal=parseInt(f_awal.value||0)
 let dihitung=f_dihitung.checked
 
 let jual=0
@@ -383,8 +491,7 @@ qtypesan=parseInt(f_qtypesan.value||1)
 }
 
 if(!nama){
-alert("Nama wajib diisi")
-saveLock=false
+alert("Nama wajib")
 return
 }
 
@@ -392,14 +499,13 @@ const {error}=await window.supabaseClient
 .from("stok_barang")
 .insert({
 nama_item:nama,
-qty:0,
+qty:awal,
 harga_beli:beli,
 harga_jual:jual,
 qty_pesan:qtypesan,
-barang_dihitung:dihitung
+barang_dihitung:dihitung,
+updated_at:new Date().toISOString()
 })
-
-saveLock=false
 
 if(error){
 alert(error.message)
@@ -409,9 +515,9 @@ return
 loadData()
 }
 
-/* =======================
+/* ======================
 PESAN BARANG
-======================= */
+====================== */
 
 function openPesan(){
 
@@ -419,23 +525,32 @@ judul.style.display="none"
 searchBox.style.display="none"
 listArea.style.display="none"
 formArea.style.display="none"
+auditArea.style.display="none"
 pesanArea.style.display="block"
 
 let html=`<div class="box"><h3>Pesan Barang</h3>`
 
 DATA.forEach((i,idx)=>{
 
-let cek=i.qty<5 ? "checked" : ""
-
 html+=`
 <div class="item">
 
 <div style="flex:1">
 <label>
-<input type="checkbox" data-index="${idx}" ${cek}>
+<input type="checkbox" data-index="${idx}">
  ${i.nama_item}
 </label>
-<div class="kecil">Tambah ${i.qty_pesan||1}</div>
+
+<div class="kecil">
+Harga beli:
+<input class="smallInput" id="beli_${idx}" value="${i.harga_beli||0}">
+</div>
+
+<div class="kecil">
+Tambah:
+<input class="smallInput" id="qty_${idx}" value="${i.qty_pesan||1}">
+</div>
+
 </div>
 
 <div>${i.qty}</div>
@@ -445,8 +560,10 @@ html+=`
 })
 
 html+=`
+<div class="rowBtn">
 <button class="green" onclick="kirimPesan()">Kirim WA</button>
 <button class="red" onclick="renderList()">Batal</button>
+</div>
 </div>
 `
 
@@ -455,31 +572,29 @@ pesanArea.innerHTML=html
 
 async function kirimPesan(){
 
-let text="Pesan barang:%0A"
-let total=0
-
 let checks=pesanArea.querySelectorAll("input[type=checkbox]")
+let text="Pesan barang:%0A"
+LAST_ORDER=[]
 
 for(let el of checks){
 
 if(!el.checked) continue
 
-let i=DATA[el.dataset.index]
+let idx=el.dataset.index
+let i=DATA[idx]
+
+let beli=parseInt(document.getElementById("beli_"+idx).value||0)
+let tambah=parseInt(document.getElementById("qty_"+idx).value||1)
 
 text += "- "+i.nama_item+"%0A"
-
-let tambah=parseInt(i.qty_pesan||1)
 
 await window.supabaseClient
 .from("stok_barang")
 .update({
-qty:i.qty+tambah
+qty:i.qty+tambah,
+harga_beli:beli
 })
 .eq("id",i.id)
-
-let biaya=Number(i.harga_beli||0)
-
-total += biaya
 
 await window.supabaseClient
 .from("stok_log")
@@ -487,15 +602,103 @@ await window.supabaseClient
 item_id:i.id,
 jenis:"pesan",
 qty:tambah,
-total:biaya
+total:beli*tambah
+})
+
+LAST_ORDER.push({
+id:i.id,
+nama:i.nama_item,
+qty:tambah
 })
 
 }
 
 window.open("https://wa.me/6282132517947?text="+text)
-
 loadData()
 }
+
+/* ======================
+AUDIT RESTOK
+====================== */
+
+function showAuditRestok(){
+
+judul.style.display="none"
+searchBox.style.display="none"
+listArea.style.display="none"
+formArea.style.display="none"
+pesanArea.style.display="none"
+auditArea.style.display="block"
+
+let html=`<div class="box"><h3>Audit Restok</h3>`
+
+if(LAST_ORDER.length===0){
+html+=`Tidak ada pesanan terakhir`
+}else{
+
+LAST_ORDER.forEach((i,idx)=>{
+
+html+=`
+<div class="item">
+
+<div style="flex:1">
+<div class="nama">${i.nama}</div>
+</div>
+
+<input class="smallInput" id="restok_${idx}" value="${i.qty}">
+<button class="red" onclick="stokKosong(${idx})">✖</button>
+
+</div>
+`
+})
+
+html+=`
+<button class="green" onclick="simpanAuditRestok()">Simpan Audit</button>
+`
+}
+
+html+=`
+<button class="gray" onclick="renderList()">Kembali</button>
+</div>
+`
+
+auditArea.innerHTML=html
+}
+
+function stokKosong(idx){
+document.getElementById("restok_"+idx).value=0
+}
+
+async function simpanAuditRestok(){
+
+for(let x=0;x<LAST_ORDER.length;x++){
+
+let row=LAST_ORDER[x]
+let real=parseInt(document.getElementById("restok_"+x).value||0)
+let selisih=row.qty-real
+
+if(selisih!==0){
+
+let item=DATA.find(a=>a.id==row.id)
+if(item){
+
+await window.supabaseClient
+.from("stok_barang")
+.update({
+qty:item.qty-selisih
+})
+.eq("id",row.id)
+
+}
+
+}
+
+}
+
+loadData()
+renderList()
+}
+
 loadData()
 </script>
 
