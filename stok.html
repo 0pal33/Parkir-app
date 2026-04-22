@@ -315,8 +315,11 @@ rows.forEach(i=>{
 let merah=true
 
 if(i.updated_at){
-let t=new Date(i.updated_at)
-t=new Date(t.toLocaleString("en-US",{timeZone:"Asia/Jakarta"}))
+
+let t = new Date(
+new Date(i.updated_at).toLocaleString("en-US",{timeZone:"Asia/Jakarta"})
+)
+
 if(sameDay(now,t)) merah=false
 }
 
@@ -325,7 +328,6 @@ html+=`
 
 <div style="flex:1">
 <div class="nama">${i.nama_item}</div>
-<div class="kecil">Qty ${i.qty}</div>
 <div class="kecil">Jual ${rupiah(i.harga_jual)}</div>
 </div>
 
@@ -369,11 +371,15 @@ beliBaru=parseInt(beliBaru||0)
 let terjual=item.qty-sisa
 if(terjual<0) terjual=0
 
+let totalJual=terjual * jualBaru
+
 LAST_UNDO={
 id:item.id,
 qty:item.qty,
 harga_jual:item.harga_jual,
-harga_beli:item.harga_beli
+harga_beli:item.harga_beli,
+log_qty:terjual,
+log_total:totalJual
 }
 
 await window.supabaseClient
@@ -394,7 +400,7 @@ await window.supabaseClient
 item_id:id,
 jenis:"jual",
 qty:terjual,
-total:terjual*jualBaru
+total:totalJual
 })
 
 }
@@ -422,6 +428,31 @@ harga_beli:LAST_UNDO.harga_beli,
 updated_at:new Date().toISOString()
 })
 .eq("id",id)
+
+/* hapus log jual terakhir */
+
+if(LAST_UNDO.log_qty>0){
+
+const {data}=await window.supabaseClient
+.from("stok_log")
+.select("id")
+.eq("item_id",id)
+.eq("jenis","jual")
+.eq("qty",LAST_UNDO.log_qty)
+.eq("total",LAST_UNDO.log_total)
+.order("created_at",{ascending:false})
+.limit(1)
+
+if(data && data.length){
+
+await window.supabaseClient
+.from("stok_log")
+.delete()
+.eq("id",data[0].id)
+
+}
+
+}
 
 LAST_UNDO=null
 loadData()
