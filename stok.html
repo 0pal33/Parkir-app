@@ -408,58 +408,45 @@ loadData()
 AUDIT STOK
 ====================== */
 
-async function auditItem(id){
+async function editQty(id,qtyLama,hargaJual,dihitung){
 
-let item=DATA.find(x=>x.id==id)
-if(!item) return
+let baru=prompt("Stok baru:",qtyLama)
+if(baru===null) return
 
-let sisa=prompt("Stok sisa sekarang:",item.qty)
-if(sisa===null) return
+baru=parseInt(baru)
+if(isNaN(baru)) return
 
-sisa=parseInt(sisa)
-if(isNaN(sisa)) return
+if(dihitung && baru > qtyLama){
+alert("Barang hitung tidak boleh melebihi stok saat ini")
+return
+}
 
-let jualBaru=prompt("Harga jual:",item.harga_jual)
-if(jualBaru===null) return
-jualBaru=parseInt(jualBaru||0)
-
-let beliBaru=prompt("Harga beli:",item.harga_beli)
-if(beliBaru===null) return
-beliBaru=parseInt(beliBaru||0)
-
-let terjual=item.qty-sisa
-if(terjual<0) terjual=0
-
-let totalJual=terjual * jualBaru
+let selisih = qtyLama - baru
+if(selisih < 0) selisih = 0
 
 LAST_UNDO={
-id:item.id,
-qty:item.qty,
-harga_jual:item.harga_jual,
-harga_beli:item.harga_beli,
-log_qty:terjual,
-log_total:totalJual
+id:id,
+qty:qtyLama,
+harga_jual:hargaJual
 }
 
 await window.supabaseClient
 .from("stok_barang")
 .update({
-qty:sisa,
-harga_jual:jualBaru,
-harga_beli:beliBaru,
+qty:baru,
 updated_at:new Date().toISOString()
 })
 .eq("id",id)
 
-if(terjual>0 && item.barang_dihitung){
+if(selisih > 0){
 
 await window.supabaseClient
 .from("stok_log")
 .insert({
 item_id:id,
 jenis:"jual",
-qty:terjual,
-total:totalJual
+qty:selisih,
+total:selisih * hargaJual
 })
 
 }
