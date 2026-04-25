@@ -227,6 +227,27 @@ let LAST_UNDO=null
 let LAST_ORDER=[]
 let FILTER_MODE="all"
 
+function saveOrder(){
+localStorage.setItem("LAST_ORDER",JSON.stringify(LAST_ORDER))
+}
+
+function loadOrder(){
+let x=localStorage.getItem("LAST_ORDER")
+
+if(x){
+try{
+LAST_ORDER=JSON.parse(x)||[]
+}catch(e){
+LAST_ORDER=[]
+}
+}
+}
+
+function clearOrder(){
+LAST_ORDER=[]
+localStorage.removeItem("LAST_ORDER")
+}
+
 function rupiah(n){
 return "Rp " + Number(n||0).toLocaleString("id-ID")
 }
@@ -708,6 +729,8 @@ beli:beli,
 dasar:dasar
 })
 
+saveOrder()
+
 }
 
 window.open("https://wa.me/6282132517947?text="+text)
@@ -763,6 +786,11 @@ auditArea.innerHTML=html
 }
 
 function stokKosong(idx){
+
+let ok=confirm("Yakin stok datang = 0 ?")
+
+if(!ok) return
+
 document.getElementById("restok_"+idx).value=0
 }
 
@@ -835,11 +863,12 @@ total:totalBaru
 
 }
 
-LAST_ORDER=[]
+clearOrder()
 loadData()
 renderList()
 }
 
+loadOrder()
 loadData()
 </script>
 
