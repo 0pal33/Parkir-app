@@ -668,6 +668,12 @@ let i=DATA[idx]
 let beli=parseInt(document.getElementById("beli_"+idx).value||0)
 let tambah=parseInt(document.getElementById("qty_"+idx).value||1)
 
+let dasar=parseInt(i.qty_pesan||1)
+if(dasar<=0) dasar=1
+
+let biaya = (beli / dasar) * tambah
+biaya = Math.round(biaya)
+
 text += "- "+i.nama_item+"%0A"
 
 await window.supabaseClient
@@ -684,7 +690,7 @@ await window.supabaseClient
 item_id:i.id,
 jenis:"pesan",
 qty:tambah,
-total:beli*tambah
+total:biaya
 })
 
 LAST_ORDER.push({
