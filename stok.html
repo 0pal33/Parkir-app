@@ -791,7 +791,8 @@ PERBAIKI STOK
 await window.supabaseClient
 .from("stok_barang")
 .update({
-qty:item.qty-selisih
+qty:item.qty-selisih,
+updated_at:new Date().toISOString()
 })
 .eq("id",row.id)
 
@@ -799,10 +800,10 @@ qty:item.qty-selisih
 PERBAIKI LOG PESAN
 =================== */
 
-let dasar = parseInt(item.qty_pesan||1)
+let dasar = parseInt(row.dasar||1)
 if(dasar <= 0) dasar = 1
 
-let beli = Number(item.harga_beli||0)
+let beli = Number(row.beli||0)
 
 /* biaya real datang */
 let totalBaru = Math.round((beli / dasar) * real)
