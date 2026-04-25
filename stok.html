@@ -761,14 +761,23 @@ async function simpanAuditRestok(){
 
 for(let x=0;x<LAST_ORDER.length;x++){
 
-let row=LAST_ORDER[x]
-let real=parseInt(document.getElementById("restok_"+x).value||0)
-let selisih=row.qty-real
+let row = LAST_ORDER[x]
+let real = parseInt(document.getElementById("restok_"+x).value||0)
+let pesan = row.qty
 
-if(selisih!==0){
+if(real < 0) real = 0
 
-let item=DATA.find(a=>a.id==row.id)
+let selisih = pesan - real
+
+if(selisih !== 0){
+
+let item = DATA.find(a=>a.id==row.id)
+
 if(item){
+
+/* ===================
+PERBAIKI STOK
+=================== */
 
 await window.supabaseClient
 .from("stok_barang")
@@ -777,12 +786,46 @@ qty:item.qty-selisih
 })
 .eq("id",row.id)
 
-}
+/* ===================
+PERBAIKI LOG PESAN
+=================== */
+
+let dasar = parseInt(item.qty_pesan||1)
+if(dasar <= 0) dasar = 1
+
+let beli = Number(item.harga_beli||0)
+
+/* biaya real datang */
+let totalBaru = Math.round((beli / dasar) * real)
+
+/* cari log pesan terakhir */
+const {data} = await window.supabaseClient
+.from("stok_log")
+.select("id")
+.eq("item_id",row.id)
+.eq("jenis","pesan")
+.order("created_at",{ascending:false})
+.limit(1)
+
+if(data && data.length){
+
+await window.supabaseClient
+.from("stok_log")
+.update({
+qty:real,
+total:totalBaru
+})
+.eq("id",data[0].id)
 
 }
 
 }
 
+}
+
+}
+
+LAST_ORDER=[]
 loadData()
 renderList()
 }
