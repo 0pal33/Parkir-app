@@ -424,10 +424,15 @@ return
 let selisih = qtyLama - baru
 if(selisih < 0) selisih = 0
 
+let item = DATA.find(x=>x.id==id)
+
 LAST_UNDO={
 id:id,
 qty:qtyLama,
-harga_jual:hargaJual
+harga_jual:hargaJual,
+harga_beli:item ? item.harga_beli : 0,
+log_qty:selisih,
+log_total:selisih * hargaJual
 }
 
 await window.supabaseClient
