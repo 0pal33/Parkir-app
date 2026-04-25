@@ -200,6 +200,11 @@ align-items:center;
 
 <input id="searchBox" placeholder="Cari barang..." oninput="renderList()">
 
+<div class="rowBtn" style="margin-bottom:8px;">
+<button class="green" onclick="setFilter('hitung')">Hitung</button>
+<button class="gray" onclick="setFilter('tidak')">Tidak</button>
+</div>
+
 <div class="rowBtn" style="margin-bottom:12px;">
 <button class="orange" onclick="showAuditRestok()">Audit Restok</button>
 </div>
@@ -220,6 +225,7 @@ align-items:center;
 let DATA=[]
 let LAST_UNDO=null
 let LAST_ORDER=[]
+let FILTER_MODE="all"
 
 function rupiah(n){
 return "Rp " + Number(n||0).toLocaleString("id-ID")
@@ -285,6 +291,11 @@ pendapatan.innerText=rupiah(masuk)
 pengeluaran.innerText=rupiah(keluar)
 }
 
+function setFilter(mode){
+FILTER_MODE=mode
+renderList()
+}
+
 /* ======================
 LIST
 ====================== */
@@ -302,9 +313,18 @@ let cari=searchBox.value.toLowerCase()
 let now=nowWIB()
 let html=""
 
-let rows=DATA.filter(i=>
-(i.nama_item||"").toLowerCase().includes(cari)
-)
+let rows=DATA.filter(i=>{
+
+let cocokNama=(i.nama_item||"").toLowerCase().includes(cari)
+
+if(!cocokNama) return false
+
+if(FILTER_MODE==="hitung") return i.barang_dihitung===true
+if(FILTER_MODE==="tidak") return i.barang_dihitung===false
+
+return true
+
+})
 
 if(rows.length===0){
 html="<div class='box'>Tidak ada data</div>"
@@ -327,14 +347,25 @@ html+=`
 <div class="item ${merah?'redbg':''}">
 
 <div style="flex:1">
-<div class="nama">${i.nama_item}</div>
-<div class="kecil">Jual ${rupiah(i.harga_jual)}</div>
+
+<div class="nama"
+onclick="editNama('${i.id}','${i.nama_item}')">
+${i.nama_item}
 </div>
 
-<div class="qty">${i.qty}</div>
+<div class="kecil"
+onclick="editJual('${i.id}',${i.harga_jual})">
+Jual ${rupiah(i.harga_jual)}
+</div>
+
+</div>
+
+<div class="qty"
+onclick="editQty('${i.id}',${i.qty},${i.harga_jual},${i.barang_dihitung})">
+${i.qty}
+</div>
 
 <div class="rightBtn">
-<button class="blue" onclick="auditItem('${i.id}')">✏️</button>
 <button class="gray" onclick="undoItem('${i.id}')">↩</button>
 </div>
 
@@ -343,6 +374,34 @@ html+=`
 })
 
 listArea.innerHTML=html
+}
+
+async function editNama(id,nama){
+
+let baru=prompt("Nama item:",nama)
+if(!baru) return
+
+await window.supabaseClient
+.from("stok_barang")
+.update({nama_item:baru})
+.eq("id",id)
+
+loadData()
+}
+
+async function editJual(id,harga){
+
+let baru=prompt("Harga jual:",harga)
+if(baru===null) return
+
+baru=parseInt(baru||0)
+
+await window.supabaseClient
+.from("stok_barang")
+.update({harga_jual:baru})
+.eq("id",id)
+
+loadData()
 }
 
 /* ======================
