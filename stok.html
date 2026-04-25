@@ -383,7 +383,10 @@ if(!baru) return
 
 await window.supabaseClient
 .from("stok_barang")
-.update({nama_item:baru})
+.update({
+nama_item:baru,
+updated_at:new Date().toISOString()
+})
 .eq("id",id)
 
 loadData()
@@ -398,7 +401,10 @@ baru=parseInt(baru||0)
 
 await window.supabaseClient
 .from("stok_barang")
-.update({harga_jual:baru})
+.update({
+harga_jual:baru,
+updated_at:new Date().toISOString()
+})
 .eq("id",id)
 
 loadData()
@@ -680,7 +686,8 @@ await window.supabaseClient
 .from("stok_barang")
 .update({
 qty:i.qty+tambah,
-harga_beli:beli
+harga_beli:beli,
+updated_at:new Date().toISOString()
 })
 .eq("id",i.id)
 
@@ -696,7 +703,9 @@ total:biaya
 LAST_ORDER.push({
 id:i.id,
 nama:i.nama_item,
-qty:tambah
+qty:tambah,
+beli:beli,
+dasar:dasar
 })
 
 }
