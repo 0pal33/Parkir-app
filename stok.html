@@ -207,6 +207,7 @@ align-items:center;
 
 <div class="rowBtn" style="margin-bottom:12px;">
 <button class="orange" onclick="showAuditRestok()">Audit Restok</button>
+<button class="red" onclick="batalPesanan()">Batal Pesanan</button>
 </div>
 
 <div id="listArea"></div>
@@ -866,6 +867,58 @@ total:totalBaru
 clearOrder()
 loadData()
 renderList()
+}
+
+async function batalPesanan(){
+
+if(LAST_ORDER.length===0){
+alert("Tidak ada pesanan terakhir")
+return
+}
+
+let ok=confirm("Batalkan pesanan terakhir?")
+if(!ok) return
+
+for(let row of LAST_ORDER){
+
+let item=DATA.find(x=>x.id==row.id)
+
+if(item){
+
+await window.supabaseClient
+.from("stok_barang")
+.update({
+qty:item.qty-row.qty,
+updated_at:new Date().toISOString()
+})
+.eq("id",row.id)
+
+const {data}=await window.supabaseClient
+.from("stok_log")
+.select("id")
+.eq("item_id",row.id)
+.eq("jenis","pesan")
+.order("created_at",{ascending:false})
+.limit(1)
+
+if(data && data.length){
+
+await window.supabaseClient
+.from("stok_log")
+.delete()
+.eq("id",data[0].id)
+
+}
+
+}
+
+}
+
+clearOrder()
+loadData()
+renderList()
+
+alert("Pesanan terakhir dibatalkan")
 }
 
 loadOrder()
