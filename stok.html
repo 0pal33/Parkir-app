@@ -225,8 +225,8 @@ touch-action:pan-y;
 <input id="searchBox" placeholder="Cari barang..." oninput="renderList()">
 
 <div class="rowBtn" style="margin-bottom:8px;">
-<button class="green" onclick="setFilter('hitung')">Hitung</button>
-<button class="gray" onclick="setFilter('tidak')">Tidak</button>
+<button class="green" onclick="setFilter('hitung')">Stok</button>
+<button class="gray" onclick="setFilter('tidak')">nonStok</button>
 </div>
 
 <div class="rowBtn" style="margin-bottom:12px;">
@@ -471,48 +471,72 @@ AUDIT STOK
 
 async function editQty(id,qtyLama,hargaJual,dihitung){
 
-let baru=prompt("Stok baru:",qtyLama)
+let teks = dihitung ? "Stok baru:" : "Jumlah terjual:"
+let baru=prompt(teks,qtyLama)
+
 if(baru===null) return
 
 baru=parseInt(baru)
 if(isNaN(baru)) return
 
-if(dihitung && baru > qtyLama){
-alert("Barang hitung tidak boleh melebihi stok saat ini")
+let item = DATA.find(x=>x.id==id)
+
+let qtyBaru=baru
+let qtyJual=0
+
+/* =====================
+BARANG STOK
+===================== */
+if(dihitung){
+
+if(qtyBaru > qtyLama){
+alert("Barang stok tidak boleh melebihi stok saat ini")
 return
 }
 
-let selisih = qtyLama - baru
-if(selisih < 0) selisih = 0
+qtyJual = qtyLama - qtyBaru
+if(qtyJual < 0) qtyJual=0
 
-let item = DATA.find(x=>x.id==id)
+}
+
+/* =====================
+BARANG NONSTOK
+===================== */
+else{
+
+qtyJual = qtyBaru
+qtyBaru = qtyBaru
+
+}
+
+let totalMasuk = qtyJual * hargaJual
 
 LAST_UNDO={
 id:id,
 qty:qtyLama,
 harga_jual:hargaJual,
 harga_beli:item ? item.harga_beli : 0,
-log_qty:selisih,
-log_total:selisih * hargaJual
+log_qty:qtyJual,
+log_total:totalMasuk
 }
 
 await window.supabaseClient
 .from("stok_barang")
 .update({
-qty:baru,
+qty:qtyBaru,
 updated_at:new Date().toISOString()
 })
 .eq("id",id)
 
-if(selisih > 0){
+if(qtyJual>0){
 
 await window.supabaseClient
 .from("stok_log")
 .insert({
 item_id:id,
 jenis:"jual",
-qty:selisih,
-total:selisih * hargaJual
+qty:qtyJual,
+total:totalMasuk
 })
 
 }
@@ -702,6 +726,8 @@ pesanArea.style.display="block"
 let html=`<div class="box"><h3>Pesan Barang</h3>`
 
 DATA.forEach((i,idx)=>{
+
+if(i.barang_dihitung!==true) return
 
 html+=`
 <div class="item">
