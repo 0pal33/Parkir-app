@@ -290,19 +290,6 @@ await window.onScan(k)
 return
 }
 
-let now = new Date()
-
-let wNow = new Date(
-now.toLocaleString("en-US",{timeZone:"Asia/Jakarta"})
-)
-
-let jam = wNow.getHours()
-
-if(jam >= 21){
-alert("Tidak bisa dibatalkan antara jam 21:00 - 00:00")
-return
-}
-
 const {error:errDelete}=await window.supabaseClient
 .from("parkir")
 .delete()
