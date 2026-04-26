@@ -968,9 +968,12 @@ alert("Pesanan terakhir dibatalkan")
 let touchDragId=null
 let holdTimer=null
 let dragMode=false
+let startX=0
+let startY=0
+let moveLock=false
 
 document.addEventListener("touchstart",e=>{
-  
+
 if(
 e.target.closest("button") ||
 e.target.closest(".qty") ||
@@ -981,26 +984,47 @@ let item=e.target.closest(".item")
 if(!item) return
 
 touchDragId=item.dataset.id
+moveLock=false
+
+startX=e.touches[0].clientX
+startY=e.touches[0].clientY
 
 holdTimer=setTimeout(()=>{
+
+if(moveLock) return
+
 dragMode=true
 item.classList.add("dragging")
-navigator.vibrate?.(50)
+navigator.vibrate?.(40)
+
 },350)
 
 },{passive:true})
 
+
 document.addEventListener("touchmove",e=>{
 
-if(!dragMode) return
+if(!touchDragId) return
 
-if(e.cancelable){
-e.preventDefault()
+let x=e.touches[0].clientX
+let y=e.touches[0].clientY
+
+let dx=Math.abs(x-startX)
+let dy=Math.abs(y-startY)
+
+if(!dragMode){
+
+if(dx>12 || dy>12){
+moveLock=true
+clearTimeout(holdTimer)
 }
 
-let y=e.touches[0].clientY
-let target=document.elementFromPoint(150,y)?.closest(".item")
+return
+}
 
+if(e.cancelable) e.preventDefault()
+
+let target=document.elementFromPoint(x,y)?.closest(".item")
 if(!target) return
 
 let targetId=target.dataset.id
@@ -1008,8 +1032,8 @@ if(targetId===touchDragId) return
 
 let arr=[...DATA]
 
-let from=arr.findIndex(x=>x.id==touchDragId)
-let to=arr.findIndex(x=>x.id==targetId)
+let from=arr.findIndex(a=>a.id==touchDragId)
+let to=arr.findIndex(a=>a.id==targetId)
 
 if(from<0 || to<0) return
 
@@ -1021,30 +1045,33 @@ renderList()
 
 },{passive:false})
 
+
 document.addEventListener("touchend",async ()=>{
 
 clearTimeout(holdTimer)
 
 if(!dragMode){
 touchDragId=null
+moveLock=false
 return
 }
 
-for(let a=0;a<DATA.length;a++){
+for(let i=0;i<DATA.length;i++){
 
 await window.supabaseClient
 .from("stok_barang")
-.update({urutan:a+1})
-.eq("id",DATA[a].id)
+.update({urutan:i+1})
+.eq("id",DATA[i].id)
 
 }
 
+document.querySelectorAll(".item").forEach(el=>{
+el.classList.remove("dragging")
+})
+
 dragMode=false
 touchDragId=null
-
-document.querySelectorAll(".item").forEach(x=>{
-x.classList.remove("dragging")
-})
+moveLock=false
 
 loadData()
 
