@@ -86,6 +86,7 @@ font-size:28px;
 font-weight:bold;
 min-width:45px;
 text-align:center;
+user-select:none;
 }
 
 button{
@@ -186,14 +187,19 @@ font-weight:bold;
 padding:6px 10px;
 cursor:pointer;
 user-select:none;
+touch-action:manipulation;
 }
 
 .dragging{
-opacity:.4;
+opacity:.5;
+transform:scale(1.02);
+z-index:999;
+position:relative;
+box-shadow:0 10px 20px rgba(0,0,0,.18);
 }
 
 .item{
-touch-action:none;
+transition:.15s;
 }
 </style>
 </head>
@@ -384,7 +390,6 @@ if(sameDay(now,t)) merah=false
 
 html+=`
 <div class="item ${merah?'redbg':''}"
-draggable="true"
 data-id="${i.id}">
 
 <div class="menuDots"
@@ -646,6 +651,7 @@ const {error}=await window.supabaseClient
 .from("stok_barang")
 .insert({
 nama_item:nama,
+urutan: DATA.length+1,
 qty:awal,
 harga_beli:beli,
 harga_jual:jual,
@@ -958,59 +964,84 @@ renderList()
 alert("Pesanan terakhir dibatalkan")
 }
 
-let dragId=null
+let touchDragId=null
+let holdTimer=null
+let dragMode=false
 
-document.addEventListener("dragstart",e=>{
+document.addEventListener("touchstart",e=>{
+  
+if(
+e.target.closest("button") ||
+e.target.closest(".qty") ||
+e.target.closest(".menuDots")
+) return
 
-let box=e.target.closest(".item")
-if(!box) return
+let item=e.target.closest(".item")
+if(!item) return
 
-dragId=box.dataset.id
-box.classList.add("dragging")
+touchDragId=item.dataset.id
 
-})
+holdTimer=setTimeout(()=>{
+dragMode=true
+item.classList.add("dragging")
+navigator.vibrate?.(50)
+},350)
 
-document.addEventListener("dragend",e=>{
+},{passive:true})
 
-let box=e.target.closest(".item")
-if(box) box.classList.remove("dragging")
+document.addEventListener("touchmove",async e=>{
 
-})
-
-document.addEventListener("dragover",e=>{
+if(!dragMode) return
 e.preventDefault()
-})
 
-document.addEventListener("drop",async e=>{
+let y=e.touches[0].clientY
+let target=document.elementFromPoint(150,y)?.closest(".item")
 
-e.preventDefault()
-
-let target=e.target.closest(".item")
-if(!target || !dragId) return
+if(!target) return
 
 let targetId=target.dataset.id
-if(targetId===dragId) return
+if(targetId===touchDragId) return
 
-let lama=[...DATA]
+let arr=[...DATA]
 
-let from=lama.findIndex(x=>x.id==dragId)
-let to=lama.findIndex(x=>x.id==targetId)
+let from=arr.findIndex(x=>x.id==touchDragId)
+let to=arr.findIndex(x=>x.id==targetId)
 
 if(from<0 || to<0) return
 
-let ambil=lama.splice(from,1)[0]
-lama.splice(to,0,ambil)
+let ambil=arr.splice(from,1)[0]
+arr.splice(to,0,ambil)
 
-for(let a=0;a<lama.length;a++){
+DATA=arr
+renderList()
+
+},{passive:false})
+
+document.addEventListener("touchend",async ()=>{
+
+clearTimeout(holdTimer)
+
+if(!dragMode){
+touchDragId=null
+return
+}
+
+for(let a=0;a<DATA.length;a++){
 
 await window.supabaseClient
 .from("stok_barang")
 .update({urutan:a+1})
-.eq("id",lama[a].id)
+.eq("id",DATA[a].id)
 
 }
 
-dragId=null
+dragMode=false
+touchDragId=null
+
+document.querySelectorAll(".item").forEach(x=>{
+x.classList.remove("dragging")
+})
+
 loadData()
 
 })
