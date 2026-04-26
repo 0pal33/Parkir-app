@@ -182,12 +182,13 @@ align-items:center;
 }
 
 .menuDots{
-font-size:26px;
+font-size:24px;
 font-weight:bold;
-padding:6px 10px;
+padding:8px 12px;
 cursor:pointer;
 user-select:none;
 touch-action:manipulation;
+opacity:.7;
 }
 
 .dragging{
@@ -394,8 +395,10 @@ html+=`
 data-id="${i.id}">
 
 <div class="menuDots"
-onclick="hapusItem('${i.id}','${i.nama_item}')">
-⋮
+data-id="${i.id}"
+data-nama="${i.nama_item}"
+onclick="klikDots(event,this)">
+☰
 </div>
 
 <div style="flex:1">
@@ -565,6 +568,20 @@ await window.supabaseClient
 
 LAST_UNDO=null
 loadData()
+}
+
+function klikDots(e,el){
+
+if(el.dataset.dragging==="1"){
+el.dataset.dragging="0"
+return
+}
+
+hapusItem(
+el.dataset.id,
+el.dataset.nama
+)
+
 }
 
 async function hapusItem(id,nama){
@@ -968,36 +985,27 @@ alert("Pesanan terakhir dibatalkan")
 let touchDragId=null
 let holdTimer=null
 let dragMode=false
-let startX=0
 let startY=0
-let moveLock=false
 
 document.addEventListener("touchstart",e=>{
 
-if(
-e.target.closest("button") ||
-e.target.closest(".qty") ||
-e.target.closest(".menuDots")
-) return
+let dots=e.target.closest(".menuDots")
+if(!dots) return
 
-let item=e.target.closest(".item")
-if(!item) return
-
-touchDragId=item.dataset.id
-moveLock=false
-
-startX=e.touches[0].clientX
+touchDragId=dots.dataset.id
 startY=e.touches[0].clientY
 
 holdTimer=setTimeout(()=>{
 
-if(moveLock) return
-
 dragMode=true
-item.classList.add("dragging")
-navigator.vibrate?.(40)
+dots.dataset.dragging="1"
 
-},350)
+let item=dots.closest(".item")
+if(item) item.classList.add("dragging")
+
+navigator.vibrate?.(50)
+
+},400)
 
 },{passive:true})
 
@@ -1006,17 +1014,13 @@ document.addEventListener("touchmove",e=>{
 
 if(!touchDragId) return
 
-let x=e.touches[0].clientX
 let y=e.touches[0].clientY
-
-let dx=Math.abs(x-startX)
-let dy=Math.abs(y-startY)
 
 if(!dragMode){
 
-if(dx>12 || dy>12){
-moveLock=true
+if(Math.abs(y-startY)>10){
 clearTimeout(holdTimer)
+touchDragId=null
 }
 
 return
@@ -1024,7 +1028,7 @@ return
 
 if(e.cancelable) e.preventDefault()
 
-let target=document.elementFromPoint(x,y)?.closest(".item")
+let target=document.elementFromPoint(120,y)?.closest(".item")
 if(!target) return
 
 let targetId=target.dataset.id
@@ -1032,8 +1036,8 @@ if(targetId===touchDragId) return
 
 let arr=[...DATA]
 
-let from=arr.findIndex(a=>a.id==touchDragId)
-let to=arr.findIndex(a=>a.id==targetId)
+let from=arr.findIndex(x=>x.id==touchDragId)
+let to=arr.findIndex(x=>x.id==targetId)
 
 if(from<0 || to<0) return
 
@@ -1043,6 +1047,9 @@ arr.splice(to,0,ambil)
 DATA=arr
 renderList()
 
+let aktif=document.querySelector(`.item[data-id="${touchDragId}"]`)
+if(aktif) aktif.classList.add("dragging")
+
 },{passive:false})
 
 
@@ -1051,8 +1058,10 @@ document.addEventListener("touchend",async ()=>{
 clearTimeout(holdTimer)
 
 if(!dragMode){
+document.querySelectorAll(".menuDots").forEach(x=>{
+x.dataset.dragging="0"
+})
 touchDragId=null
-moveLock=false
 return
 }
 
@@ -1065,15 +1074,36 @@ await window.supabaseClient
 
 }
 
-document.querySelectorAll(".item").forEach(el=>{
-el.classList.remove("dragging")
+dragMode=false
+
+document.querySelectorAll(".menuDots").forEach(x=>{
+x.dataset.dragging="0"
 })
+
+touchDragId=null
+
+document.querySelectorAll(".item").forEach(x=>{
+x.classList.remove("dragging")
+})
+
+loadData()
+
+})
+
+document.addEventListener("touchcancel",()=>{
+
+clearTimeout(holdTimer)
 
 dragMode=false
 touchDragId=null
-moveLock=false
 
-loadData()
+document.querySelectorAll(".menuDots").forEach(x=>{
+x.dataset.dragging="0"
+})
+
+document.querySelectorAll(".item").forEach(x=>{
+x.classList.remove("dragging")
+})
 
 })
 
