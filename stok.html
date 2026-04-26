@@ -200,6 +200,7 @@ box-shadow:0 10px 20px rgba(0,0,0,.18);
 
 .item{
 transition:.15s;
+touch-action:pan-y;
 }
 </style>
 </head>
@@ -989,10 +990,13 @@ navigator.vibrate?.(50)
 
 },{passive:true})
 
-document.addEventListener("touchmove",async e=>{
+document.addEventListener("touchmove",e=>{
 
 if(!dragMode) return
+
+if(e.cancelable){
 e.preventDefault()
+}
 
 let y=e.touches[0].clientY
 let target=document.elementFromPoint(150,y)?.closest(".item")
