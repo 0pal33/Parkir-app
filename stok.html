@@ -179,6 +179,22 @@ display:flex;
 gap:6px;
 align-items:center;
 }
+
+.menuDots{
+font-size:26px;
+font-weight:bold;
+padding:6px 10px;
+cursor:pointer;
+user-select:none;
+}
+
+.dragging{
+opacity:.4;
+}
+
+.item{
+touch-action:none;
+}
 </style>
 </head>
 
@@ -270,7 +286,8 @@ async function loadData(){
 const {data,error}=await window.supabaseClient
 .from("stok_barang")
 .select("*")
-.order("nama_item")
+.order("urutan",{ascending:true})
+.order("nama_item",{ascending:true})
 
 if(error){
 alert(error.message)
@@ -366,7 +383,14 @@ if(sameDay(now,t)) merah=false
 }
 
 html+=`
-<div class="item ${merah?'redbg':''}">
+<div class="item ${merah?'redbg':''}"
+draggable="true"
+data-id="${i.id}">
+
+<div class="menuDots"
+onclick="hapusItem('${i.id}','${i.nama_item}')">
+⋮
+</div>
 
 <div style="flex:1">
 
@@ -534,6 +558,19 @@ await window.supabaseClient
 }
 
 LAST_UNDO=null
+loadData()
+}
+
+async function hapusItem(id,nama){
+
+let ok=confirm("Hapus item:\n"+nama+" ?")
+if(!ok) return
+
+await window.supabaseClient
+.from("stok_barang")
+.delete()
+.eq("id",id)
+
 loadData()
 }
 
@@ -920,6 +957,63 @@ renderList()
 
 alert("Pesanan terakhir dibatalkan")
 }
+
+let dragId=null
+
+document.addEventListener("dragstart",e=>{
+
+let box=e.target.closest(".item")
+if(!box) return
+
+dragId=box.dataset.id
+box.classList.add("dragging")
+
+})
+
+document.addEventListener("dragend",e=>{
+
+let box=e.target.closest(".item")
+if(box) box.classList.remove("dragging")
+
+})
+
+document.addEventListener("dragover",e=>{
+e.preventDefault()
+})
+
+document.addEventListener("drop",async e=>{
+
+e.preventDefault()
+
+let target=e.target.closest(".item")
+if(!target || !dragId) return
+
+let targetId=target.dataset.id
+if(targetId===dragId) return
+
+let lama=[...DATA]
+
+let from=lama.findIndex(x=>x.id==dragId)
+let to=lama.findIndex(x=>x.id==targetId)
+
+if(from<0 || to<0) return
+
+let ambil=lama.splice(from,1)[0]
+lama.splice(to,0,ambil)
+
+for(let a=0;a<lama.length;a++){
+
+await window.supabaseClient
+.from("stok_barang")
+.update({urutan:a+1})
+.eq("id",lama[a].id)
+
+}
+
+dragId=null
+loadData()
+
+})
 
 loadOrder()
 loadData()
