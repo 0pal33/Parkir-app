@@ -203,6 +203,45 @@ box-shadow:0 10px 20px rgba(0,0,0,.18);
 transition:.15s;
 touch-action:pan-y;
 }
+
+.tableWrap{
+overflow-x:auto;
+margin-bottom:12px;
+}
+
+.tbl{
+width:100%;
+border-collapse:collapse;
+font-size:14px;
+background:#fff;
+border-radius:12px;
+overflow:hidden;
+}
+
+.tbl th,.tbl td{
+border:1px solid #ddd;
+padding:8px;
+text-align:center;
+}
+
+.tbl th{
+background:#f7f7f7;
+font-weight:bold;
+}
+
+.tbl input{
+margin:0;
+padding:6px;
+width:75px;
+font-size:14px;
+}
+
+.tbl input[type="checkbox"]{
+width:20px;
+height:20px;
+padding:0;
+margin:0;
+}
 </style>
 </head>
 
@@ -723,44 +762,57 @@ formArea.style.display="none"
 auditArea.style.display="none"
 pesanArea.style.display="block"
 
-let html=`<div class="box"><h3>Pesan Barang</h3>`
+let html=`<div class="box">
+<h3>Pesan Barang</h3>
+
+<div class="tableWrap">
+<table class="tbl">
+<tr>
+<th>✔</th>
+<th>Nama Barang</th>
+<th>Harga Beli</th>
+<th>Tambah</th>
+<th>Stok</th>
+</tr>
+`
 
 DATA.forEach((i,idx)=>{
 
 if(i.barang_dihitung!==true) return
 
 html+=`
-<div class="item">
-
-<div style="flex:1">
-<label>
+<tr>
+<td>
 <input type="checkbox" data-index="${idx}">
- ${i.nama_item}
-</label>
+</td>
 
-<div class="kecil">
-Harga beli:
-<input class="smallInput" id="beli_${idx}" value="${i.harga_beli||0}">
-</div>
+<td style="text-align:left">
+${i.nama_item}
+</td>
 
-<div class="kecil">
-Tambah:
-<input class="smallInput" id="qty_${idx}" value="${i.qty_pesan||1}">
-</div>
+<td>
+<input inputmode="numeric" id="beli_${idx}" value="${i.harga_beli||0}">
+</td>
 
-</div>
+<td>
+<input inputmode="numeric" id="qty_${idx}" value="${i.qty_pesan||1}">
+</td>
 
-<div>${i.qty}</div>
-
-</div>
+<td>${i.qty}</td>
+</tr>
 `
 })
 
 html+=`
+</table>
+</div>
+
 <div class="rowBtn">
+<button class="blue" onclick="tambahManual()">Tambah</button>
 <button class="green" onclick="kirimPesan()">Kirim WA</button>
 <button class="red" onclick="renderList()">Batal</button>
 </div>
+
 </div>
 `
 
@@ -768,6 +820,8 @@ pesanArea.innerHTML=html
 }
 
 async function kirimPesan(){
+  
+let ada=false
 
 let checks=pesanArea.querySelectorAll("input[type=checkbox]")
 let text="Pesan barang:%0A"
@@ -776,6 +830,7 @@ LAST_ORDER=[]
 for(let el of checks){
 
 if(!el.checked) continue
+ada=true
 
 let idx=el.dataset.index
 let i=DATA[idx]
@@ -821,8 +876,70 @@ saveOrder()
 
 }
 
+if(!ada){
+alert("Pilih barang dulu")
+return
+}
+
 window.open("https://wa.me/6282132517947?text="+text)
 loadData()
+}
+
+async function tambahManual(){
+
+if(window.loadingTambah) return
+window.loadingTambah=true
+
+let checks=pesanArea.querySelectorAll("input[type=checkbox]")
+let ada=false
+
+for(let el of checks){
+
+if(!el.checked) continue
+ada=true
+
+let idx=el.dataset.index
+let i=DATA[idx]
+
+let beli=parseInt(document.getElementById("beli_"+idx).value||0)
+let tambah=parseInt(document.getElementById("qty_"+idx).value||1)
+
+let dasar=parseInt(i.qty_pesan||1)
+if(dasar<=0) dasar=1
+
+let biaya=(beli/dasar)*tambah
+biaya=Math.round(biaya)
+
+await window.supabaseClient
+.from("stok_barang")
+.update({
+qty:i.qty+tambah,
+harga_beli:beli,
+updated_at:new Date().toISOString()
+})
+.eq("id",i.id)
+
+await window.supabaseClient
+.from("stok_log")
+.insert({
+item_id:i.id,
+jenis:"pesan",
+qty:tambah,
+total:biaya
+})
+
+}
+
+if(!ada){
+window.loadingTambah=false
+alert("Pilih barang dulu")
+return
+}
+
+loadData()
+renderList()
+window.loadingTambah=false
+alert("Stok berhasil ditambah")
 }
 
 /* ======================
