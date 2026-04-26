@@ -290,6 +290,8 @@ await window.onScan(k)
 return
 }
 
+if(!confirm("Batalkan parkir ini?")) return
+
 const {error:errDelete}=await window.supabaseClient
 .from("parkir")
 .delete()
