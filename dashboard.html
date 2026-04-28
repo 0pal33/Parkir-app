@@ -272,6 +272,8 @@ Lihat Parkir Aktif
 Titipan Warung
 </button>
 
+<button onclick="exportCSV()">Export Data</button>
+
 </div>
 
 <script>
@@ -704,6 +706,28 @@ flatpickr("#filterTanggal", {
 })
 
 })
+
+async function exportCSV(){
+
+let {data} = await window.supabaseClient
+.from("stok_log")
+.select("*")
+
+let csv = "id,jenis,qty,total,created_at\n"
+
+data.forEach(row=>{
+csv += `${row.id},${row.jenis},${row.qty},${row.total},${row.created_at}\n`
+})
+
+let blob = new Blob([csv], { type: 'text/csv' })
+let url = URL.createObjectURL(blob)
+
+let a = document.createElement("a")
+a.href = url
+a.download = "backup.csv"
+a.click()
+
+}
 
 </script>
 
