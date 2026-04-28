@@ -299,6 +299,8 @@ let DATA=[]
 let LAST_UNDO=null
 let LAST_ORDER=[]
 let FILTER_MODE="all"
+let sortableInstance = null
+let isDragging = false
 
 function saveOrder(){
 localStorage.setItem("LAST_ORDER",JSON.stringify(LAST_ORDER))
@@ -484,7 +486,6 @@ function initSortable(){
 
 let el = document.getElementById("listArea")
 
-// 🔥 destroy dulu kalau sudah ada
 if(sortableInstance){
 sortableInstance.destroy()
 }
@@ -497,6 +498,15 @@ delayOnTouchOnly:true,
 ghostClass:"dragging",
 fallbackOnBody: true,
 swapThreshold: 0.65,
+forceFallback: true,
+touchStartThreshold: 5,
+
+onStart: function(){
+  isDragging = true
+},
+onEnd: function(){
+  setTimeout(()=> isDragging = false, 100)
+}
 
 onEnd: async function (evt){
 
@@ -510,16 +520,16 @@ return newOrder.indexOf(a.id) - newOrder.indexOf(b.id)
 })
 
 // simpan ke database
-for(let i=0;i<DATA.length;i++){
+let updates = DATA.map((item, index) => ({
+id: item.id,
+urutan: index + 1
+}))
 
 await window.supabaseClient
 .from("stok_barang")
-.update({urutan:i+1})
-.eq("id",DATA[i].id)
+.upsert(updates, { onConflict: 'id' })
 
-}
-
-loadData()
+renderList()
 
 }
 })
@@ -690,10 +700,7 @@ loadData()
 
 function klikDots(e,el){
 
-// kalau lagi drag, skip
-if(sortableInstance && sortableInstance.dragging){
-return
-}
+if(isDragging) return
 
 hapusItem(
 el.dataset.id,
