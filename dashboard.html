@@ -274,8 +274,6 @@ Titipan Warung
 
 </div>
 
-</div>
-
 <script>
 
 let dashboardInterval = null
@@ -570,14 +568,47 @@ window.location.href="index.html"
 }
 
 async function loadDashboardRange(start, end){
+let isFiltering = false
 
 let startISO = new Date(start).toISOString()
-let endISO = new Date(end).toISOString()
+let endISO = new Date(end)
+endISO.setHours(23,59,59,999)
+endISO = endISO.toISOString()
 
 console.log("FILTER:", startISO, endISO)
 
-/* contoh dulu: sementara reload biasa */
-loadDashboard()
+let {data:parkir} = await window.supabaseClient
+.from("parkir")
+.select("checkout_at, checkin_at")
+.eq("status","off")
+.gte("checkout_at", startISO)
+.lte("checkout_at", endISO)
+
+let {data:bulanan} = await window.supabaseClient
+.from("bulanan")
+.select("last_paid_at")
+.gte("last_paid_at", startISO)
+.lte("last_paid_at", endISO)
+
+/* reset semua */
+let totalParkir = 0
+let totalBulanan = 0
+
+;(parkir||[]).forEach(p=>{
+let tOut = new Date(p.checkout_at)
+let tIn = new Date(p.checkin_at)
+
+let durasi = hitungDurasiParkir(tIn, tOut)
+let tarif = hitungTarifParkir(durasi)
+
+totalParkir += tarif
+})
+
+let bulTarif = 30000
+totalBulanan = (bulanan||[]).length * bulTarif
+
+/* tampilkan di card pertama aja (biar simpel dulu) */
+document.getElementById("all1").innerText = rupiah(totalParkir + totalBulanan)
 
 }
 
