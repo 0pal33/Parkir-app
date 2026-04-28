@@ -8,6 +8,7 @@
 <title>Stok Barang</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
 <script src="config.js"></script>
 
 <style>
@@ -242,6 +243,14 @@ height:20px;
 padding:0;
 margin:0;
 }
+
+.sortable-chosen{
+opacity:0.6;
+}
+
+.sortable-ghost{
+opacity:0.3;
+}
 </style>
 </head>
 
@@ -468,6 +477,52 @@ ${i.qty}
 })
 
 listArea.innerHTML=html
+initSortable()
+}
+
+function initSortable(){
+
+let el = document.getElementById("listArea")
+
+// 🔥 destroy dulu kalau sudah ada
+if(sortableInstance){
+sortableInstance.destroy()
+}
+
+sortableInstance = Sortable.create(el,{
+animation:150,
+handle:".menuDots",
+delay:100,
+delayOnTouchOnly:true,
+ghostClass:"dragging",
+fallbackOnBody: true,
+swapThreshold: 0.65,
+
+onEnd: async function (evt){
+
+let items = [...document.querySelectorAll(".item")]
+
+let newOrder = items.map(el => el.dataset.id)
+
+// update DATA sesuai urutan DOM (INI LEBIH AMAN)
+DATA.sort((a,b)=>{
+return newOrder.indexOf(a.id) - newOrder.indexOf(b.id)
+})
+
+// simpan ke database
+for(let i=0;i<DATA.length;i++){
+
+await window.supabaseClient
+.from("stok_barang")
+.update({urutan:i+1})
+.eq("id",DATA[i].id)
+
+}
+
+loadData()
+
+}
+})
 }
 
 async function editNama(id,nama){
@@ -635,8 +690,8 @@ loadData()
 
 function klikDots(e,el){
 
-if(el.dataset.dragging==="1"){
-el.dataset.dragging="0"
+// kalau lagi drag, skip
+if(sortableInstance && sortableInstance.dragging){
 return
 }
 
@@ -1124,131 +1179,6 @@ renderList()
 
 alert("Pesanan terakhir dibatalkan")
 }
-
-let touchDragId=null
-let holdTimer=null
-let dragMode=false
-let startY=0
-
-document.addEventListener("touchstart",e=>{
-
-let dots=e.target.closest(".menuDots")
-if(!dots) return
-
-touchDragId=dots.dataset.id
-startY=e.touches[0].clientY
-
-holdTimer=setTimeout(()=>{
-
-dragMode=true
-dots.dataset.dragging="1"
-
-let item=dots.closest(".item")
-if(item) item.classList.add("dragging")
-
-navigator.vibrate?.(50)
-
-},400)
-
-},{passive:true})
-
-
-document.addEventListener("touchmove",e=>{
-
-if(!touchDragId) return
-
-let y=e.touches[0].clientY
-
-if(!dragMode){
-
-if(Math.abs(y-startY)>10){
-clearTimeout(holdTimer)
-touchDragId=null
-}
-
-return
-}
-
-if(e.cancelable) e.preventDefault()
-
-let target=document.elementFromPoint(120,y)?.closest(".item")
-if(!target) return
-
-let targetId=target.dataset.id
-if(targetId===touchDragId) return
-
-let arr=[...DATA]
-
-let from=arr.findIndex(x=>x.id==touchDragId)
-let to=arr.findIndex(x=>x.id==targetId)
-
-if(from<0 || to<0) return
-
-let ambil=arr.splice(from,1)[0]
-arr.splice(to,0,ambil)
-
-DATA=arr
-renderList()
-
-let aktif=document.querySelector(`.item[data-id="${touchDragId}"]`)
-if(aktif) aktif.classList.add("dragging")
-
-},{passive:false})
-
-
-document.addEventListener("touchend",async ()=>{
-
-clearTimeout(holdTimer)
-
-if(!dragMode){
-document.querySelectorAll(".menuDots").forEach(x=>{
-x.dataset.dragging="0"
-})
-touchDragId=null
-return
-}
-
-for(let i=0;i<DATA.length;i++){
-
-await window.supabaseClient
-.from("stok_barang")
-.update({urutan:i+1})
-.eq("id",DATA[i].id)
-
-}
-
-dragMode=false
-
-document.querySelectorAll(".menuDots").forEach(x=>{
-x.dataset.dragging="0"
-})
-
-touchDragId=null
-
-document.querySelectorAll(".item").forEach(x=>{
-x.classList.remove("dragging")
-})
-
-loadData()
-
-})
-
-document.addEventListener("touchcancel",()=>{
-
-clearTimeout(holdTimer)
-
-dragMode=false
-touchDragId=null
-
-document.querySelectorAll(".menuDots").forEach(x=>{
-x.dataset.dragging="0"
-})
-
-document.querySelectorAll(".item").forEach(x=>{
-x.classList.remove("dragging")
-})
-
-})
 
 loadOrder()
 loadData()
