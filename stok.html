@@ -301,6 +301,11 @@ let LAST_ORDER=[]
 let FILTER_MODE="all"
 let sortableInstance = null
 let isDragging = false
+let dragSaveTimeout = null
+
+window.loadingSimpan = false
+window.loadingPesan = false
+window.loadingTambah = false
 
 function saveOrder(){
 localStorage.setItem("LAST_ORDER",JSON.stringify(LAST_ORDER))
@@ -504,33 +509,34 @@ touchStartThreshold: 5,
 onStart: function(){
   isDragging = true
 },
-onEnd: function(){
+
+onEnd: function () {
+
   setTimeout(()=> isDragging = false, 100)
-}
 
-onEnd: async function (evt){
+  clearTimeout(dragSaveTimeout)
 
-let items = [...document.querySelectorAll(".item")]
+  dragSaveTimeout = setTimeout(async ()=>{
 
-let newOrder = items.map(el => el.dataset.id)
+    let items = [...document.querySelectorAll(".item")]
+    let newOrder = items.map(el => el.dataset.id)
 
-// update DATA sesuai urutan DOM (INI LEBIH AMAN)
-DATA.sort((a,b)=>{
-return newOrder.indexOf(a.id) - newOrder.indexOf(b.id)
-})
+    DATA.sort((a,b)=>{
+      return newOrder.indexOf(a.id) - newOrder.indexOf(b.id)
+    })
 
-// simpan ke database
-let updates = DATA.map((item, index) => ({
-id: item.id,
-urutan: index + 1
-}))
+    let updates = DATA.map((item, index) => ({
+      id: item.id,
+      urutan: index + 1
+    }))
 
-await window.supabaseClient
-.from("stok_barang")
-.upsert(updates, { onConflict: 'id' })
+    await window.supabaseClient
+    .from("stok_barang")
+    .upsert(updates, { onConflict: 'id' })
 
-renderList()
+    await loadData()
 
+  },300) // delay 300ms
 }
 })
 }
@@ -581,7 +587,10 @@ let baru=prompt(teks,qtyLama)
 if(baru===null) return
 
 baru=parseInt(baru)
-if(isNaN(baru)) return
+if(isNaN(baru) || baru < 0){
+  alert("Input tidak valid")
+  return
+}
 
 let item = DATA.find(x=>x.id==id)
 
@@ -655,8 +664,7 @@ UNDO
 async function undoItem(id){
 
 if(!LAST_UNDO || LAST_UNDO.id!==id){
-alert("Tidak ada undo terakhir")
-return
+return // diam saja
 }
 
 await window.supabaseClient
@@ -698,27 +706,41 @@ LAST_UNDO=null
 loadData()
 }
 
+let clickTimeout = null
+
 function klikDots(e,el){
 
-if(isDragging) return
+  if(isDragging) return
 
-hapusItem(
-el.dataset.id,
-el.dataset.nama
-)
+  clearTimeout(clickTimeout)
 
+  clickTimeout = setTimeout(()=>{
+    hapusItem(
+      el.dataset.id,
+      el.dataset.nama
+    )
+  },150) // delay kecil
 }
+
+let isDeleting = false
 
 async function hapusItem(id,nama){
 
+if(isDeleting) return
+isDeleting = true
+
 let ok=confirm("Hapus item:\n"+nama+" ?")
-if(!ok) return
+if(!ok){
+  isDeleting = false
+  return
+}
 
 await window.supabaseClient
 .from("stok_barang")
 .delete()
 .eq("id",id)
 
+isDeleting = false
 loadData()
 }
 
@@ -771,6 +793,9 @@ boxHitung.style.display=f_dihitung.checked?"block":"none"
 }
 
 async function simpanBarang(){
+  
+if(window.loadingSimpan) return
+window.loadingSimpan = true
 
 let nama=f_nama.value.trim()
 let beli=parseInt(f_beli.value||0)
@@ -786,8 +811,21 @@ qtypesan=parseInt(f_qtypesan.value||1)
 }
 
 if(!nama){
-alert("Nama wajib")
-return
+  alert("Nama wajib")
+  window.loadingSimpan = false
+  return
+}
+
+if(awal < 0 || beli < 0){
+  alert("Harga / stok tidak boleh minus")
+  window.loadingSimpan = false
+  return
+}
+
+if(dihitung && jual < 0){
+  alert("Harga jual tidak valid")
+  window.loadingSimpan = false
+  return
 }
 
 const {error}=await window.supabaseClient
@@ -804,10 +842,12 @@ updated_at:new Date().toISOString()
 })
 
 if(error){
-alert(error.message)
-return
+  alert(error.message)
+  window.loadingSimpan = false
+  return
 }
 
+window.loadingSimpan = false
 loadData()
 }
 
@@ -882,75 +922,84 @@ pesanArea.innerHTML=html
 }
 
 async function kirimPesan(){
-  
-let ada=false
 
+if(window.loadingPesan) return
+window.loadingPesan = true
+
+try{
+
+let ada=false
 let checks=pesanArea.querySelectorAll("input[type=checkbox]")
 let text="Pesan barang:%0A"
 LAST_ORDER=[]
 
 for(let el of checks){
 
-if(!el.checked) continue
-ada=true
+  if(!el.checked) continue
+  ada=true
 
-let idx=el.dataset.index
-let i=DATA[idx]
+  let idx=el.dataset.index
+  let i=DATA[idx]
 
-let beli=parseInt(document.getElementById("beli_"+idx).value||0)
-let tambah=parseInt(document.getElementById("qty_"+idx).value||1)
+  let beli=parseInt(document.getElementById("beli_"+idx).value||0)
+  let tambah=parseInt(document.getElementById("qty_"+idx).value||1)
 
-let dasar=parseInt(i.qty_pesan||1)
-if(dasar<=0) dasar=1
+  let dasar=parseInt(i.qty_pesan||1)
+  if(dasar<=0) dasar=1
 
-let biaya = (beli / dasar) * tambah
-biaya = Math.round(biaya)
+  let biaya = (beli / dasar) * tambah
+  biaya = Math.round(biaya)
 
-text += "- "+i.nama_item+"%0A"
+  text += "- "+i.nama_item+"%0A"
 
-await window.supabaseClient
-.from("stok_barang")
-.update({
-qty:i.qty+tambah,
-harga_beli:beli,
-updated_at:new Date().toISOString()
-})
-.eq("id",i.id)
+  await window.supabaseClient
+  .from("stok_barang")
+  .update({
+    qty:i.qty+tambah,
+    harga_beli:beli,
+    updated_at:new Date().toISOString()
+  })
+  .eq("id",i.id)
 
-await window.supabaseClient
-.from("stok_log")
-.insert({
-item_id:i.id,
-jenis:"pesan",
-qty:tambah,
-total:biaya
-})
+  await window.supabaseClient
+  .from("stok_log")
+  .insert({
+    item_id:i.id,
+    jenis:"pesan",
+    qty:tambah,
+    total:biaya
+  })
 
-LAST_ORDER.push({
-id:i.id,
-nama:i.nama_item,
-qty:tambah,
-beli:beli,
-dasar:dasar
-})
-
-saveOrder()
+  LAST_ORDER.push({
+    id:i.id,
+    nama:i.nama_item,
+    qty:tambah,
+    beli:beli,
+    dasar:dasar
+  })
 
 }
 
 if(!ada){
-alert("Pilih barang dulu")
-return
+  alert("Pilih barang dulu")
+  return
 }
 
+saveOrder()
 window.open("https://wa.me/6282132517947?text="+text)
 loadData()
+
+} finally {
+  window.loadingPesan = false
+}
 }
 
 async function tambahManual(){
 
 if(window.loadingTambah) return
 window.loadingTambah=true
+
+try{
 
 let checks=pesanArea.querySelectorAll("input[type=checkbox]")
 let ada=false
@@ -993,15 +1042,17 @@ total:biaya
 }
 
 if(!ada){
-window.loadingTambah=false
 alert("Pilih barang dulu")
 return
 }
 
 loadData()
 renderList()
-window.loadingTambah=false
 alert("Stok berhasil ditambah")
+
+} finally {
+window.loadingTambah=false
+}
 }
 
 /* ======================
