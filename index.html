@@ -112,13 +112,10 @@ location.href="stok.html"
 
 async function cekAkses(){
 
-const { data } = await window.supabaseClient.auth.getSession()
-
-// tampilkan menu operasional
 document.getElementById("menuOperasional").style.display="block"
 
-// kalau bukan admin → sembunyikan stok
-if(!data.session){
+// cek admin lokal
+if(localStorage.getItem("adminLogin") !== "true"){
 document.getElementById("btnStok").style.display="none"
 }
 
