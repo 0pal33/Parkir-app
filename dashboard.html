@@ -4,6 +4,8 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
 <title>Admin Dashboard</title>
 
@@ -256,6 +258,18 @@ TOTAL Rp <span id="all3">0</span>
 <span class="dot"></span>
 </div>
 
+<input id="filterTanggal" placeholder="Pilih tanggal / range">
+
+flatpickr("#filterTanggal", {
+mode: "range",
+dateFormat: "Y-m-d",
+onChange: function(selectedDates){
+  if(selectedDates.length === 2){
+    loadDashboardRange(selectedDates[0], selectedDates[1])
+  }
+}
+})
+
 </div> <!-- slider -->
 
 <div class="menu" id="menuContainer">
@@ -264,9 +278,17 @@ TOTAL Rp <span id="all3">0</span>
 Lihat Parkir Aktif
 </button>
 
-<button class="green btn" onclick="window.location='stok.html'">
-Stok Barang
+<div class="menu" id="menuContainer">
+
+<button class="blue btn" onclick="window.location='parkirAktif.html'">
+Parkir Aktif
 </button>
+
+<button class="green btn" onclick="window.location='titipan.html'">
+Titipan Warung
+</button>
+
+</div>
 
 </div>
 
