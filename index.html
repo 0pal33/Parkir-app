@@ -82,6 +82,52 @@ type="tel">
 <!-- BOTTOM -->
 <div class="bottom" id="bottomButtons"></div>
 
+<div class="menu-operasional" id="menuOperasional" style="display:none">
+
+<button onclick="goBulanan()">Bulanan</button>
+
+<button onclick="goTitipan()">Titipan</button>
+
+<button id="btnStok" onclick="goStok()">Stok Barang</button>
+
+</div>
+
+<script>
+
+function goBulanan(){
+location.href="bulanan.html"
+}
+
+function goTitipan(){
+location.href="titipan.html"
+}
+
+function goStok(){
+location.href="stok.html"
+}
+
+/* =========================
+   CEK ADMIN (UNTUK STOK)
+========================= */
+
+async function cekAkses(){
+
+const { data } = await window.supabaseClient.auth.getSession()
+
+// tampilkan menu operasional
+document.getElementById("menuOperasional").style.display="block"
+
+// kalau bukan admin → sembunyikan stok
+if(!data.session){
+document.getElementById("btnStok").style.display="none"
+}
+
+}
+
+cekAkses()
+
+</script>
+
 <script>
 
 const reminderInterval = setInterval(loadReminder,60000)
