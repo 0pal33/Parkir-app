@@ -260,28 +260,12 @@ TOTAL Rp <span id="all3">0</span>
 
 <input id="filterTanggal" placeholder="Pilih tanggal / range">
 
-flatpickr("#filterTanggal", {
-mode: "range",
-dateFormat: "Y-m-d",
-onChange: function(selectedDates){
-  if(selectedDates.length === 2){
-    loadDashboardRange(selectedDates[0], selectedDates[1])
-  }
-}
-})
-
 </div> <!-- slider -->
 
 <div class="menu" id="menuContainer">
 
 <button class="blue btn" onclick="window.location='parkirAktif.html'">
 Lihat Parkir Aktif
-</button>
-
-<div class="menu" id="menuContainer">
-
-<button class="blue btn" onclick="window.location='parkirAktif.html'">
-Parkir Aktif
 </button>
 
 <button class="green btn" onclick="window.location='titipan.html'">
@@ -584,6 +568,19 @@ console.log(err)
 function goPetugas(){
 window.location.href="index.html"
 }
+
+async function loadDashboardRange(start, end){
+
+let startISO = new Date(start).toISOString()
+let endISO = new Date(end).toISOString()
+
+console.log("FILTER:", startISO, endISO)
+
+/* contoh dulu: sementara reload biasa */
+loadDashboard()
+
+}
+
 window.onload = () => {
 
 if(dashboardInterval !== null){
@@ -659,6 +656,24 @@ if(IS_DEV && !window.__SUGER_LOADED__){
   script.src = "https://suger-cdn.vercel.app/suger-dev.js"
   document.body.appendChild(script)
 }
+</script>
+
+<script>
+
+document.addEventListener("DOMContentLoaded",()=>{
+
+flatpickr("#filterTanggal", {
+  mode: "range",
+  dateFormat: "Y-m-d",
+  onChange: function(selectedDates){
+    if(selectedDates.length === 2){
+      loadDashboardRange(selectedDates[0], selectedDates[1])
+    }
+  }
+})
+
+})
+
 </script>
 
 <script>
