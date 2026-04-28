@@ -287,7 +287,7 @@ opacity:0.3;
 <div id="pesanArea"></div>
 <div id="auditArea"></div>
 
-<button class="topBack red" onclick="location.href='dashboard.html'">⌂</button>
+<button class="topBack red" onclick="location.href='index.html'">⌂</button>
 
 <div class="floating">
 <button class="blue" onclick="openPesan()">🛒</button>
@@ -295,6 +295,15 @@ opacity:0.3;
 </div>
 
 <script>
+(async ()=>{
+
+if(localStorage.getItem("adminLogin") !== "true"){
+  alert("Akses ditolak")
+  location.href="index.html"
+  return
+}
+
+})()
 let DATA=[]
 let LAST_UNDO=null
 let LAST_ORDER=[]
