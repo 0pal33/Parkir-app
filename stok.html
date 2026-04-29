@@ -297,6 +297,17 @@ opacity:0.3;
 
 <script>
   
+let DATA=[]
+let LAST_UNDO=null
+let LAST_ORDER=[]
+let FILTER_MODE="all"
+let sortableInstance = null
+let isDragging = false
+let dragSaveTimeout = null
+
+window.loadingSimpan = false
+window.loadingPesan = false
+window.loadingTambah = false
 window.loadingAction = false
 
 (async ()=>{
@@ -310,17 +321,6 @@ if(localStorage.getItem("adminLogin") !== "true" || !data.session){
 }
 
 })()
-let DATA=[]
-let LAST_UNDO=null
-let LAST_ORDER=[]
-let FILTER_MODE="all"
-let sortableInstance = null
-let isDragging = false
-let dragSaveTimeout = null
-
-window.loadingSimpan = false
-window.loadingPesan = false
-window.loadingTambah = false
 
 function saveOrder(){
 localStorage.setItem("LAST_ORDER",JSON.stringify(LAST_ORDER))
