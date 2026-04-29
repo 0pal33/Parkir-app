@@ -294,10 +294,13 @@ opacity:0.3;
 <button class="green" onclick="formTambah()">＋</button>
 </div>
 
+window.loadingAction = false
 <script>
 (async ()=>{
 
-if(localStorage.getItem("adminLogin") !== "true"){
+const { data } = await window.supabaseClient.auth.getSession()
+
+if(localStorage.getItem("adminLogin") !== "true" || !data.session){
   alert("Akses ditolak")
   location.href="index.html"
   return
@@ -589,6 +592,9 @@ AUDIT STOK
 ====================== */
 
 async function editQty(id,qtyLama,hargaJual,dihitung){
+  
+if(window.loadingAction) return
+window.loadingAction = true
 
 let teks = dihitung ? "Stok baru:" : "Jumlah terjual:"
 let baru=prompt(teks,qtyLama)
@@ -664,6 +670,7 @@ total:totalMasuk
 }
 
 loadData()
+window.loadingAction = false
 }
 
 /* ======================
