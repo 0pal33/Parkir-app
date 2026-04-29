@@ -628,8 +628,9 @@ BARANG STOK
 if(dihitung){
 
 if(qtyBaru > qtyLama){
-alert("Barang stok tidak boleh melebihi stok saat ini")
-return
+  alert("Barang stok tidak boleh melebihi stok saat ini")
+  window.loadingAction = false
+  return
 }
 
 qtyJual = qtyLama - qtyBaru
