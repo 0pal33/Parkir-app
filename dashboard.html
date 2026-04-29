@@ -279,6 +279,7 @@ Titipan Warung
 <script>
 
 let dashboardInterval = null
+let isFiltering = false // ✅ TAMBAH INIl
 
 function rupiah(n){
 n = Number(n) || 0
@@ -298,7 +299,9 @@ new Date().toLocaleString("en-US",{timeZone:"Asia/Jakarta"})
 }
 
 async function loadDashboard(){
-  
+
+if(isFiltering) return // ✅ TAMBAH INI
+
 console.log("RUN DASHBOARD")
 
 if(document.readyState !== "complete"){
@@ -570,7 +573,8 @@ window.location.href="index.html"
 }
 
 async function loadDashboardRange(start, end){
-let isFiltering = false
+
+isFiltering = true // ✅ TAMBAH INI
 
 let startISO = new Date(start).toISOString()
 let endISO = new Date(end)
@@ -701,6 +705,9 @@ flatpickr("#filterTanggal", {
   onChange: function(selectedDates){
     if(selectedDates.length === 2){
       loadDashboardRange(selectedDates[0], selectedDates[1])
+    }else if(selectedDates.length === 0){
+      isFiltering = false
+      loadDashboard()
     }
   }
 })
@@ -709,9 +716,18 @@ flatpickr("#filterTanggal", {
 
 async function exportCSV(){
 
+let month = new Date()
+month.setMonth(month.getMonth()-1)
+
 let {data} = await window.supabaseClient
 .from("stok_log")
 .select("*")
+.gte("created_at", month.toISOString())
+
+if(!data || data.length === 0){
+alert("Tidak ada data")
+return
+}
 
 let csv = "id,jenis,qty,total,created_at\n"
 
@@ -727,7 +743,7 @@ a.href = url
 a.download = "backup.csv"
 a.click()
 
-}
+}}
 
 </script>
 
