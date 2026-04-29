@@ -294,8 +294,11 @@ opacity:0.3;
 <button class="green" onclick="formTambah()">＋</button>
 </div>
 
-window.loadingAction = false
+
 <script>
+  
+window.loadingAction = false
+
 (async ()=>{
 
 const { data } = await window.supabaseClient.auth.getSession()
@@ -572,7 +575,10 @@ loadData()
 async function editJual(id,harga){
 
 let baru=prompt("Harga jual:",harga)
-if(baru===null) return
+if(baru===null){
+  window.loadingAction = false
+  return
+}
 
 baru=parseInt(baru||0)
 
@@ -599,7 +605,10 @@ window.loadingAction = true
 let teks = dihitung ? "Stok baru:" : "Jumlah terjual:"
 let baru=prompt(teks,qtyLama)
 
-if(baru===null) return
+if(baru===null){
+  window.loadingAction = false
+  return
+}
 
 baru=parseInt(baru)
 if(isNaN(baru) || baru < 0){
