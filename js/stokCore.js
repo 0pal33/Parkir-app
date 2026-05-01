@@ -107,7 +107,7 @@ STOK.sortableInstance.destroy()
 STOK.sortableInstance = Sortable.create(el,{
 animation:150,
 handle:".menuDots",
-delay:200,
+delay:300,
 delayOnTouchOnly:true,
 ghostClass:"dragging",
 fallbackOnBody: true,
@@ -843,7 +843,7 @@ StokUI.renderList()
 alert("Pesanan terakhir dibatalkan")
 },
 
-resetNonStokHarian(){
+async resetNonStokHarian(){
 
 let now = this.nowWIB()
 let lastReset = localStorage.getItem("STOK.LAST_RESET")
@@ -869,10 +869,6 @@ updated_at:new Date().toISOString()
 })
 
 localStorage.setItem("STOK.LAST_RESET", today)
-
-setTimeout(()=>{
-  StokCore.loadData()
-},500)
 
 }
 
