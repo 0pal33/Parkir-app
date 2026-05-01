@@ -198,7 +198,11 @@ if(isNaN(baru) || baru < 0){
 }
 
 let item = STOK.DATA.find(x=>x.id==id)
-if(!item) return
+if(!item){
+  alert("Item tidak ditemukan")
+  window.loadingAction = false
+  return
+}
 
 let qtyBaru=baru
 let qtyJual=0
@@ -396,10 +400,10 @@ async simpanBarang(){
 if(window.loadingSimpan) return
 window.loadingSimpan = true
 
-let nama=f_nama.value.trim()
-let beli=parseInt(f_beli.value||0)
-let awal=parseInt(f_awal.value||0)
-let dihitung=f_dihitung.checked
+const nama = document.getElementById("f_nama").value.trim()
+const beli = parseInt(document.getElementById("f_beli").value || 0)
+const awal = parseInt(document.getElementById("f_awal").value || 0)
+const dihitung = document.getElementById("f_dihitung").checked
 
 let jual=0
 let qtypesan=1
