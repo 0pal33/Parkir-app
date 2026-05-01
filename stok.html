@@ -273,13 +273,13 @@ opacity:0.3;
 <input id="searchBox" placeholder="Cari barang..." oninput="StokUI.renderList()">
 
 <div class="rowBtn" style="margin-bottom:8px;">
-<button class="green">Stok</button>
-<button class="gray">nonStok</button>
+<button id="btnFilterStok" class="green">Stok</button>
+<button id="btnFilterNon" class="gray">nonStok</button>
 </div>
 
 <div class="rowBtn" style="margin-bottom:12px;">
-<button class="orange">Audit Restok</button>
-<button class="red">Batal Pesanan</button>
+<button id="btnAudit" class="orange">Audit Restok</button>
+<button id="btnBatal" class="red">Batal Pesanan</button>
 </div>
 
 <div id="listArea"></div>
@@ -313,16 +313,16 @@ if(localStorage.getItem("adminLogin") !== "true" || !data.session){
 await StokCore.loadData()
 
 // tombol filter
-document.querySelector(".green").onclick = ()=> StokUI.setFilter("hitung")
-document.querySelector(".gray").onclick = ()=> StokUI.setFilter("tidak")
+document.getElementById("btnFilterStok").onclick = ()=> StokUI.setFilter("hitung")
+document.getElementById("btnFilterNon").onclick = ()=> StokUI.setFilter("tidak")
 
 // tombol floating
 document.querySelector(".floating .green").onclick = ()=> StokCore.formTambah()
 document.querySelector(".floating .blue").onclick = ()=> StokCore.openPesan()
 
 // tombol audit & batal
-document.querySelector(".orange").onclick = ()=> StokCore.showAuditRestok()
-document.querySelector(".red").onclick = ()=> StokCore.batalPesanan()
+document.getElementById("btnAudit").onclick = ()=> StokCore.showAuditRestok()
+document.getElementById("btnBatal").onclick = ()=> StokCore.batalPesanan()
 
 })
 </script>
