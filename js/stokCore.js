@@ -133,7 +133,7 @@ STOK.dragSaveTimeout = setTimeout(async ()=>{
     .from("stok_barang")
     .upsert(updates, { onConflict: 'id' })
 
-    await this.loadData()
+    await StokCore.loadData()
 
   },300) // delay 300ms
 }
@@ -339,7 +339,7 @@ await window.supabaseClient
 .delete()
 .eq("id",id)
 
-isDeleting = false
+STOK.isDeleting = false
 this.loadData()
 },
 
