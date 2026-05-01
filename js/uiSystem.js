@@ -53,16 +53,22 @@ window.showMenuLain=function(){
 
 hideAll()
 
-let mid=document.getElementById("middleBox")
+let isAdmin = localStorage.getItem("adminLogin")==="true"
 
-if(mid){
-mid.innerHTML=`
+let html = `
 <div style="display:flex;flex-direction:column;gap:15px;width:100%;max-width:280px;margin:auto;">
 <button class="green" onclick="showBulanan()">Bulanan</button>
 <button class="blue" onclick="goTitipan()">Titip Jajan</button>
-</div>
 `
+
+if(isAdmin){
+html += `<button class="blue" onclick="goStok()">Stok Barang</button>`
 }
+
+html += `</div>`
+
+let mid=document.getElementById("middleBox")
+if(mid) mid.innerHTML = html
 
 document.getElementById("bottomButtons").innerHTML=`
 <button class="red" onclick="showHome()">Kembali</button>
