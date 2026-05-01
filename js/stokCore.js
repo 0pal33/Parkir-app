@@ -841,7 +841,7 @@ StokCore.loadData()
 StokUI.renderList()
 
 alert("Pesanan terakhir dibatalkan")
-}
+},
 
 resetNonStokHarian(){
 
