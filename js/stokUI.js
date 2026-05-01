@@ -35,7 +35,15 @@ RENDER ITEM
 ========================= */
 rows.forEach(i=>{
 
-let merah = i.qty <= 0 ? "redbg" : ""
+let merah = ""
+
+let now = StokCore.nowWIB()
+
+let logHariIni = STOK.LOG_HARI_INI?.find(x=>x.item_id===i.id)
+
+if(!logHariIni){
+  merah = "redbg"
+}
 
 html+=`
 <div class="item ${merah}" data-id="${i.id}" data-nama="${i.nama_item}">
