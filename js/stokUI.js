@@ -41,7 +41,10 @@ html+=`
 <div class="item ${merah}" data-id="${i.id}" data-nama="${i.nama_item}">
 
   <!-- GARIS 3 (DRAG) -->
-  <div class="menuDots">☰</div>
+  <div class="menuDots"
+  onclick="StokCore.hapusItem('${i.id}','${i.nama_item}')">
+  ☰
+</div>
 
   <!-- NAMA -->
   <div style="flex:1">
@@ -67,12 +70,6 @@ html+=`
     onclick="StokCore.undoItem('${i.id}')">
     ↺
   </button>
-
-  <!-- HAPUS -->
-  <div class="menuDots"
-    onclick="StokCore.klikDots(event,this.parentElement)">
-    ⋮
-  </div>
 
 </div>
 `
