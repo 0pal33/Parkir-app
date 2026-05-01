@@ -18,6 +18,11 @@ window.showHome=function(){
 
 hideAll()
 
+/* TAMBAHKAN INI */
+let result=document.getElementById("resultBox")
+if(result) result.innerHTML=""
+
+/* lanjut kode lama */
 let powerBtn=document.querySelector(".logout-btn")
 let dash=document.getElementById("dashboardBtn")
 let sw=document.getElementById("switchCamBtn")
