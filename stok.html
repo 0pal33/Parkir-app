@@ -295,9 +295,12 @@ opacity:0.3;
 </div>
 
 
-<script>
+<script src="js/stokState.js"></script>
+<script src="js/stokCore.js"></script>
+<script src="js/stokUI.js"></script>
 
-(async ()=>{
+<script>
+document.addEventListener("DOMContentLoaded", async ()=>{
 
 const { data } = await window.supabaseClient.auth.getSession()
 
@@ -307,14 +310,14 @@ if(localStorage.getItem("adminLogin") !== "true" || !data.session){
   return
 }
 
-})()
+// init
+await StokCore.loadData()
 
-let clickTimeout = null
+// event tombol (ganti onclick)
+document.querySelector(".green").onclick = ()=> StokUI.setFilter("hitung")
+document.querySelector(".gray").onclick = ()=> StokUI.setFilter("tidak")
 
-let isDeleting = false
-
-loadOrder()
-loadData()
+})
 </script>
 
 <script>
