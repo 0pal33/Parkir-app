@@ -197,6 +197,7 @@ if(isNaN(baru) || baru < 0){
   return
 }
 
+let item = STOK.DATA.find(x=>x.id==id)
 if(!item) return
 
 let qtyBaru=baru
@@ -383,8 +384,11 @@ formArea.innerHTML=`
 StokCore.toggleHitung()
 },
 
-StokCore.toggleHitung(){
-boxHitung.style.display=f_dihitung.checked?"block":"none"
+toggleHitung(){
+  const box = document.getElementById("boxHitung")
+  const check = document.getElementById("f_dihitung")
+  if(!box || !check) return
+  box.style.display = check.checked ? "block" : "none"
 },
 
 async simpanBarang(){
