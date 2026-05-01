@@ -77,16 +77,6 @@ type="tel">
 
 <div id="resultBox"></div>
 
-<div class="menu-operasional" id="menuOperasional" style="display:none">
-
-<button onclick="goBulanan()">Bulanan</button>
-
-<button onclick="goTitipan()">Titipan</button>
-
-<button id="btnStok" onclick="goStok()">Stok Barang</button>
-
-</div>
-
 </div>
 
 <!-- BOTTOM -->
@@ -106,38 +96,6 @@ function goStok(){
 toggleMenu()
 location.href="stok.html"
 }
-
-/* =========================
-   CEK ADMIN (UNTUK STOK)
-========================= */
-
-async function cekAkses(){
-
-let btn = document.getElementById("btnStok")
-
-if(!btn) return
-
-if(localStorage.getItem("adminLogin") !== "true"){
-btn.style.display="none"
-}else{
-btn.style.display="block"
-}
-
-}
-
-function toggleMenu(){
-
-let el = document.getElementById("menuOperasional")
-
-if(el.style.display === "none" || el.style.display === ""){
-el.style.display = "flex"
-}else{
-el.style.display = "none"
-}
-
-}
-
-cekAkses()
 
 </script>
 
