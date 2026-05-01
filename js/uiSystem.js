@@ -146,3 +146,7 @@ location.reload()
 window.showManual=function(){
 showManualState()
 }
+
+window.goBulanan=function(){
+location.href="bulanan.html"
+}
