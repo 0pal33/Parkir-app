@@ -40,19 +40,19 @@ html += `
 <div style="flex:1">
 
 <div class="nama"
-onclick="StokCore.editNama(${i.id},'${i.nama_item}')">
+onclick="StokCore.editNama('${i.id}','${i.nama_item}')">
 ${i.nama_item}
 </div>
 
 <div class="kecil"
-onclick="StokCore.editJual(${i.id},${i.harga_jual||0})">
+onclick="StokCore.editJual('${i.id}',${i.harga_jual||0})">
 ${StokCore.rupiah(i.harga_jual||0)}
 </div>
 
 </div>
 
 <div class="qty"
-onclick="StokCore.editQty(${i.id},${i.qty},${i.harga_jual||0},${i.barang_dihitung})">
+onclick="StokCore.editQty('${i.id}',${i.qty},${i.harga_jual||0},${i.barang_dihitung})">
 ${i.qty}
 </div>
 
