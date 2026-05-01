@@ -409,8 +409,8 @@ let jual=0
 let qtypesan=1
 
 if(dihitung){
-jual=parseInt(f_jual.value||0)
-qtypesan=parseInt(f_qtypesan.value||1)
+jual = parseInt(document.getElementById("f_jual").value || 0)
+qtypesan = parseInt(document.getElementById("f_qtypesan").value || 1))
 }
 
 if(!nama){
