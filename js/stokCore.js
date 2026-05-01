@@ -52,6 +52,8 @@ return
 
 STOK.DATA = data || []
 
+await this.resetNonStokHarian()
+
 StokUI.renderList()
 this.loadDashboard()
 },
@@ -75,6 +77,14 @@ if(!this.sameDay(now,new Date(t.toLocaleString("en-US",{timeZone:"Asia/Jakarta"}
 
 if(i.jenis==="jual") masuk+=Number(i.total||0)
 if(i.jenis==="pesan") keluar+=Number(i.total||0)
+})
+
+STOK.LOG_HARI_INI = (data||[]).filter(i=>{
+  let t = new Date(i.created_at)
+  return this.sameDay(
+    now,
+    new Date(t.toLocaleString("en-US",{timeZone:"Asia/Jakarta"}))
+  )
 })
 
 pendapatan.innerText=this.rupiah(masuk)
@@ -484,7 +494,7 @@ if(i.barang_dihitung!==true) return
 html+=`
 <tr>
 <td>
-<input type="checkbox" data-index="${idx}">
+<input type="checkbox" data-index="${idx}" ${i.qty <= 4 ? "checked" : ""}>
 </td>
 
 <td style="text-align:left">
@@ -831,6 +841,35 @@ StokCore.loadData()
 StokUI.renderList()
 
 alert("Pesanan terakhir dibatalkan")
+}
+
+resetNonStokHarian(){
+
+let now = this.nowWIB()
+let lastReset = localStorage.getItem("STOK.LAST_RESET")
+
+let today = now.toISOString().slice(0,10)
+
+if(lastReset === today) return
+
+STOK.DATA.forEach(async i=>{
+
+if(i.barang_dihitung === false && i.qty !== 0){
+
+await window.supabaseClient
+.from("stok_barang")
+.update({
+qty:0,
+updated_at:new Date().toISOString()
+})
+.eq("id",i.id)
+
+}
+
+})
+
+localStorage.setItem("STOK.LAST_RESET", today)
+
 }
 
 
