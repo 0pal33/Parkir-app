@@ -197,7 +197,7 @@ if(isNaN(baru) || baru < 0){
   return
 }
 
-let item = STOK.DATA.find(x=>x.id==id)
+if(!item) return
 
 let qtyBaru=baru
 let qtyJual=0
@@ -380,10 +380,10 @@ formArea.innerHTML=`
 </div>
 `
 
-toggleHitung()
+StokCore.toggleHitung()
 },
 
-toggleHitung(){
+StokCore.toggleHitung(){
 boxHitung.style.display=f_dihitung.checked?"block":"none"
 },
 
@@ -678,7 +678,7 @@ html+=`
 })
 
 html+=`
-<button class="green" onclick="simpanAuditRestok()">Simpan Audit</button>
+<button class="green" onclick="StokCore.simpanAuditRestok()">Simpan Audit</button>
 `
 }
 
