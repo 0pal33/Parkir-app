@@ -7,6 +7,7 @@ let result=document.getElementById("resultBox")
 if(reader) reader.style.display="none"
 if(manual) manual.style.display="none"
 if(result) result.innerHTML=""
+if(result) result.style.display="block"
 
 let f=document.querySelector(".floatingTambah")
 if(f) f.remove()
@@ -67,8 +68,10 @@ html += `<button class="blue" onclick="goStok()">Stok Barang</button>`
 
 html += `</div>`
 
-let mid=document.getElementById("middleBox")
-if(mid) mid.innerHTML = html
+let result = document.getElementById("resultBox")
+if(result){
+  result.innerHTML = html
+}
 
 document.getElementById("bottomButtons").innerHTML=`
 <button class="red" onclick="showHome()">Kembali</button>
