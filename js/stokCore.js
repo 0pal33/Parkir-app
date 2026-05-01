@@ -82,8 +82,8 @@ pengeluaran.innerText=this.rupiah(keluar)
 },
 
 setFilter(mode){
-STOK.FILTER_MODE=mode
-renderList()
+STOK.FILTER_MODE = mode
+StokUI.renderList()
 },
 
 initSortable(){
@@ -113,9 +113,9 @@ onEnd: function () {
 
   setTimeout(()=> STOK.isDragging = false, 100)
 
-  clearTimeout(dragSaveTimeout)
+  clearTimeout(STOK.dragSaveTimeout)
 
-  dragSaveTimeout = setTimeout(async ()=>{
+STOK.dragSaveTimeout = setTimeout(async ()=>{
 
     let items = [...document.querySelectorAll(".item")]
     let newOrder = items.map(el => el.dataset.id)
@@ -133,7 +133,7 @@ onEnd: function () {
     .from("stok_barang")
     .upsert(updates, { onConflict: 'id' })
 
-    await loadData()
+    await this.loadData()
 
   },300) // delay 300ms
 }
@@ -313,10 +313,10 @@ klikDots(e,el){
 
   if(STOK.isDragging) return
 
-  clearTimeout(clickTimeout)
+  clearTimeout(STOK.clickTimeout)
 
-  clickTimeout = setTimeout(()=>{
-    hapusItem(
+STOK.clickTimeout = setTimeout(()=>{
+    this.hapusItem(
       el.dataset.id,
       el.dataset.nama
     )
@@ -325,12 +325,12 @@ klikDots(e,el){
 
 async hapusItem(id,nama){
 
-if(isDeleting) return
-isDeleting = true
+if(STOK.isDeleting) return
+STOK.isDeleting = true
 
 let ok=confirm("Hapus item:\n"+nama+" ?")
 if(!ok){
-  isDeleting = false
+  STOK.isDeleting = false
   return
 }
 
