@@ -1,24 +1,24 @@
 window.StokCore = {
 
 saveOrder(){
-localStorage.setItem("LAST_ORDER",JSON.stringify(LAST_ORDER))
+localStorage.setItem("STOK.LAST_ORDER",JSON.stringify(STOK.LAST_ORDER))
 },
 
 loadOrder(){
-let x=localStorage.getItem("LAST_ORDER")
+let x=localStorage.getItem("STOK.LAST_ORDER")
 
 if(x){
 try{
-LAST_ORDER=JSON.parse(x)||[]
+STOK.LAST_ORDER=JSON.parse(x)||[]
 }catch(e){
-LAST_ORDER=[]
+STOK.LAST_ORDER=[]
 }
 }
 },
 
 clearOrder(){
-LAST_ORDER=[]
-localStorage.removeItem("LAST_ORDER")
+STOK.LAST_ORDER=[]
+localStorage.removeItem("STOK.LAST_ORDER")
 },
 
 rupiah(n){
@@ -82,7 +82,7 @@ pengeluaran.innerText=this.rupiah(keluar)
 },
 
 setFilter(mode){
-FILTER_MODE=mode
+STOK.FILTER_MODE=mode
 renderList()
 },
 
@@ -90,11 +90,11 @@ initSortable(){
 
 let el = document.getElementById("listArea")
 
-if(sortableInstance){
-sortableInstance.destroy()
+if(STOK.sortableInstance){
+STOK.sortableInstance.destroy()
 }
 
-sortableInstance = Sortable.create(el,{
+STOK.sortableInstance = Sortable.create(el,{
 animation:150,
 handle:".menuDots",
 delay:100,
@@ -106,12 +106,12 @@ forceFallback: true,
 touchStartThreshold: 5,
 
 onStart: function(){
-  isDragging = true
+  STOK.isDragging = true
 },
 
 onEnd: function () {
 
-  setTimeout(()=> isDragging = false, 100)
+  setTimeout(()=> STOK.isDragging = false, 100)
 
   clearTimeout(dragSaveTimeout)
 
@@ -120,11 +120,11 @@ onEnd: function () {
     let items = [...document.querySelectorAll(".item")]
     let newOrder = items.map(el => el.dataset.id)
 
-    DATA.sort((a,b)=>{
+    STOK.DATA.sort((a,b)=>{
       return newOrder.indexOf(a.id) - newOrder.indexOf(b.id)
     })
 
-    let updates = DATA.map((item, index) => ({
+    let updates = STOK.DATA.map((item, index) => ({
       id: item.id,
       urutan: index + 1
     }))
@@ -197,7 +197,7 @@ if(isNaN(baru) || baru < 0){
   return
 }
 
-let item = DATA.find(x=>x.id==id)
+let item = STOK.DATA.find(x=>x.id==id)
 
 let qtyBaru=baru
 let qtyJual=0
@@ -230,7 +230,7 @@ qtyBaru = qtyBaru
 
 let totalMasuk = qtyJual * hargaJual
 
-LAST_UNDO={
+STOK.LAST_UNDO={
 id:id,
 qty:qtyLama,
 harga_jual:hargaJual,
@@ -266,31 +266,31 @@ window.loadingAction = false
 
 async undoItem(id){
 
-if(!LAST_UNDO || LAST_UNDO.id!==id){
+if(!STOK.LAST_UNDO || STOK.LAST_UNDO.id!==id){
 return // diam saja
 }
 
 await window.supabaseClient
 .from("stok_barang")
 .update({
-qty:LAST_UNDO.qty,
-harga_jual:LAST_UNDO.harga_jual,
-harga_beli:LAST_UNDO.harga_beli,
+qty:STOK.LAST_UNDO.qty,
+harga_jual:STOK.LAST_UNDO.harga_jual,
+harga_beli:STOK.LAST_UNDO.harga_beli,
 updated_at:new Date().toISOString()
 })
 .eq("id",id)
 
 /* hapus log jual terakhir */
 
-if(LAST_UNDO.log_qty>0){
+if(STOK.LAST_UNDO.log_qty>0){
 
 const {data}=await window.supabaseClient
 .from("stok_log")
 .select("id")
 .eq("item_id",id)
 .eq("jenis","jual")
-.eq("qty",LAST_UNDO.log_qty)
-.eq("total",LAST_UNDO.log_total)
+.eq("qty",STOK.LAST_UNDO.log_qty)
+.eq("total",STOK.LAST_UNDO.log_total)
 .order("created_at",{ascending:false})
 .limit(1)
 
@@ -305,13 +305,13 @@ await window.supabaseClient
 
 }
 
-LAST_UNDO=null
+STOK.LAST_UNDO=null
 this.loadData()
 },
 
 klikDots(e,el){
 
-  if(isDragging) return
+  if(STOK.isDragging) return
 
   clearTimeout(clickTimeout)
 
@@ -427,7 +427,7 @@ const {error}=await window.supabaseClient
 .from("stok_barang")
 .insert({
 nama_item:nama,
-urutan: DATA.length+1,
+urutan: STOK.DATA.length+1,
 qty:awal,
 harga_beli:beli,
 harga_jual:jual,
@@ -469,7 +469,7 @@ let html=`<div class="box">
 </tr>
 `
 
-DATA.forEach((i,idx)=>{
+STOK.DATA.forEach((i,idx)=>{
 
 if(i.barang_dihitung!==true) return
 
@@ -522,7 +522,7 @@ try{
 let ada=false
 let checks=pesanArea.querySelectorAll("input[type=checkbox]")
 let text="Pesan barang:%0A"
-LAST_ORDER=[]
+STOK.LAST_ORDER=[]
 
 for(let el of checks){
 
@@ -530,7 +530,7 @@ for(let el of checks){
   ada=true
 
   let idx=el.dataset.index
-  let i=DATA[idx]
+  let i=STOK.DATA[idx]
 
   let beli=parseInt(document.getElementById("beli_"+idx).value||0)
   let tambah=parseInt(document.getElementById("qty_"+idx).value||1)
@@ -561,7 +561,7 @@ for(let el of checks){
     total:biaya
   })
 
-  LAST_ORDER.push({
+  STOK.LAST_ORDER.push({
     id:i.id,
     nama:i.nama_item,
     qty:tambah,
@@ -601,7 +601,7 @@ if(!el.checked) continue
 ada=true
 
 let idx=el.dataset.index
-let i=DATA[idx]
+let i=STOK.DATA[idx]
 
 let beli=parseInt(document.getElementById("beli_"+idx).value||0)
 let tambah=parseInt(document.getElementById("qty_"+idx).value||1)
@@ -657,11 +657,11 @@ auditArea.style.display="block"
 
 let html=`<div class="box"><h3>Audit Restok</h3>`
 
-if(LAST_ORDER.length===0){
+if(STOK.LAST_ORDER.length===0){
 html+=`Tidak ada pesanan terakhir`
 }else{
 
-LAST_ORDER.forEach((i,idx)=>{
+STOK.LAST_ORDER.forEach((i,idx)=>{
 
 html+=`
 <div class="item">
@@ -701,9 +701,9 @@ document.getElementById("restok_"+idx).value=0
 
 async simpanAuditRestok(){
 
-for(let x=0;x<LAST_ORDER.length;x++){
+for(let x=0;x<STOK.LAST_ORDER.length;x++){
 
-let row = LAST_ORDER[x]
+let row = STOK.LAST_ORDER[x]
 let real = parseInt(document.getElementById("restok_"+x).value||0)
 let pesan = row.qty
 
@@ -713,7 +713,7 @@ let selisih = pesan - real
 
 if(selisih !== 0){
 
-let item = DATA.find(a=>a.id==row.id)
+let item = STOK.DATA.find(a=>a.id==row.id)
 
 if(item){
 
@@ -775,7 +775,7 @@ stokUI.renderList()
 
 async batalPesanan(){
 
-if(LAST_ORDER.length===0){
+if(STOK.LAST_ORDER.length===0){
 alert("Tidak ada pesanan terakhir")
 return
 }
@@ -783,9 +783,9 @@ return
 let ok=confirm("Batalkan pesanan terakhir?")
 if(!ok) return
 
-for(let row of LAST_ORDER){
+for(let row of STOK.LAST_ORDER){
 
-let item=DATA.find(x=>x.id==row.id)
+let item=STOK.DATA.find(x=>x.id==row.id)
 
 if(item){
 
