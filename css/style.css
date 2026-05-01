@@ -203,18 +203,18 @@ transform:scale(1.05);
 }
 
 .menu-operasional{
-position:fixed;
-bottom:10px;
-left:50%;
-transform:translateX(-50%);
 display:flex;
-gap:8px;
+flex-direction:column;
+gap:12px;
+margin-top:20px;
 }
 
 .menu-operasional button{
-padding:10px;
+width:220px;
+padding:15px;
+font-size:16px;
+border-radius:12px;
 border:none;
-border-radius:10px;
 background:#3498db;
 color:white;
 }
