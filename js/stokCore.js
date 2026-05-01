@@ -866,7 +866,7 @@ updated_at:new Date().toISOString()
 
 }
 
-})
+}
 
 localStorage.setItem("STOK.LAST_RESET", today)
 
