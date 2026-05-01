@@ -57,7 +57,7 @@ let isAdmin = localStorage.getItem("adminLogin")==="true"
 
 let html = `
 <div style="display:flex;flex-direction:column;gap:15px;width:100%;max-width:280px;margin:auto;">
-<button class="green" onclick="showBulanan()">Bulanan</button>
+<button class="green" onclick="goBulanan()">Bulanan</button>
 <button class="blue" onclick="goTitipan()">Titip Jajan</button>
 `
 
