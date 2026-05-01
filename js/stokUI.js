@@ -39,7 +39,9 @@ let merah = ""
 
 let now = StokCore.nowWIB()
 
-let logHariIni = STOK.LOG_HARI_INI?.find(x=>x.item_id===i.id)
+let logHariIni = STOK.LOG_HARI_INI?.find(x=>
+  x.item_id===i.id && x.jenis==="jual"
+)
 
 if(!logHariIni){
   merah = "redbg"
@@ -50,7 +52,7 @@ html+=`
 
   <!-- GARIS 3 (DRAG) -->
   <div class="menuDots"
-  onclick="StokCore.hapusItem('${i.id}','${i.nama_item}')">
+  onclick="StokCore.klikDots(event,this.parentElement)">
   ☰
 </div>
 
