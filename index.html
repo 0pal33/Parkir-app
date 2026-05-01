@@ -103,6 +103,7 @@ location.href="titipan.html"
 }
 
 function goStok(){
+toggleMenu()
 location.href="stok.html"
 }
 
@@ -112,11 +113,26 @@ location.href="stok.html"
 
 async function cekAkses(){
 
-document.getElementById("menuOperasional").style.display="block"
+let btn = document.getElementById("btnStok")
 
-// cek admin lokal
+if(!btn) return
+
 if(localStorage.getItem("adminLogin") !== "true"){
-document.getElementById("btnStok").style.display="none"
+btn.style.display="none"
+}else{
+btn.style.display="block"
+}
+
+}
+
+function toggleMenu(){
+
+let el = document.getElementById("menuOperasional")
+
+if(el.style.display === "none" || el.style.display === ""){
+el.style.display = "flex"
+}else{
+el.style.display = "none"
 }
 
 }
