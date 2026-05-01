@@ -576,7 +576,7 @@ if(!ada){
   return
 }
 
-saveOrder()
+this.saveOrder()
 window.open("https://wa.me/6282132517947?text="+text)
 this.loadData()
 
@@ -638,7 +638,7 @@ return
 }
 
 this.loadData()
-stokUI.renderList()
+StokUI.renderList()
 alert("Stok berhasil ditambah")
 
 } finally {
@@ -770,7 +770,7 @@ total:totalBaru
 
 this.clearOrder()
 this.loadData()
-stokUI.renderList()
+StokUI.renderList()
 },
 
 async batalPesanan(){
@@ -820,7 +820,7 @@ await window.supabaseClient
 
 this.clearOrder()
 this.loadData()
-stokUI.renderList()
+StokUI.renderList()
 
 alert("Pesanan terakhir dibatalkan")
 }
