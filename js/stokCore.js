@@ -852,7 +852,7 @@ let today = now.toISOString().slice(0,10)
 
 if(lastReset === today) return
 
-STOK.DATA.forEach(async i=>{
+for (let i of STOK.DATA){
 
 if(i.barang_dihitung === false && i.qty !== 0){
 
@@ -869,6 +869,10 @@ updated_at:new Date().toISOString()
 })
 
 localStorage.setItem("STOK.LAST_RESET", today)
+
+setTimeout(()=>{
+  StokCore.loadData()
+},500)
 
 }
 
