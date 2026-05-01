@@ -153,7 +153,7 @@ updated_at:new Date().toISOString()
 })
 .eq("id",id)
 
-this.loadData()
+StokCore.loadData()
 },
 
 async editJual(id,harga){
@@ -174,7 +174,7 @@ updated_at:new Date().toISOString()
 })
 .eq("id",id)
 
-this.loadData()
+StokCore.loadData()
 },
 
 async editQty(id,qtyLama,hargaJual,dihitung){
@@ -260,7 +260,7 @@ total:totalMasuk
 
 }
 
-this.loadData()
+StokCore.loadData()
 window.loadingAction = false
 },
 
@@ -306,7 +306,7 @@ await window.supabaseClient
 }
 
 STOK.LAST_UNDO=null
-this.loadData()
+StokCore.loadData()
 },
 
 klikDots(e,el){
@@ -340,7 +340,7 @@ await window.supabaseClient
 .eq("id",id)
 
 STOK.isDeleting = false
-this.loadData()
+StokCore.loadData()
 },
 
 formTambah(){
@@ -363,7 +363,7 @@ formArea.innerHTML=`
 <input id="f_awal" type="number" placeholder="Masukkan stok barang saat ini">
 
 <div class="checkLine">
-<input type="checkbox" id="f_dihitung" checked onchange="toggleHitung()">
+<input type="checkbox" id="f_dihitung" checked onchange="StokCore.toggleHitung()">
 <span>Barang dihitung</span>
 </div>
 
@@ -373,8 +373,8 @@ formArea.innerHTML=`
 </div>
 
 <div class="rowBtn">
-<button class="green" onclick="simpanBarang()">Simpan</button>
-<button class="red" onclick="renderList()">Batal</button>
+<button class="green" onclick="StokCore.simpanBarang()">Simpan</button>
+<button class="red" onclick="StokUI.renderList()">Batal</button>
 </div>
 
 </div>
@@ -443,7 +443,7 @@ if(error){
 }
 
 window.loadingSimpan = false
-this.loadData()
+StokCore.loadData()
 },
 
 openPesan(){
@@ -501,9 +501,9 @@ html+=`
 </div>
 
 <div class="rowBtn">
-<button class="blue" onclick="tambahManual()">Tambah</button>
-<button class="green" onclick="kirimPesan()">Kirim WA</button>
-<button class="red" onclick="renderList()">Batal</button>
+<button class="blue" onclick="StokCore.tambahManual()">Tambah</button>
+<button class="green" onclick="StokCore.kirimPesan()">Kirim WA</button>
+<button class="red" onclick="StokUI.renderList()">Batal</button>
 </div>
 
 </div>
@@ -578,7 +578,7 @@ if(!ada){
 
 this.saveOrder()
 window.open("https://wa.me/6282132517947?text="+text)
-this.loadData()
+StokCore.loadData()
 
 } finally {
   window.loadingPesan = false
@@ -637,7 +637,7 @@ alert("Pilih barang dulu")
 return
 }
 
-this.loadData()
+StokCore.loadData()
 StokUI.renderList()
 alert("Stok berhasil ditambah")
 
@@ -671,7 +671,7 @@ html+=`
 </div>
 
 <input class="smallInput" id="restok_${idx}" value="${i.qty}">
-<button class="red" onclick="stokKosong(${idx})">✖</button>
+<button class="red" onclick="StokCore.stokKosong(${idx})">✖</button>
 
 </div>
 `
@@ -683,7 +683,7 @@ html+=`
 }
 
 html+=`
-<button class="gray" onclick="renderList()">Kembali</button>
+<button class="gray" onclick="StokUI.renderList()">Kembali</button>
 </div>
 `
 
@@ -769,7 +769,7 @@ total:totalBaru
 }
 
 this.clearOrder()
-this.loadData()
+StokCore.loadData()
 StokUI.renderList()
 },
 
@@ -819,7 +819,7 @@ await window.supabaseClient
 }
 
 this.clearOrder()
-this.loadData()
+StokCore.loadData()
 StokUI.renderList()
 
 alert("Pesanan terakhir dibatalkan")
