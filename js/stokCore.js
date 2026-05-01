@@ -97,7 +97,7 @@ STOK.sortableInstance.destroy()
 STOK.sortableInstance = Sortable.create(el,{
 animation:150,
 handle:".menuDots",
-delay:100,
+delay:200,
 delayOnTouchOnly:true,
 ghostClass:"dragging",
 fallbackOnBody: true,
