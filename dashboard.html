@@ -275,10 +275,6 @@ new Date().toLocaleString("en-US",{timeZone:"Asia/Jakarta"})
 }
 
 async function loadDashboard(){
-  
-document.getElementById("grandTotal").innerText = "Loading..."
-document.getElementById("incomeTotal").innerText = "Loading..."
-document.getElementById("expenseTotal").innerText = "Loading..."
 
 const setLoading = ()=>{
   ["grandTotal","incomeTotal","expenseTotal"].forEach(id=>{
@@ -639,9 +635,13 @@ dashboardInterval = setInterval(loadDashboard,10000)
 }
 
   selectedDates = dates
-  isCustom = true
-  loadDashboard()
+isCustom = true
+
+if(dashboardInterval){
   clearInterval(dashboardInterval)
+}
+
+loadDashboard()
 }
 })
 
