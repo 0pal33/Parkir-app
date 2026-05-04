@@ -236,8 +236,6 @@ document.body.style.display="block"
 </div>
 
 <div class="menu" id="menuContainer">
-  
-<div id="detailBox" style="display:none"></div>
 
 <button class="blue btn" onclick="window.location='parkirAktif.html'">
 Lihat Parkir Aktif
@@ -248,6 +246,8 @@ Titipan Warung
 </button>
 
 <button class="blue btn" onclick="toggleDetail()">Detail</button>
+
+<div id="detailBox" style="display:none"></div>
 
 </div>
 
@@ -277,9 +277,22 @@ new Date().toLocaleString("en-US",{timeZone:"Asia/Jakarta"})
 async function loadDashboard(){
   
 document.getElementById("grandTotal").innerText = "Loading..."
-document.getElementById("incomeTotal").innerText = "Loading..."
-document.getElementById("expenseTotal").innerText = "Loading..."
+const setLoading = ()=>{
+  ["grandTotal","incomeTotal","expenseTotal"].forEach(id=>{
+    let el = document.getElementById(id)
+    if(el) el.style.opacity = 0.5
+  })
+}
 
+const clearLoading = ()=>{
+  ["grandTotal","incomeTotal","expenseTotal"].forEach(id=>{
+    let el = document.getElementById(id)
+    if(el) el.style.opacity = 1
+  })
+}
+setLoading()
+// fetch data
+clearLoading()
 let today = nowWIB()
 
 let start, end
@@ -366,7 +379,10 @@ if(s.jenis==="pesan") expense += Number(s.total||0)
 ;(titipan||[]).forEach(t=>{
 let total = Number(t.total || 0)
 
-if(t.jenis==="ambil") expense += total
+if(t.jenis==="ambil"){
+  income += total          // uang masuk
+  expense += total         // uang ke penitip
+}
 })
 
 // =====================
@@ -552,7 +568,11 @@ setTimeout(()=>{
   if(typeof loadDashboard === "function"){
     loadDashboard()
     if(!isCustom){
-  dashboardInterval = setInterval(loadDashboard,10000)
+  if(dashboardInterval){
+  clearInterval(dashboardInterval)
+}
+
+dashboardInterval = setInterval(loadDashboard,10000)
 }
   }else{
     console.log("loadDashboard belum siap")
@@ -604,7 +624,11 @@ const fp = flatpickr("#filterTanggal", {
   selectedDates = []
 
   clearInterval(dashboardInterval)
-  dashboardInterval = setInterval(loadDashboard,10000)
+  if(dashboardInterval){
+  clearInterval(dashboardInterval)
+}
+
+dashboardInterval = setInterval(loadDashboard,10000)
 
   loadDashboard()
   return
