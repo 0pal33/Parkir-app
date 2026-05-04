@@ -200,7 +200,7 @@ document.body.style.display="block"
 
 <div class="slider">
 
-  <button id="periodBtn" class="blue btn" style="margin-bottom:10px">
+  <button id="periodBtn" class="blue btn" style="margin-bottom:10px">Hari ini 
   </button>
 
   <input id="filterTanggal" style="display:none">
@@ -228,6 +228,11 @@ document.body.style.display="block"
 
   </div>
 
+</div>
+
+<div id="titipanAktifBox" class="card" style="margin-top:15px">
+  <b>Barang Titipan Aktif</b>
+  <div id="titipanAktifList">Loading...</div>
 </div>
 
 <div class="menu" id="menuContainer">
@@ -355,8 +360,7 @@ if(s.jenis==="pesan") expense += Number(s.total||0)
 ;(titipan||[]).forEach(t=>{
 let total = Number(t.total || 0)
 
-if(t.jenis==="jual") income += total
-if(t.jenis==="modal") expense += total
+if(t.jenis==="ambil") income += total
 })
 
 // =====================
@@ -368,6 +372,8 @@ document.getElementById("expenseTotal").innerText = rupiah(expense)
 document.getElementById("grandTotal").innerText = rupiah(income - expense)
 
 document.getElementById("periodBtn").innerText = formatLabel()
+
+await loadTitipanAktif()
 
 }
 
@@ -473,6 +479,39 @@ function formatLabel(){
   }
 
   return `${d1} ${m1} ${y1} - ${d2} ${m2} ${y2}`
+}
+
+async function loadTitipanAktif(){
+
+let {data,error} = await window.supabaseClient
+.from("barang_titipan")
+.select("nama_item, qty")
+.gt("qty", 0)
+.order("nama_item")
+
+if(error){
+document.getElementById("titipanAktifList").innerText = "Gagal load"
+return
+}
+
+if(!data || data.length === 0){
+document.getElementById("titipanAktifList").innerText = "Kosong"
+return
+}
+
+let html = ""
+
+data.forEach(i=>{
+html += `
+<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #eee">
+<span>${i.nama_item}</span>
+<b>${i.qty}</b>
+</div>
+`
+})
+
+document.getElementById("titipanAktifList").innerHTML = html
+
 }
 
 window.onload = () => {
