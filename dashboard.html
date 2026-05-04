@@ -231,7 +231,7 @@ document.body.style.display="block"
 </div>
 
 <div id="titipanAktifBox" class="card" style="margin-top:15px">
-  <b>Barang Titipan Aktif</b>
+  <b>Barang Titipan Aktif (di warung)</b>
   <div id="titipanAktifList">Loading...</div>
 </div>
 
@@ -275,6 +275,8 @@ new Date().toLocaleString("en-US",{timeZone:"Asia/Jakarta"})
 async function loadDashboard(){
   
 document.getElementById("grandTotal").innerText = "Loading..."
+document.getElementById("incomeTotal").innerText = "Loading..."
+document.getElementById("expenseTotal").innerText = "Loading..."
 
 let today = nowWIB()
 
@@ -347,7 +349,9 @@ income += tarif
 
 // bulanan
 ;(bulanan||[]).forEach(b=>{
-income += Number(b.last_paid_amount || 30000)
+if(b.last_paid_amount){
+  income += Number(b.last_paid_amount)
+}
 })
 
 // stok
@@ -523,7 +527,9 @@ if(dashboardInterval !== null){
 setTimeout(()=>{
   if(typeof loadDashboard === "function"){
     loadDashboard()
-    dashboardInterval = setInterval(loadDashboard,10000)
+    if(!isCustom){
+  dashboardInterval = setInterval(loadDashboard,10000)
+}
   }else{
     console.log("loadDashboard belum siap")
   }
@@ -579,6 +585,7 @@ const fp = flatpickr("#filterTanggal", {
   selectedDates = dates
   isCustom = true
   loadDashboard()
+  clearInterval(dashboardInterval)
 }
 })
 
