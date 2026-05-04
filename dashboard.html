@@ -425,8 +425,6 @@ document.getElementById("grandTotal").innerText = rupiah(income - expense)
 
 document.getElementById("periodBtn").innerText = formatLabel()
 
-await loadTitipanAktif()
-
 clearLoading()
 
 }
@@ -535,40 +533,16 @@ function formatLabel(){
   return `${d1} ${m1} ${y1} - ${d2} ${m2} ${y2}`
 }
 
-async function loadTitipanAktif(){
+async function loadTitipanDetail(btn){
 
-let {data,error} = await window.supabaseClient
-.from("barang_titipan")
-.select("nama_item, qty")
-.gt("qty", 0)
-.order("nama_item")
-
-if(error){
-document.getElementById("titipanAktifList").innerText = "Gagal load"
-return
-}
-
-if(!data || data.length === 0){
-document.getElementById("titipanAktifList").innerText = "Kosong"
-return
-}
-
-let html = ""
-
-data.forEach(i=>{
-html += `
-<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #eee">
-<span>${i.nama_item}</span>
-<b>${i.qty}</b>
-</div>
-`
+// reset semua button
+document.querySelectorAll("#detailBox button").forEach(b=>{
+  b.style.opacity = 0.5
 })
 
-document.getElementById("titipanAktifList").innerHTML = html
-
-}
-
-async function loadTitipanDetail(){
+if(btn){
+  btn.style.opacity = 1
+}1
 
 let el = document.getElementById("titipanDetailList")
 el.innerHTML = "Loading..."
@@ -625,9 +599,9 @@ function toggleDetail(){
           Parkir Aktif
         </button>
 
-        <button class="green btn" onclick="loadTitipanDetail()">
-          Barang Titipan Aktif
-        </button>
+        <button class="green btn" onclick="loadTitipanDetail(this)">
+  Barang Titipan Aktif
+</button>
 
         <div id="titipanDetailList" style="margin-top:15px"></div>
 
