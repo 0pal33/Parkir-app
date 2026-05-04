@@ -42,15 +42,17 @@ padding-bottom:100px;
   font-size:32px;
   margin:8px 0 15px;
   color:#2c3e50;
+  font-weight:600; /* ⬅️ BIAR LEBIH "MAHAL" LOOK */
 }
 
 .rowStat{
   display:flex;
   gap:10px;
+  flex-wrap:wrap; /* ⬅️ BIAR TURUN KALAU SEMPIT */
 }
 
 .stat{
-  flex:1;
+  flex:1 1 45%; /* ⬅️ RESPONSIVE 2 KOLOM */
   padding:10px;
   border-radius:10px;
   font-size:14px;
@@ -136,9 +138,9 @@ padding:20px;
 border-radius:15px;
 box-shadow:0 4px 10px rgba(0,0,0,0.1);
 
-min-width:95%;
-flex-shrink:0;
-scroll-snap-align:start;
+width:100%;
+max-width:420px; /* ⬅️ BATASI BIAR GA KELEBARAN */
+margin:auto;     /* ⬅️ TENGAH */
 }
 
 .menu{
@@ -271,10 +273,6 @@ document.body.style.display="block"
 </div>
 
 <div class="menu" id="menuContainer">
-
-<button class="blue btn" onclick="window.location='parkirAktif.html'">
-Lihat Parkir Aktif
-</button>
 
 <button class="blue btn" onclick="toggleDetail()">Detail</button>
 
