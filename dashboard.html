@@ -200,67 +200,36 @@ document.body.style.display="block"
 
 <div class="slider">
 
-<div class="slides">
+  <button id="periodBtn" class="blue btn">
+    Hari ini
+  </button>
 
-<div class="card">
+  <input id="filterTanggal" style="display:none">
 
-<h4>Pendapatan Hari Ini</h4>
+  <div class="card">
 
-Checkout : <span id="d1">0</span><br>
-Total Checkout : Rp <span id="t1">0</span><br><br>
+    <div>Total :</div>
+    <div class="big" id="grandTotal">Rp 0</div>
 
-Bulanan : <span id="b1">0</span><br>
-Total Bulanan : Rp <span id="bt1">0</span>
+    <hr>
 
-<div class="big">
-TOTAL Rp <span id="all1">0</span>
-</div>
+    <div style="display:flex;justify-content:space-between">
 
-</div>
+      <div>
+        Pendapatan :
+        <div id="incomeTotal">Rp 0</div>
+      </div>
 
-<div class="card">
+      <div>
+        Pengeluaran :
+        <div id="expenseTotal">Rp 0</div>
+      </div>
 
-<h4>Pendapatan Minggu Ini</h4>
+    </div>
 
-Checkout : <span id="d2">0</span><br>
-Total Checkout : Rp <span id="t2">0</span><br><br>
-
-Bulanan : <span id="b2">0</span><br>
-Total Bulanan : Rp <span id="bt2">0</span>
-
-<div class="big">
-TOTAL Rp <span id="all2">0</span>
-</div>
+  </div>
 
 </div>
-
-<div class="card">
-
-<h4>Pendapatan Bulan Ini</h4>
-
-Checkout : <span id="d3">0</span><br>
-Total Checkout : Rp <span id="t3">0</span><br><br>
-
-Bulanan : <span id="b3">0</span><br>
-Total Bulanan : Rp <span id="bt3">0</span>
-
-<div class="big">
-TOTAL Rp <span id="all3">0</span>
-</div>
-
-</div>
-
-</div> <!-- slides -->
-
-<div class="dots">
-<span class="dot active"></span>
-<span class="dot"></span>
-<span class="dot"></span>
-</div>
-
-<input id="filterTanggal" placeholder="Pilih tanggal / range">
-
-</div> <!-- slider -->
 
 <div class="menu" id="menuContainer">
 
@@ -300,204 +269,103 @@ new Date().toLocaleString("en-US",{timeZone:"Asia/Jakarta"})
 
 async function loadDashboard(){
 
-if(isFiltering) return // ✅ TAMBAH INI
-
-console.log("RUN DASHBOARD")
-
-if(document.readyState !== "complete"){
-  console.log("DOM belum siap")
-  return
-}
-
-if(typeof supabase === "undefined"){
-  console.log("Supabase belum siap")
-  return
-}
-
-// loading state
-const ids = [
-"d1","t1","b1","bt1","all1",
-"d2","t2","b2","bt2","all2",
-"d3","t3","b3","bt3","all3"
-]
-
-ids.forEach(id=>{
-  let el = document.getElementById(id)
-  if(el){
-    el.innerText="..."
-  }else{
-    console.log("ELEMENT TIDAK ADA:", id)
-  }
-})
-
-// ambil data
-let parkir = []
-let bulanan = []
-
-// waktu (HARUS DI LUAR TRY)
 let today = nowWIB()
 
-let week = new Date(today)
-week.setDate(today.getDate()-7)
+let start, end
 
-let month = new Date(today)
-month.setMonth(today.getMonth()-1)
+if(!isCustom || selectedDates.length === 0){
+  start = new Date(today)
+  start.setHours(0,0,0,0)
 
-try{
+  end = new Date(today)
+  end.setHours(23,59,59,999)
 
-const {data:p,error:e1}=await window.supabaseClient
+}else{
+  start = new Date(selectedDates[0])
+  start.setHours(0,0,0,0)
+
+  end = new Date(selectedDates[1] || selectedDates[0])
+  end.setHours(23,59,59,999)
+}
+
+let startISO = start.toISOString()
+let endISO = end.toISOString()
+
+// =====================
+// FETCH DATA
+// =====================
+
+let {data:parkir} = await window.supabaseClient
 .from("parkir")
 .select("checkout_at, checkin_at")
 .eq("status","off")
-.gte("checkout_at", month.toISOString())
-.order("checkout_at", { ascending: false })
+.gte("checkout_at", startISO)
+.lte("checkout_at", endISO)
 
-
-
-if(e1) throw e1
-
-parkir = p || []
-
-const {data:b,error:e2}=await window.supabaseClient
+let {data:bulanan} = await window.supabaseClient
 .from("bulanan")
-.select("last_paid_at")
-.not("last_paid_at","is",null)
+.select("last_paid_at, last_paid_amount")
+.gte("last_paid_at", startISO)
+.lte("last_paid_at", endISO)
 
-if(e2) throw e2
+let {data:stok} = await window.supabaseClient
+.from("stok_log")
+.select("*")
+.gte("created_at", startISO)
+.lte("created_at", endISO)
 
-bulanan = b || []
-
-}catch(err){
-console.log("ERROR DASHBOARD:",err)
-return
-}
-
+let {data:titipan} = await window.supabaseClient
+.from("titipan_log")
+.select("*")
+.gte("created_at", startISO)
+.lte("created_at", endISO)
 
 // =====================
-// PARKIR
+// HITUNG
 // =====================
 
-let dayCheckout=0
-let weekCheckout=0
-let monthCheckout=0
+let income = 0
+let expense = 0
 
-let tDay=0
-let tWeek=0
-let tMonth=0
-
-let listParkir = parkir || []
-
-listParkir.forEach(p=>{
-
-let tOut = p.checkout_at 
-  ? new Date(new Date(p.checkout_at).toLocaleString("en-US",{timeZone:"Asia/Jakarta"}))
-  : null
-
-let tIn = p.checkin_at 
-  ? new Date(new Date(p.checkin_at).toLocaleString("en-US",{timeZone:"Asia/Jakarta"}))
-  : null
-
-if(!tOut || !tIn) return
+// parkir
+;(parkir||[]).forEach(p=>{
+let tOut = new Date(p.checkout_at)
+let tIn = new Date(p.checkin_at)
 
 let durasi = hitungDurasiParkir(tIn, tOut)
 let tarif = hitungTarifParkir(durasi)
 
-if(isSameDay(tOut, today)){
-  dayCheckout++
-  tDay += tarif
-}
+income += tarif
+})
 
-if(tOut>=week){
-  weekCheckout++
-  tWeek += tarif
-}
+// bulanan
+;(bulanan||[]).forEach(b=>{
+income += Number(b.last_paid_amount || 30000)
+})
 
-if(tOut>=month){
-  monthCheckout++
-  tMonth += tarif
-}
+// stok
+;(stok||[]).forEach(s=>{
+if(s.jenis==="jual") income += Number(s.total||0)
+if(s.jenis==="pesan") expense += Number(s.total||0)
+})
 
+// titipan (sesuaikan kalau beda)
+;(titipan||[]).forEach(t=>{
+let total = Number(t.total || 0)
+
+if(t.jenis==="masuk") income += total
+if(t.jenis==="keluar") expense += total
 })
 
 // =====================
-// BULANAN
+// RENDER
 // =====================
 
-let dayBul=0
-let weekBul=0
-let monthBul=0
+document.getElementById("incomeTotal").innerText = rupiah(income)
+document.getElementById("expenseTotal").innerText = rupiah(expense)
+document.getElementById("grandTotal").innerText = rupiah(income - expense)
 
-let listBulanan = bulanan || []
-listBulanan.forEach(b=>{
-
-let t = b.last_paid_at 
-  ? new Date(new Date(b.last_paid_at).toLocaleString("en-US",{timeZone:"Asia/Jakarta"}))
-  : null
-if(!t || isNaN(t)) return
-
-if(isSameDay(t, today)) dayBul++
-if(t>=week) weekBul++
-if(t>=month) monthBul++
-
-})
-
-let bulTarif=30000
-
-let tbDay=dayBul*bulTarif
-let tbWeek=weekBul*bulTarif
-let tbMonth=monthBul*bulTarif
-
-// =====================
-// ELEMENT
-// =====================
-
-const d1=document.getElementById("d1")
-const t1=document.getElementById("t1")
-const b1=document.getElementById("b1")
-const bt1=document.getElementById("bt1")
-const all1=document.getElementById("all1")
-
-const d2=document.getElementById("d2")
-const t2=document.getElementById("t2")
-const b2=document.getElementById("b2")
-const bt2=document.getElementById("bt2")
-const all2=document.getElementById("all2")
-
-const d3=document.getElementById("d3")
-const t3=document.getElementById("t3")
-const b3=document.getElementById("b3")
-const bt3=document.getElementById("bt3")
-const all3=document.getElementById("all3")
-
-console.log("BEFORE UI UPDATE")
-console.log(tDay, tWeek, tMonth)
-console.log("CEK ELEMENT:", d1, t1, all1)
-
-// =====================
-// UPDATE UI
-// =====================
-// hari ini
-if(d1) d1.innerText = dayCheckout;
-if(t1) t1.innerText = rupiah(tDay);
-if(b1) b1.innerText = dayBul;
-if(bt1) bt1.innerText = rupiah(tbDay);
-if(all1) all1.innerText = rupiah(tDay + tbDay);
-
-// minggu
-if(d2) d2.innerText = weekCheckout;
-if(t2) t2.innerText = rupiah(tWeek);
-if(b2) b2.innerText = weekBul;
-if(bt2) bt2.innerText = rupiah(tbWeek);
-if(all2) all2.innerText = rupiah(tWeek + tbWeek);
-
-// bulan
-if(d3) d3.innerText = monthCheckout;
-if(t3) t3.innerText = rupiah(tMonth);
-if(b3) b3.innerText = monthBul;
-if(bt3) bt3.innerText = rupiah(tbMonth);
-if(all3) all3.innerText = rupiah(tMonth + tbMonth);
-
-
+document.getElementById("periodBtn").innerText = formatLabel()
 
 }
 
@@ -572,50 +440,40 @@ function goPetugas(){
 window.location.href="index.html"
 }
 
-async function loadDashboardRange(start, end){
+let selectedDates = []
+let isCustom = false
 
-isFiltering = true // ✅ TAMBAH INI
+function formatLabel(){
+  if(!isCustom || selectedDates.length === 0){
+    return "Hari ini"
+  }
 
-let startISO = new Date(start).toISOString()
-let endISO = new Date(end)
-endISO.setHours(23,59,59,999)
-endISO = endISO.toISOString()
+  let a = selectedDates[0]
+  let b = selectedDates[1] || a
 
-console.log("FILTER:", startISO, endISO)
+  const bulan = ["Jan","Feb","Mar","Apr","Mei","Jun","Jul","Agu","Sep","Okt","Nov","Des"]
 
-let {data:parkir} = await window.supabaseClient
-.from("parkir")
-.select("checkout_at, checkin_at")
-.eq("status","off")
-.gte("checkout_at", startISO)
-.lte("checkout_at", endISO)
+  let d1 = a.getDate()
+  let m1 = bulan[a.getMonth()]
+  let y1 = String(a.getFullYear()).slice(-2)
 
-let {data:bulanan} = await window.supabaseClient
-.from("bulanan")
-.select("last_paid_at")
-.gte("last_paid_at", startISO)
-.lte("last_paid_at", endISO)
+  let d2 = b.getDate()
+  let m2 = bulan[b.getMonth()]
+  let y2 = String(b.getFullYear()).slice(-2)
 
-/* reset semua */
-let totalParkir = 0
-let totalBulanan = 0
+  if(a.getTime() === b.getTime()){
+    return `${d1} ${m1} ${y1}`
+  }
 
-;(parkir||[]).forEach(p=>{
-let tOut = new Date(p.checkout_at)
-let tIn = new Date(p.checkin_at)
+  if(a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth()){
+    return `${d1} - ${d2} ${m2} ${y2}`
+  }
 
-let durasi = hitungDurasiParkir(tIn, tOut)
-let tarif = hitungTarifParkir(durasi)
+  if(a.getFullYear() === b.getFullYear()){
+    return `${d1} ${m1} - ${d2} ${m2} ${y2}`
+  }
 
-totalParkir += tarif
-})
-
-let bulTarif = 30000
-totalBulanan = (bulanan||[]).length * bulTarif
-
-/* tampilkan di card pertama aja (biar simpel dulu) */
-document.getElementById("all1").innerText = rupiah(totalParkir + totalBulanan)
-
+  return `${d1} ${m1} ${y1} - ${d2} ${m2} ${y2}`
 }
 
 window.onload = () => {
@@ -699,18 +557,21 @@ if(IS_DEV && !window.__SUGER_LOADED__){
 
 document.addEventListener("DOMContentLoaded",()=>{
 
-flatpickr("#filterTanggal", {
+const fp = flatpickr("#filterTanggal", {
   mode: "range",
   dateFormat: "Y-m-d",
-  onChange: function(selectedDates){
-    if(selectedDates.length === 2){
-      loadDashboardRange(selectedDates[0], selectedDates[1])
-    }else if(selectedDates.length === 0){
-      isFiltering = false
+  onChange: function(dates){
+    if(dates.length >= 1){
+      selectedDates = dates
+      isCustom = true
       loadDashboard()
     }
   }
 })
+
+document.getElementById("periodBtn").onclick = ()=>{
+  fp.open()
+}
 
 })
 
