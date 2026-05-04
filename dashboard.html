@@ -200,8 +200,7 @@ document.body.style.display="block"
 
 <div class="slider">
 
-  <button id="periodBtn" class="blue btn">
-    Hari ini
+  <button id="periodBtn" class="blue btn" style="margin-bottom:10px">
   </button>
 
   <input id="filterTanggal" style="display:none">
@@ -248,7 +247,8 @@ Titipan Warung
 <script>
 
 let dashboardInterval = null
-let isFiltering = false // ✅ TAMBAH INIl
+let selectedDates = []
+let isCustom = false
 
 function rupiah(n){
 n = Number(n) || 0
@@ -268,6 +268,8 @@ new Date().toLocaleString("en-US",{timeZone:"Asia/Jakarta"})
 }
 
 async function loadDashboard(){
+  
+document.getElementById("grandTotal").innerText = "Loading..."
 
 let today = nowWIB()
 
@@ -353,8 +355,8 @@ if(s.jenis==="pesan") expense += Number(s.total||0)
 ;(titipan||[]).forEach(t=>{
 let total = Number(t.total || 0)
 
-if(t.jenis==="masuk") income += total
-if(t.jenis==="keluar") expense += total
+if(t.jenis==="jual") income += total
+if(t.jenis==="modal") expense += total
 })
 
 // =====================
@@ -440,9 +442,6 @@ function goPetugas(){
 window.location.href="index.html"
 }
 
-let selectedDates = []
-let isCustom = false
-
 function formatLabel(){
   if(!isCustom || selectedDates.length === 0){
     return "Hari ini"
@@ -508,36 +507,6 @@ if(dashboardInterval !== null){
 clearInterval(dashboardInterval)
 }
 })
-/* =========================
-   SLIDER DOT INDICATOR
-========================= */
-
-document.addEventListener("DOMContentLoaded",()=>{
-
-const slides = document.querySelector(".slides")
-const dots = document.querySelectorAll(".dot")
-
-if(!slides || !dots.length) return
-
-let scrollTimer
-
-slides.addEventListener("scroll",()=>{
-
-clearTimeout(scrollTimer)
-
-scrollTimer = setTimeout(()=>{
-
-let cardWidth = slides.querySelector(".card").offsetWidth + 15
-let index = Math.round(slides.scrollLeft / cardWidth)
-
-dots.forEach(d=>d.classList.remove("active"))
-if(dots[index]) dots[index].classList.add("active")
-
-},50)
-
-})
-
-})
 
 </script>
 
@@ -561,12 +530,17 @@ const fp = flatpickr("#filterTanggal", {
   mode: "range",
   dateFormat: "Y-m-d",
   onChange: function(dates){
-    if(dates.length >= 1){
-      selectedDates = dates
-      isCustom = true
-      loadDashboard()
-    }
+  if(dates.length === 0){
+    isCustom = false
+    selectedDates = []
+    loadDashboard()
+    return
   }
+
+  selectedDates = dates
+  isCustom = true
+  loadDashboard()
+}
 })
 
 document.getElementById("periodBtn").onclick = ()=>{
