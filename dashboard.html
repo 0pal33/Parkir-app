@@ -230,14 +230,14 @@ document.body.style.display="block"
 
 </div>
 
-<div id="detailBox" style="display:none"></div>
-
 <div id="titipanAktifBox" class="card" style="margin-top:15px">
   <b>Barang Titipan Aktif (di warung)</b>
   <div id="titipanAktifList">Loading...</div>
 </div>
 
 <div class="menu" id="menuContainer">
+  
+<div id="detailBox" style="display:none"></div>
 
 <button class="blue btn" onclick="window.location='parkirAktif.html'">
 Lihat Parkir Aktif
@@ -600,11 +600,15 @@ const fp = flatpickr("#filterTanggal", {
   dateFormat: "Y-m-d",
   onChange: function(dates){
   if(dates.length === 0){
-    isCustom = false
-    selectedDates = []
-    loadDashboard()
-    return
-  }
+  isCustom = false
+  selectedDates = []
+
+  clearInterval(dashboardInterval)
+  dashboardInterval = setInterval(loadDashboard,10000)
+
+  loadDashboard()
+  return
+}
 
   selectedDates = dates
   isCustom = true
@@ -618,37 +622,6 @@ document.getElementById("periodBtn").onclick = ()=>{
 }
 
 })
-
-async function exportCSV(){
-
-let month = new Date()
-month.setMonth(month.getMonth()-1)
-
-let {data} = await window.supabaseClient
-.from("stok_log")
-.select("*")
-.gte("created_at", month.toISOString())
-
-if(!data || data.length === 0){
-alert("Tidak ada data")
-return
-}
-
-let csv = "id,jenis,qty,total,created_at\n"
-
-data.forEach(row=>{
-csv += `${row.id},${row.jenis},${row.qty},${row.total},${row.created_at}\n`
-})
-
-let blob = new Blob([csv], { type: 'text/csv' })
-let url = URL.createObjectURL(blob)
-
-let a = document.createElement("a")
-a.href = url
-a.download = "backup.csv"
-a.click()
-
-}
 
 </script>
 
