@@ -28,6 +28,50 @@ text-align:center;
 padding-bottom:100px;
 }
 
+.modernCard{
+  text-align:left;
+}
+
+.label{
+  font-size:12px;
+  color:#888;
+  letter-spacing:1px;
+}
+
+.highlight{
+  font-size:32px;
+  margin:8px 0 15px;
+  color:#2c3e50;
+}
+
+.rowStat{
+  display:flex;
+  gap:10px;
+}
+
+.stat{
+  flex:1;
+  padding:10px;
+  border-radius:10px;
+  font-size:14px;
+}
+
+.stat b{
+  display:block;
+  margin-top:4px;
+  font-size:16px;
+}
+
+.income{
+  background:#eafaf1;
+  color:#27ae60;
+}
+
+.expense{
+  background:#fdecea;
+  color:#e74c3c;
+}
+
 .top{
 display:flex;
 justify-content:space-between;
@@ -205,44 +249,31 @@ document.body.style.display="block"
 
   <input id="filterTanggal" style="display:none">
 
-  <div class="card">
+<div class="card modernCard">
 
-    <div>Total :</div>
-    <div class="big" id="grandTotal">Rp 0</div>
+  <div class="label">TOTAL</div>
+  <div class="big highlight" id="grandTotal">Rp 0</div>
 
-    <hr>
-
-    <div style="display:flex;justify-content:space-between">
-
-      <div>
-        Pendapatan :
-        <div id="incomeTotal">Rp 0</div>
-      </div>
-
-      <div>
-        Pengeluaran :
-        <div id="expenseTotal">Rp 0</div>
-      </div>
-
+  <div class="rowStat">
+    <div class="stat income">
+      <div>Pendapatan</div>
+      <b id="incomeTotal">Rp 0</b>
     </div>
 
+    <div class="stat expense">
+      <div>Pengeluaran</div>
+      <b id="expenseTotal">Rp 0</b>
+    </div>
   </div>
 
 </div>
 
-<div id="titipanAktifBox" class="card" style="margin-top:15px">
-  <b>Barang Titipan Aktif (di warung)</b>
-  <div id="titipanAktifList">Loading...</div>
 </div>
 
 <div class="menu" id="menuContainer">
 
 <button class="blue btn" onclick="window.location='parkirAktif.html'">
 Lihat Parkir Aktif
-</button>
-
-<button class="green btn" onclick="window.location='titipan.html'">
-Titipan Warung
 </button>
 
 <button class="blue btn" onclick="toggleDetail()">Detail</button>
@@ -537,6 +568,50 @@ document.getElementById("titipanAktifList").innerHTML = html
 
 }
 
+async function loadTitipanDetail(){
+
+let el = document.getElementById("titipanDetailList")
+el.innerHTML = "Loading..."
+
+let {data,error} = await window.supabaseClient
+.from("barang_titipan")
+.select("nama_item, qty")
+.gt("qty", 0)
+.order("nama_item")
+
+if(error){
+  el.innerHTML = "Gagal load"
+  return
+}
+
+if(!data || data.length === 0){
+  el.innerHTML = "Kosong"
+  return
+}
+
+let html = `
+<table style="width:100%;border-collapse:collapse;font-size:14px">
+<tr style="background:#f5f5f5">
+  <th style="text-align:left;padding:6px">Nama</th>
+  <th style="text-align:right;padding:6px">Qty</th>
+</tr>
+`
+
+data.forEach(i=>{
+  html += `
+  <tr>
+    <td style="padding:6px;border-bottom:1px solid #eee">${i.nama_item}</td>
+    <td style="padding:6px;text-align:right;border-bottom:1px solid #eee">${i.qty}</td>
+  </tr>
+  `
+})
+
+html += `</table>`
+
+el.innerHTML = html
+
+}
+
 function toggleDetail(){
   let box = document.getElementById("detailBox")
 
@@ -545,13 +620,17 @@ function toggleDetail(){
 
     box.innerHTML = `
       <div class="card" style="margin-top:10px">
+
         <button class="blue btn" onclick="window.location='parkirAktif.html'">
-        Lihat Parkir Aktif
+          Parkir Aktif
         </button>
 
-        <button class="green btn" onclick="window.location='titipan.html'">
-        Kelola Titipan
+        <button class="green btn" onclick="loadTitipanDetail()">
+          Barang Titipan Aktif
         </button>
+
+        <div id="titipanDetailList" style="margin-top:15px"></div>
+
       </div>
     `
   }else{
