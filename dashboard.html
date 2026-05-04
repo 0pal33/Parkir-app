@@ -277,6 +277,9 @@ new Date().toLocaleString("en-US",{timeZone:"Asia/Jakarta"})
 async function loadDashboard(){
   
 document.getElementById("grandTotal").innerText = "Loading..."
+document.getElementById("incomeTotal").innerText = "Loading..."
+document.getElementById("expenseTotal").innerText = "Loading..."
+
 const setLoading = ()=>{
   ["grandTotal","incomeTotal","expenseTotal"].forEach(id=>{
     let el = document.getElementById(id)
@@ -290,9 +293,9 @@ const clearLoading = ()=>{
     if(el) el.style.opacity = 1
   })
 }
+
 setLoading()
-// fetch data
-clearLoading()
+
 let today = nowWIB()
 
 let start, end
@@ -384,6 +387,8 @@ if(t.jenis==="ambil"){
   expense += total         // uang ke penitip
 }
 })
+
+clearLoading()
 
 // =====================
 // RENDER
@@ -623,7 +628,6 @@ const fp = flatpickr("#filterTanggal", {
   isCustom = false
   selectedDates = []
 
-  clearInterval(dashboardInterval)
   if(dashboardInterval){
   clearInterval(dashboardInterval)
 }
