@@ -384,8 +384,6 @@ if(t.jenis==="ambil"){
 }
 })
 
-clearLoading()
-
 // =====================
 // RENDER
 // =====================
@@ -397,6 +395,8 @@ document.getElementById("grandTotal").innerText = rupiah(income - expense)
 document.getElementById("periodBtn").innerText = formatLabel()
 
 await loadTitipanAktif()
+
+clearLoading()
 
 }
 
