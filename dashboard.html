@@ -230,6 +230,8 @@ document.body.style.display="block"
 
 </div>
 
+<div id="detailBox" style="display:none"></div>
+
 <div id="titipanAktifBox" class="card" style="margin-top:15px">
   <b>Barang Titipan Aktif (di warung)</b>
   <div id="titipanAktifList">Loading...</div>
@@ -245,7 +247,7 @@ Lihat Parkir Aktif
 Titipan Warung
 </button>
 
-<button onclick="exportCSV()">Export Data</button>
+<button class="blue btn" onclick="toggleDetail()">Detail</button>
 
 </div>
 
@@ -364,7 +366,7 @@ if(s.jenis==="pesan") expense += Number(s.total||0)
 ;(titipan||[]).forEach(t=>{
 let total = Number(t.total || 0)
 
-if(t.jenis==="ambil") income += total
+if(t.jenis==="ambil") expense += total
 })
 
 // =====================
@@ -516,6 +518,28 @@ html += `
 
 document.getElementById("titipanAktifList").innerHTML = html
 
+}
+
+function toggleDetail(){
+  let box = document.getElementById("detailBox")
+
+  if(box.style.display === "none"){
+    box.style.display = "block"
+
+    box.innerHTML = `
+      <div class="card" style="margin-top:10px">
+        <button class="blue btn" onclick="window.location='parkirAktif.html'">
+        Lihat Parkir Aktif
+        </button>
+
+        <button class="green btn" onclick="window.location='titipan.html'">
+        Kelola Titipan
+        </button>
+      </div>
+    `
+  }else{
+    box.style.display = "none"
+  }
 }
 
 window.onload = () => {
