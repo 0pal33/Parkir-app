@@ -282,7 +282,6 @@ document.body.style.display="block"
 
 <script>
 
-let dashboardInterval = null
 let selectedDates = []
 let isCustom = false
 
@@ -610,44 +609,66 @@ function toggleDetail(){
   }
 }
 
+let rtTimeout
+
+function triggerReload(){
+  clearTimeout(rtTimeout)
+  rtTimeout = setTimeout(loadDashboard, 300)
+}
+
+function setupRealtime(){
+
+  if(!window.supabaseClient) return
+
+  const channel = window.supabaseClient.channel('dashboard-realtime')
+
+  channel
+  .on('postgres_changes', {
+    event: '*',
+    schema: 'public',
+    table: 'parkir'
+  }, triggerReload)
+
+  .on('postgres_changes', {
+    event: '*',
+    schema: 'public',
+    table: 'bulanan'
+  }, triggerReload)
+
+  .on('postgres_changes', {
+    event: '*',
+    schema: 'public',
+    table: 'stok_log'
+  }, triggerReload)
+
+  .on('postgres_changes', {
+    event: '*',
+    schema: 'public',
+    table: 'titipan_log'
+  }, triggerReload)
+
+  .subscribe()
+}
+
 window.onload = () => {
 
-if(dashboardInterval !== null){
-  clearInterval(dashboardInterval)
-}
+  // load pertama
+  loadDashboard()
 
-setTimeout(()=>{
-  if(typeof loadDashboard === "function"){
-    loadDashboard()
-    if(!isCustom){
-  if(dashboardInterval){
-  clearInterval(dashboardInterval)
-}
+  // aktifkan realtime
+  setupRealtime()
 
-dashboardInterval = setInterval(loadDashboard,10000)
-}
-  }else{
-    console.log("loadDashboard belum siap")
+  // tombol dev
+  if(IS_DEV){
+    const btn = document.createElement("button")
+    btn.className = "red btn"
+    btn.innerText = "Reset Data Test"
+    btn.onclick = resetData
+
+    document.getElementById("menuContainer").appendChild(btn)
   }
-}, 500)
 
-if(IS_DEV){
-  const btn = document.createElement("button")
-  btn.className = "red btn"
-  btn.innerText = "Reset Data Test"
-  btn.onclick = resetData
-
-  document.getElementById("menuContainer").appendChild(btn)
 }
-
-};
-
-
-window.addEventListener("beforeunload",()=>{
-if(dashboardInterval !== null){
-clearInterval(dashboardInterval)
-}
-})
 
 </script>
 
@@ -675,22 +696,12 @@ const fp = flatpickr("#filterTanggal", {
   isCustom = false
   selectedDates = []
 
-  if(dashboardInterval){
-  clearInterval(dashboardInterval)
-}
-
-dashboardInterval = setInterval(loadDashboard,10000)
-
   loadDashboard()
   return
 }
 
   selectedDates = dates
 isCustom = true
-
-if(dashboardInterval){
-  clearInterval(dashboardInterval)
-}
 
 loadDashboard()
 }
