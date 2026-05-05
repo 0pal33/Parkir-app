@@ -12,6 +12,8 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
 <script src="js/parkirEngine.js"></script>
+<script src="js/dashboard.js"></script>
+<script src="js/breakdown.js"></script>
 
 <style>
 body{display:none}
@@ -327,12 +329,12 @@ document.body.style.display="block"
   <!-- ROW 2 KOLOM -->
   <div class="rowBox">
 
-    <div class="card statCard incomeCard">
+   <div class="card statCard incomeCard" onclick="toggleBreakdown('income')">
       <div class="label">Pendapatan</div>
       <div class="big" id="incomeTotal">Rp 0</div>
     </div>
 
-    <div class="card statCard expenseCard">
+    <div class="card statCard expenseCard" onclick="toggleBreakdown('expense')">
       <div class="label">Pengeluaran</div>
       <div class="big" id="expenseTotal">Rp 0</div>
     </div>
@@ -340,6 +342,8 @@ document.body.style.display="block"
   </div>
 
 </div>
+
+<div id="breakdownBox" style="display:none; max-width:420px; margin:10px auto;"></div>
 
 </div>
 
