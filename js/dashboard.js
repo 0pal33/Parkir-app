@@ -81,7 +81,7 @@ let stokExpenseItems = new Set()
 let titipanItems = new Set()
 
 // PARKIR
-;(parkir||[]).forEach(p=>{
+(parkir ?? []).forEach(p=>{
 let tarif = hitungTarifParkir(
   hitungDurasiParkir(
     new Date(p.checkin_at),
@@ -95,7 +95,7 @@ checkoutCount++
 })
 
 // BULANAN
-;(bulanan||[]).forEach(b=>{
+(bulanan ?? []).forEach(b=>{
 let val = Number(b.last_paid_amount || 0)
 income += val
 bulananTotal += val
@@ -103,7 +103,7 @@ bulananCount++
 })
 
 // STOK
-;(stok||[]).forEach(s=>{
+(stok ?? []).forEach(s=>{
 let val = Number(s.total||0)
 
 if(s.jenis==="jual"){
@@ -117,12 +117,14 @@ if(s.jenis==="jual"){
 if(s.jenis==="pesan"){
   expense += val
   stokExpenseTotal += val
+  if(s.nama_item){
   stokExpenseItems.add(s.nama_item)
+}
 }
 })
 
 // TITIPAN
-;(titipan||[]).forEach(t=>{
+(titipan ?? []).forEach(t=>{
 let val = Number(t.total||0)
 
 if(t.jenis==="ambil"){
@@ -151,6 +153,8 @@ dashboardData = {
   titipanExpenseTotal,
   titipanItems: titipanItems.size
 }
+
+console.log("Dashboard Data:", dashboardData)
 
 // RENDER
 document.getElementById("incomeTotal").innerText = rupiah(income)
