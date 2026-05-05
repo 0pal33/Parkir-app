@@ -9,7 +9,7 @@ function renderBreakdown(){
 
 const box = document.getElementById("breakdownBox")
 
-if(!breakdownMode){
+if(!breakdownMode || !window.dashboardData){
   box.style.display = "none"
   return
 }
