@@ -26,6 +26,11 @@ margin:0;
 padding:20px;
 text-align:center;
 padding-bottom:100px;
+overflow-x:hidden;
+}
+
+*{
+  box-sizing: border-box;
 }
 
 .modernCard{
@@ -226,12 +231,14 @@ transform:translateX(-50%) scale(0.9);
   display:flex;
   gap:10px;
   align-items:stretch;
+  width:100%;
 }
 
 /* CARD KECIL */
 .statCard{
   flex:1;
-  min-width:0; /* ⬅️ PENTING biar ga overflow */
+  min-width:0;
+  width:0; /* ⬅️ FIX BIAR GA MELEBAR */
   padding:16px;
   border-radius:14px;
 }
@@ -250,6 +257,10 @@ transform:translateX(-50%) scale(0.9);
 }
 
 /* FONT */
+.label{
+  text-align:center;
+}
+
 .statCard .big{
   font-size:20px;
   font-weight:600;
