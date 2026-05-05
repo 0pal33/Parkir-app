@@ -1,4 +1,4 @@
-let dashboardData = {}
+let window.dashboardData = {}
 
 function rupiah(n){
 n = Number(n) || 0
@@ -140,7 +140,7 @@ if(t.jenis==="ambil"){
 })
 
 // SIMPAN
-dashboardData = {
+window.dashboardData = {
   checkoutTotal,
   checkoutCount,
   bulananTotal,
@@ -161,5 +161,7 @@ document.getElementById("incomeTotal").innerText = rupiah(income)
 document.getElementById("expenseTotal").innerText = rupiah(expense)
 document.getElementById("grandTotal").innerText = rupiah(income - expense)
 
-renderBreakdown()
+if(typeof renderBreakdown === "function"){
+  renderBreakdown()
+}
 }
