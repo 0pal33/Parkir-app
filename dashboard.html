@@ -208,6 +208,57 @@ z-index:999;
 transform:translateX(-50%) scale(0.9);
 }
 
+/* CONTAINER */
+.summary{
+  max-width:420px;
+  margin:auto;
+}
+
+/* TOTAL CARD */
+.totalCard{
+  margin-bottom:10px;
+}
+
+/* 2 KOLOM */
+.rowBox{
+  display:flex;
+  gap:10px;
+}
+
+/* CARD KECIL */
+.statCard{
+  flex:1;
+  padding:14px;
+  border-radius:14px;
+}
+
+/* WARNA */
+.incomeCard{
+  background:#eafaf1;
+  color:#27ae60;
+  box-shadow:0 3px 10px rgba(39,174,96,0.15);
+}
+
+.expenseCard{
+  background:#fdecea;
+  color:#e74c3c;
+  box-shadow:0 3px 10px rgba(231,76,60,0.15);
+}
+
+/* FONT */
+.statCard .big{
+  font-size:20px;
+  font-weight:600;
+  margin-top:6px;
+}
+
+/* MOBILE FIX */
+@media(max-width:400px){
+  .rowBox{
+    flex-direction:column;
+  }
+}
+
 </style>
 </head>
 
@@ -251,21 +302,27 @@ document.body.style.display="block"
 
   <input id="filterTanggal" style="display:none">
 
-<div class="card modernCard">
+<div class="summary">
 
-  <div class="label">TOTAL</div>
-  <div class="big highlight" id="grandTotal">Rp 0</div>
+  <!-- TOTAL -->
+  <div class="card totalCard">
+    <div class="label">TOTAL</div>
+    <div class="big highlight" id="grandTotal">Rp 0</div>
+  </div>
 
-  <div class="rowStat">
-    <div class="stat income">
-      <div>Pendapatan</div>
-      <b id="incomeTotal">Rp 0</b>
+  <!-- ROW 2 KOLOM -->
+  <div class="rowBox">
+
+    <div class="card statCard incomeCard">
+      <div class="label">Pendapatan</div>
+      <div class="big" id="incomeTotal">Rp 0</div>
     </div>
 
-    <div class="stat expense">
-      <div>Pengeluaran</div>
-      <b id="expenseTotal">Rp 0</b>
+    <div class="card statCard expenseCard">
+      <div class="label">Pengeluaran</div>
+      <div class="big" id="expenseTotal">Rp 0</div>
     </div>
+
   </div>
 
 </div>
