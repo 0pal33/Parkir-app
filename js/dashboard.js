@@ -1,4 +1,4 @@
-let window.dashboardData = {}
+window.dashboardData = {}
 
 function rupiah(n){
 n = Number(n) || 0
@@ -154,7 +154,7 @@ window.dashboardData = {
   titipanItems: titipanItems.size
 }
 
-console.log("Dashboard Data:", dashboardData)
+console.log("Dashboard Data:", window.dashboardData)
 
 // RENDER
 document.getElementById("incomeTotal").innerText = rupiah(income)
