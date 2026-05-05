@@ -5,6 +5,8 @@ function toggleBreakdown(mode){
   renderBreakdown()
 }
 
+const d = window.dashboardData
+
 function renderBreakdown(){
 
 const box = document.getElementById("breakdownBox")
