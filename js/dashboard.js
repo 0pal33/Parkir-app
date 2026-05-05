@@ -1,6 +1,3 @@
-let selectedDates = []
-let isCustom = false
-
 let dashboardData = {}
 
 function rupiah(n){
@@ -48,7 +45,7 @@ let {data:bulanan} = await window.supabaseClient
 .from("bulanan")
 .select("last_paid_at, last_paid_amount")
 .gte("last_paid_at", startISO)
-.lte("last_paid_at", endISO))
+.lte("last_paid_at", endISO)
 
 let {data:stok} = await window.supabaseClient
 .from("stok_log")
@@ -112,7 +109,9 @@ let val = Number(s.total||0)
 if(s.jenis==="jual"){
   income += val
   stokIncomeTotal += val
+  if(s.nama_item){
   stokIncomeItems.add(s.nama_item)
+}
 }
 
 if(s.jenis==="pesan"){
@@ -132,7 +131,9 @@ if(t.jenis==="ambil"){
 
   titipanIncomeTotal += val
   titipanExpenseTotal += val
+  if(t.nama_item){
   titipanItems.add(t.nama_item)
+}
 }
 })
 
