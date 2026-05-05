@@ -675,37 +675,24 @@ function triggerReload(){
   rtTimeout = setTimeout(loadDashboard, 300)
 }
 
+let realtimeChannel = null
+
 function setupRealtime(){
 
   if(!window.supabaseClient) return
 
-  const channel = window.supabaseClient.channel('dashboard-realtime')
+  // HAPUS channel lama kalau ada
+  if(realtimeChannel){
+    window.supabaseClient.removeChannel(realtimeChannel)
+  }
 
-  channel
-  .on('postgres_changes', {
-    event: '*',
-    schema: 'public',
-    table: 'parkir'
-  }, triggerReload)
+  realtimeChannel = window.supabaseClient.channel('dashboard-realtime')
 
-  .on('postgres_changes', {
-    event: '*',
-    schema: 'public',
-    table: 'bulanan'
-  }, triggerReload)
-
-  .on('postgres_changes', {
-    event: '*',
-    schema: 'public',
-    table: 'stok_log'
-  }, triggerReload)
-
-  .on('postgres_changes', {
-    event: '*',
-    schema: 'public',
-    table: 'titipan_log'
-  }, triggerReload)
-
+  realtimeChannel
+  .on('postgres_changes', { event:'*', schema:'public', table:'parkir' }, triggerReload)
+  .on('postgres_changes', { event:'*', schema:'public', table:'bulanan' }, triggerReload)
+  .on('postgres_changes', { event:'*', schema:'public', table:'stok_log' }, triggerReload)
+  .on('postgres_changes', { event:'*', schema:'public', table:'titipan_log' }, triggerReload)
   .subscribe()
 }
 
