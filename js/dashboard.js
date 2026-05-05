@@ -46,7 +46,9 @@ let {data:parkir} = await window.supabaseClient
 
 let {data:bulanan} = await window.supabaseClient
 .from("bulanan")
-.select("last_paid_amount")
+.select("last_paid_at, last_paid_amount")
+.gte("last_paid_at", startISO)
+.lte("last_paid_at", endISO))
 
 let {data:stok} = await window.supabaseClient
 .from("stok_log")
