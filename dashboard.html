@@ -357,9 +357,6 @@ document.body.style.display="block"
 
 <script>
 
-let selectedDates = []
-let isCustom = false
-
 function isSameDay(a,b){
 return a.getFullYear()===b.getFullYear() &&
        a.getMonth()===b.getMonth() &&
@@ -620,17 +617,15 @@ const fp = flatpickr("#filterTanggal", {
   dateFormat: "Y-m-d",
   onChange: function(dates){
   if(dates.length === 0){
-  isCustom = false
-  selectedDates = []
+    window.isCustom = false
+    window.selectedDates = []
+    refreshDashboard()
+    return
+  }
 
-  loadDashboard()
-  return
-}
-
-  selectedDates = dates
-isCustom = true
-
-loadDashboard()
+  window.selectedDates = dates
+  window.isCustom = true
+  refreshDashboard()
 }
 })
 
