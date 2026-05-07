@@ -171,3 +171,7 @@ if(typeof renderBreakdown === "function"){
 function refreshDashboard(){
   loadDashboard()
 }
+
+window.addEventListener("load", () => {
+  loadDashboard()
+})
