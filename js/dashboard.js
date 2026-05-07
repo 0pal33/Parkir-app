@@ -1,4 +1,6 @@
 window.dashboardData = {}
+window.selectedDates = []
+window.isCustom = false
 
 function rupiah(n){
 n = Number(n) || 0
@@ -17,17 +19,17 @@ let today = nowWIB()
 
 let start, end
 
-if(!isCustom || selectedDates.length === 0){
+if(!window.isCustom || window.selectedDates.length === 0){
   start = new Date(today)
   start.setHours(0,0,0,0)
 
   end = new Date(today)
   end.setHours(23,59,59,999)
 }else{
-  start = new Date(selectedDates[0])
+  start = new Date(window.selectedDates[0])
   start.setHours(0,0,0,0)
 
-  end = new Date(selectedDates[1] || selectedDates[0])
+  end = new Date(window.selectedDates[1] || window.selectedDates[0])
   end.setHours(23,59,59,999)
 }
 
@@ -164,4 +166,8 @@ document.getElementById("grandTotal").innerText = rupiah(income - expense)
 if(typeof renderBreakdown === "function"){
   renderBreakdown()
 }
+}
+
+function refreshDashboard(){
+  loadDashboard()
 }
