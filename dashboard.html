@@ -576,13 +576,8 @@ function setupRealtime(){
 
 window.onload = () => {
 
-  // load pertama
-  loadDashboard()
-
-  // aktifkan realtime
   setupRealtime()
 
-  // tombol dev
   if(IS_DEV){
     const btn = document.createElement("button")
     btn.className = "red btn"
