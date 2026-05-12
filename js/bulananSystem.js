@@ -384,7 +384,7 @@ baseDate = paidUntil
 
 baseDate = new Date(
 today.getFullYear(),
-today.getMonth(),
+today.getMonth() - 1,
 tempo
 )
 
