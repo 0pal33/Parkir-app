@@ -425,11 +425,16 @@ targetMonth,
 finalDay
 )
 
+const paidUntilString =
+nextMonth.getFullYear() + "-" +
+String(nextMonth.getMonth()+1).padStart(2,'0') + "-" +
+String(nextMonth.getDate()).padStart(2,'0')
+
 const {error}=await window.supabaseClient
 .from('bulanan')
 .update({
-paid_until:nextMonth,
-last_paid_at:new Date(),
+paid_until: paidUntilString,
+last_paid_at:new Date().toISOString(),
 last_paid_amount:nominal
 })
 .eq('id',id)
