@@ -374,7 +374,17 @@ comparePaid.setHours(23,59,59,999)
 
 if(compareToday > comparePaid){
 
-baseDate = paidUntil
+baseDate = new Date(
+today.getFullYear(),
+today.getMonth() - 1,
+tempo
+)
+
+if(today.getDate() > tempo){
+baseDate.setMonth(
+baseDate.getMonth() + 1
+)
+}
 
 }else{
 baseDate = paidUntil
