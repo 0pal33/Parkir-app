@@ -69,6 +69,7 @@ let html = `
 
 if(isAdmin){
 html += `<button class="blue" onclick="goStok()">Stok Barang</button>`
+html += `<button class="green" onclick="goKalkulator()">Kalkulator</button>`
 }
 
 html += `</div>`
