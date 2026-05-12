@@ -376,7 +376,7 @@ if(compareToday > comparePaid){
 
 baseDate = new Date(
 today.getFullYear(),
-today.getMonth() - 1,
+today.getMonth(),
 tempo
 )
 
@@ -394,7 +394,7 @@ baseDate = paidUntil
 
 baseDate = new Date(
 today.getFullYear(),
-today.getMonth() - 1,
+today.getMonth(),
 tempo
 )
 
