@@ -327,7 +327,7 @@ let nominal = Number(nominalInput)
 
 if(nominal < 1000){
 nominal *= 1000
-}0
+}
 
 if(!nominalInput){
 alert("Masukkan nominal")
@@ -363,7 +363,15 @@ let today = new Date()
 let baseDate
 
 if(data.paid_until){
-baseDate = new Date(data.paid_until)
+
+const paidUntil = new Date(data.paid_until)
+
+if(today > paidUntil){
+baseDate = today
+}else{
+baseDate = paidUntil
+}
+
 }else{
 
 baseDate = new Date(
@@ -495,14 +503,14 @@ if(newDate.getDate() !== tempo){
 newDate = new Date(today.getFullYear(), today.getMonth()+1, 0)
 }
 
-const {error}=await window.supabaseClient
-.from('bulanan')
 let nama =
 document.getElementById("editNama").value.trim()
 
 let motor =
 document.getElementById("editMotor").value.trim()
 
+const {error} = await window.supabaseClient
+.from('bulanan')
 .update({
 nama:nama,
 motor:motor,
