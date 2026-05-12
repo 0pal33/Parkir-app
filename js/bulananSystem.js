@@ -367,7 +367,19 @@ if(data.paid_until){
 const paidUntil = new Date(data.paid_until)
 
 if(today > paidUntil){
-baseDate = today
+
+baseDate = new Date(
+today.getFullYear(),
+today.getMonth(),
+tempo
+)
+
+if(today.getDate() > tempo){
+baseDate.setMonth(
+baseDate.getMonth() + 1
+)
+}
+
 }else{
 baseDate = paidUntil
 }
@@ -431,11 +443,17 @@ window.editTempo = async function(id,nama,tempo){
 
 hideAll()
 
-const { data } = await window.supabaseClient
+const { data, error } = await window.supabaseClient
 .from('bulanan')
 .select('nama,motor')
 .eq('id', id)
 .single()
+
+if(error){
+alert("Gagal mengambil data pelanggan")
+listBayar()
+return
+}
 
 document.getElementById("resultBox").innerHTML = `
 
