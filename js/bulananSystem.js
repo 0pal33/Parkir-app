@@ -366,10 +366,13 @@ if(data.paid_until){
 
 const paidUntil = new Date(data.paid_until)
 
-today.setHours(0,0,0,0)
-paidUntil.setHours(23,59,59,999)
+const compareToday = new Date(today)
+compareToday.setHours(0,0,0,0)
 
-if(today > paidUntil){
+const comparePaid = new Date(paidUntil)
+comparePaid.setHours(23,59,59,999)
+
+if(compareToday > comparePaid){
 
 baseDate = new Date(
 today.getFullYear(),
