@@ -366,6 +366,9 @@ if(data.paid_until){
 
 const paidUntil = new Date(data.paid_until)
 
+today.setHours(0,0,0,0)
+paidUntil.setHours(23,59,59,999)
+
 if(today > paidUntil){
 
 baseDate = new Date(
