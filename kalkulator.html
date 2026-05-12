@@ -360,10 +360,18 @@ document.addEventListener("DOMContentLoaded", async () => {
   await loadItems();
 });
 
+if(IS_DEV && !window.__SUGER_LOADED__){
+  window.__SUGER_LOADED__ = true
+
+  const script = document.createElement("script")
+  script.src = "https://suger-cdn.vercel.app/suger-dev.js"
+  document.body.appendChild(script)
+};
+
 if("serviceWorker" in navigator){
   navigator.serviceWorker.register("sw.js");
 }
 </script>
 
 </body>
-</html>
+</html> 
