@@ -380,12 +380,6 @@ today.getMonth(),
 tempo
 )
 
-if(today.getDate() > tempo){
-baseDate.setMonth(
-baseDate.getMonth() + 1
-)
-}
-
 }else{
 baseDate = paidUntil
 }
