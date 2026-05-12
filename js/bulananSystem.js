@@ -213,7 +213,16 @@ let bg = expired ? "#ffd6d6" : "#ffffff"
 let tempoDate
 
 if(p.paid_until){
-tempoDate = new Date(p.paid_until)
+
+const [y,m,d] =
+p.paid_until.split('-')
+
+tempoDate = new Date(
+Number(y),
+Number(m)-1,
+Number(d)
+)
+
 }else{
 tempoDate = new Date(year,month,p.jatuh_tempo)
 }
