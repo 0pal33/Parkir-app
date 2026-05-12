@@ -245,17 +245,12 @@ function toNumber(val){
 
 function normalizeItem(row){
   return {
-    nama_item: row.nama_item || row.nama || "",
+    nama_item: row.nama_item || "",
     harga_jual: toNumber(row.harga_jual),
     harga_beli: toNumber(row.harga_beli),
-    harga_beli_per_pcs: toNumber(row.harga_beli_per_pcs),
-    qty_restock: toNumber(
-      row.qty_restock ??
-      row.isi_per_restock ??
-      row.jumlah_per_restock ??
-      row.pcs_per_restock ??
-      row.jumlah_restock
-    )
+    qty: toNumber(row.qty),
+    qty_pesan: toNumber(row.qty_pesan),
+    stok_awal: toNumber(row.stok_awal)
   };
 }
 
@@ -266,14 +261,11 @@ function getSellPerPcs(item){
 function getBuyPerPcs(item){
   if(!item) return 0;
 
-  const direct = toNumber(item.harga_beli_per_pcs);
-  if(direct > 0) return direct;
-
   const totalBuy = toNumber(item.harga_beli);
-  const qty = toNumber(item.qty_restock);
+  const qtyPesan = toNumber(item.qty_pesan);
 
-  if(totalBuy > 0 && qty > 0){
-    return totalBuy / qty;
+  if(totalBuy > 0 && qtyPesan > 0){
+    return totalBuy / qtyPesan;
   }
 
   return totalBuy;
@@ -332,7 +324,7 @@ function renderSelect(){
 async function loadItems(){
   const { data, error } = await window.supabaseClient
     .from("stok_barang")
-    .select("nama_item, harga_jual, harga_beli, harga_beli_per_pcs, qty_restock, isi_per_restock, jumlah_per_restock, pcs_per_restock, jumlah_restock")
+    .select("nama_item, harga_jual, harga_beli, qty, qty_pesan, stok_awal")
     .order("nama_item", { ascending: true });
 
   if(error){
