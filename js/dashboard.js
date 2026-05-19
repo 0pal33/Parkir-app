@@ -1,6 +1,12 @@
 window.dashboardData = {}
 window.selectedDates = []
 window.isCustom = false
+window.dashboardRows = {
+  parkir: [],
+  bulanan: [],
+  stok: [],
+  titipan: []
+}
 
 function rupiah(n){
 n = Number(n) || 0
@@ -60,6 +66,13 @@ let {data:titipan} = await window.supabaseClient
 .select("*")
 .gte("created_at", startISO)
 .lte("created_at", endISO)
+
+window.dashboardRows = {
+  parkir: parkir ?? [],
+  bulanan: bulanan ?? [],
+  stok: stok ?? [],
+  titipan: titipan ?? []
+}
 
 // ===== HITUNG =====
 
@@ -165,6 +178,10 @@ document.getElementById("grandTotal").innerText = rupiah(income - expense)
 
 if(typeof renderBreakdown === "function"){
   renderBreakdown()
+}
+
+if(typeof renderBreakdownDetail === "function"){
+  renderBreakdownDetail()
 }
 }
 
