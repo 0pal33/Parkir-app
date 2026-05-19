@@ -2,9 +2,15 @@ let breakdownMode = null
 let breakdownDetailMode = null
 
 function toggleBreakdown(mode){
-  breakdownMode = breakdownMode === mode ? null : mode
+  breakdownMode =
+    breakdownMode === mode
+      ? null
+      : mode
+
   breakdownDetailMode = null
+
   renderBreakdown()
+
   if(typeof renderBreakdownDetail === "function"){
     renderBreakdownDetail()
   }
@@ -12,7 +18,9 @@ function toggleBreakdown(mode){
 
 function renderBreakdown(){
 
-  const box = document.getElementById("breakdownBox")
+  const box =
+    document.getElementById("breakdownBox")
+
   const d = window.dashboardData
 
   if(!breakdownMode || !d){
@@ -22,54 +30,146 @@ function renderBreakdown(){
 
   box.style.display = "block"
 
+  /* ======================
+     PENDAPATAN
+  ====================== */
+
   if(breakdownMode === "income"){
+
     box.innerHTML = `
       <div class="card">
-        <b>Pendapatan</b><br><br>
 
-        Parkir:<br>
-        Checkout: ${d.checkoutCount} (${rupiah(d.checkoutTotal)})<br>
-         <button class="blue btn" style="margin-top:8px;width:100%" onclick="toggleBreakdownDetail('parkir')">
-  Parkir
-</button>
+        <b>Pendapatan</b>
+        <br><br>
 
-        Bulanan: ${d.bulananCount} (${rupiah(d.bulananTotal)})<br><br>
-        <button class="blue btn" style="margin-top:8px;width:100%" onclick="toggleBreakdownDetail('bulanan')">
-  Bulanan
-</button>
-       
+        <div>
+          <b>Parkir</b><br>
+          Checkout:
+          ${d.checkoutCount}
+          (${rupiah(d.checkoutTotal)})
+        </div>
 
-        Titip Jajan:<br>
-        Item: ${d.titipanItems}<br>
-        Total: ${rupiah(d.titipanIncomeTotal)}<br><br>
-        <button class="blue btn" style="margin-top:8px;width:100%" onclick="toggleBreakdownDetail('titipan')">
-  Titip Jajan
-</button>
+        <button
+          class="blue btn"
+          style="margin-top:8px;width:100%"
+          onclick="toggleBreakdownDetail('parkir')">
+          Parkir
+        </button>
 
-        Stok:<br>
-        Item: ${d.stokIncomeItems}<br>
-        Total: ${rupiah(d.stokIncomeTotal)}
-        <button class="blue btn" style="margin-top:8px;width:100%" onclick="toggleBreakdownDetail('stok')">
-  Stok
-</button>
-<div id="breakdownDetailBox" style="margin-top:12px"></div>
+        <br>
+
+        <div>
+          <b>Bulanan</b><br>
+          Item:
+          ${d.bulananCount}<br>
+          Total:
+          ${rupiah(d.bulananTotal)}
+        </div>
+
+        <button
+          class="blue btn"
+          style="margin-top:8px;width:100%"
+          onclick="toggleBreakdownDetail('bulanan')">
+          Bulanan
+        </button>
+
+        <br>
+
+        <div>
+          <b>Titip Jajan</b><br>
+          Item:
+          ${d.titipanItems}<br>
+          Total:
+          ${rupiah(d.titipanIncomeTotal)}
+        </div>
+
+        <button
+          class="blue btn"
+          style="margin-top:8px;width:100%"
+          onclick="toggleBreakdownDetail('titipan')">
+          Titip Jajan
+        </button>
+
+        <br>
+
+        <div>
+          <b>Stok</b><br>
+          Item:
+          ${d.stokIncomeItems}<br>
+          Total:
+          ${rupiah(d.stokIncomeTotal)}
+        </div>
+
+        <button
+          class="blue btn"
+          style="margin-top:8px;width:100%"
+          onclick="toggleBreakdownDetail('stok')">
+          Stok
+        </button>
+
+        <div
+          id="breakdownDetailBox"
+          style="margin-top:12px">
+        </div>
+
       </div>
     `
   }
 
+  /* ======================
+     PENGELUARAN
+  ====================== */
+
   if(breakdownMode === "expense"){
+
     box.innerHTML = `
       <div class="card">
-        <b>Pengeluaran</b><br><br>
 
-        Titip Jajan:<br>
-        Item: ${d.titipanItems}<br>
-        Total: ${rupiah(d.titipanExpenseTotal)}<br><br>
+        <b>Pengeluaran</b>
+        <br><br>
 
-        Stok:<br>
-        Item: ${d.stokExpenseItems}<br>
-        Total: ${rupiah(d.stokExpenseTotal)}
+        <div>
+          <b>Titip Jajan</b><br>
+          Item:
+          ${d.titipanItems}<br>
+          Total:
+          ${rupiah(d.titipanExpenseTotal)}
+        </div>
+
+        <button
+          class="blue btn"
+          style="margin-top:8px;width:100%"
+          onclick="toggleBreakdownDetail('titipan')">
+          Titip Jajan
+        </button>
+
+        <br>
+
+        <div>
+          <b>Stok</b><br>
+          Item:
+          ${d.stokExpenseItems}<br>
+          Total:
+          ${rupiah(d.stokExpenseTotal)}
+        </div>
+
+        <button
+          class="blue btn"
+          style="margin-top:8px;width:100%"
+          onclick="toggleBreakdownDetail('stok')">
+          Stok
+        </button>
+
+        <div
+          id="breakdownDetailBox"
+          style="margin-top:12px">
+        </div>
+
       </div>
     `
+  }
+
+  if(typeof renderBreakdownDetail === "function"){
+    renderBreakdownDetail()
   }
 }
