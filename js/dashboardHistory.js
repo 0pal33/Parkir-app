@@ -140,7 +140,6 @@ async function showDashboardHistory(type){
   const endISO = end.toISOString()
 
   let data = []
-  let mode = "income"
 
   /* ===== PARKIR ===== */
 
@@ -296,9 +295,11 @@ if(
   } = await window.supabaseClient
   .from("stok_barang")
   .select(`
-    id,
-    nama_item
-  `)
+  id,
+  nama_item,
+  harga_beli,
+  harga_jual
+`)
 
   if(barangError){
     console.log(barangError)
@@ -352,10 +353,31 @@ if(
       </td>
 
       <td>
-        Rp ${formatRupiah(
-          item.total
-        )}
-      </td>
+Rp ${
+formatRupiah(
+
+type==="stok-income"
+
+? (
+Number(
+item.barang
+?.harga_jual || 0
+)
+*
+Number(item.qty || 0)
+)
+
+: (
+Number(
+item.barang
+?.harga_beli || 0
+)
+*
+Number(item.qty || 0)
+)
+
+)}
+</td>
 
       <td>
         ${formatJam(
@@ -472,13 +494,18 @@ if(
       const barang =
       item.barang || {}
 
-      const masuk =
-      Number(item.total || 0)
+      const qty =
+Number(item.qty || 0)
 
-      const keluar =
-      Number(
-        barang.harga_penitip || 0
-      ) * Number(item.qty || 0)
+const masuk =
+Number(
+  barang.harga_jual || 0
+) * qty
+
+const keluar =
+Number(
+  barang.harga_penitip || 0
+) * qty
 
       return `
       <tr>
