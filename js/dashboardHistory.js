@@ -28,22 +28,37 @@ function formatTanggal(dateString){
   })
 }
 
-function groupByTanggal(data,key="created_at"){
+function groupByTanggal(
+  data,
+  key="created_at"
+){
 
   const grouped = {}
 
   data.forEach(item=>{
 
-    const dateKey = new Date(item[key])
-    .toLocaleDateString("sv-SE",{
-      timeZone:"Asia/Jakarta"
-    })
+    const wibDate =
+    new Date(
+      new Date(item[key])
+      .toLocaleString(
+        "en-US",
+        {
+          timeZone:
+          "Asia/Jakarta"
+        }
+      )
+    )
+
+    const dateKey =
+    wibDate.toISOString()
+    .split("T")[0]
 
     if(!grouped[dateKey]){
       grouped[dateKey] = []
     }
 
-    grouped[dateKey].push(item)
+    grouped[dateKey]
+    .push(item)
 
   })
 
@@ -215,79 +230,136 @@ async function showDashboardHistory(type){
     return
   }
 
-  /* ===== STOK ===== */
+/* ===== STOK ===== */
 
-  if(type === "stok-income" ||
-     type === "stok-expense"){
+if(
+  type === "stok-income" ||
+  type === "stok-expense"
+){
 
-    mode =
-    type === "stok-income"
-    ? "jual"
-    : "pesan"
+  mode =
+  type === "stok-income"
+  ? "jual"
+  : "pesan"
 
-    titleEl.innerText =
-    type === "stok-income"
-    ? "Riwayat Stok Masuk"
-    : "Riwayat Stok Keluar"
+  titleEl.innerText =
+  type === "stok-income"
+  ? "Riwayat Stok Masuk"
+  : "Riwayat Stok Keluar"
 
-    const { data: stok } =
-    await window.supabaseClient
-    .from("stok_log")
-    .select(`
-      qty,
-      total,
-      created_at,
-      jenis,
-      stok_barang(
-        nama_item
-      )
-    `)
-    .eq("jenis",mode)
-    .gte("created_at",startISO)
-    .lte("created_at",endISO)
-    .order("created_at",{
-      ascending:false
-    })
+  /* ambil log */
+  const {
+    data: stokLog,
+    error: logError
+  } = await window.supabaseClient
+  .from("stok_log")
+  .select(`
+    item_id,
+    qty,
+    total,
+    created_at,
+    jenis
+  `)
+  .eq("jenis", mode)
+  .gte("created_at",startISO)
+  .lte("created_at",endISO)
+  .order("created_at",{
+    ascending:false
+  })
 
-    data = stok || []
-
-    renderHistoryTable({
-      data,
-      content,
-      dateKey:"created_at",
-      columns:[
-        "Nama",
-        "Total",
-        type==="stok-income"
-        ? "Masuk"
-        : "Keluar",
-        "Waktu"
-      ],
-      row:item=>`
-      <tr>
-        <td>
-          ${
-            item.stok_barang
-            ?.nama_item || "-"
-          }
-        </td>
-        <td>${item.qty || 0}</td>
-        <td>
-          Rp ${formatRupiah(
-            item.total
-          )}
-        </td>
-        <td>
-          ${formatJam(
-            item.created_at
-          )}
-        </td>
-      </tr>
-      `
-    })
-
+  if(logError){
+    console.log(logError)
+    content.innerHTML =
+    "Gagal mengambil data"
     return
   }
+
+  if(!stokLog?.length){
+    content.innerHTML =
+    "<p>Tidak ada data</p>"
+    return
+  }
+
+  /* ambil master stok */
+  const {
+    data: stokBarang,
+    error: barangError
+  } = await window.supabaseClient
+  .from("stok_barang")
+  .select(`
+    id,
+    nama_item
+  `)
+
+  if(barangError){
+    console.log(barangError)
+    content.innerHTML =
+    "Gagal mengambil data"
+    return
+  }
+
+  const stokMap = {}
+
+  ;(stokBarang || [])
+  .forEach(item=>{
+    stokMap[item.id] = item
+  })
+
+  data = stokLog.map(log=>({
+
+    ...log,
+
+    barang:
+    stokMap[log.item_id]
+    || null
+
+  }))
+
+  renderHistoryTable({
+    data,
+    content,
+    dateKey:"created_at",
+    columns:[
+      "Nama",
+      "Total",
+      type==="stok-income"
+      ? "Masuk"
+      : "Keluar",
+      "Waktu"
+    ],
+
+    row:item=>`
+    <tr>
+
+      <td>
+        ${
+          item.barang
+          ?.nama_item || "-"
+        }
+      </td>
+
+      <td>
+        ${item.qty || 0}
+      </td>
+
+      <td>
+        Rp ${formatRupiah(
+          item.total
+        )}
+      </td>
+
+      <td>
+        ${formatJam(
+          item.created_at
+        )}
+      </td>
+
+    </tr>
+    `
+  })
+
+  return
+}
 
 /* ===== TITIPAN ===== */
 
@@ -434,6 +506,7 @@ if(
 
   return
 }
+}
 
 function renderHistoryTable({
   data,
@@ -455,8 +528,10 @@ function renderHistoryTable({
   let html = ""
 
   Object.keys(grouped)
-  .reverse()
-  .forEach(date=>{
+.sort((a,b)=>
+  new Date(b) - new Date(a)
+)
+.forEach(date=>{
 
     html += `
     <div class="historyDate">
