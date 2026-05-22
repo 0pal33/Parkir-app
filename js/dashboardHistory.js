@@ -488,9 +488,6 @@ if(
       const barang =
       item.barang || {}
 
-      const qty =
-Number(item.qty || 0)
-
 const masuk =
 window.dashboardShared
 .calcTitipanIncome(
