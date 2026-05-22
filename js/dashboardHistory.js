@@ -245,7 +245,7 @@ if(
   type === "stok-expense"
 ){
 
-  mode =
+let mode =
   type === "stok-income"
   ? "jual"
   : "pesan"
