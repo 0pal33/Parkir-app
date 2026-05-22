@@ -18,14 +18,23 @@ function formatJam(dateString){
 
 function formatTanggal(dateString){
 
-  let d = new Date(dateString)
+  const [year,month,day] =
+  dateString.split("-")
 
-  return d.toLocaleDateString("id-ID",{
-    day:"numeric",
-    month:"long",
-    year:"numeric",
-    timeZone:"Asia/Jakarta"
-  })
+  const d = new Date(
+    Number(year),
+    Number(month)-1,
+    Number(day)
+  )
+
+  return d.toLocaleDateString(
+    "id-ID",
+    {
+      day:"numeric",
+      month:"long",
+      year:"numeric"
+    }
+  )
 }
 
 function groupByTanggal(
