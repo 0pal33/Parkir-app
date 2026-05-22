@@ -454,12 +454,6 @@ document.body.style.display="block"
 
 <script>
 
-function isSameDay(a,b){
-return a.getFullYear()===b.getFullYear() &&
-       a.getMonth()===b.getMonth() &&
-       a.getDate()===b.getDate()
-}
-
 async function logout(){
 
 await window.supabaseClient.auth.signOut()
