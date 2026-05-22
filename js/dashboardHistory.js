@@ -1,79 +1,5 @@
 window.dashboardHistoryOpen = false
 
-function formatRupiah(n){
-  return Number(n || 0).toLocaleString("id-ID")
-}
-
-function formatJam(dateString){
-  let d = new Date(dateString)
-
-  return d.toLocaleTimeString("id-ID",{
-    hour:"2-digit",
-    minute:"2-digit",
-    second:"2-digit",
-    hour12:false,
-    timeZone:"Asia/Jakarta"
-  })
-}
-
-function formatTanggal(dateString){
-
-  const [year,month,day] =
-  dateString.split("-")
-
-  const d = new Date(
-    Number(year),
-    Number(month)-1,
-    Number(day)
-  )
-
-  return d.toLocaleDateString(
-    "id-ID",
-    {
-      day:"numeric",
-      month:"long",
-      year:"numeric"
-    }
-  )
-}
-
-function groupByTanggal(
-  data,
-  key="created_at"
-){
-
-  const grouped = {}
-
-  data.forEach(item=>{
-
-    const wibDate =
-    new Date(
-      new Date(item[key])
-      .toLocaleString(
-        "en-US",
-        {
-          timeZone:
-          "Asia/Jakarta"
-        }
-      )
-    )
-
-    const dateKey =
-    wibDate.toISOString()
-    .split("T")[0]
-
-    if(!grouped[dateKey]){
-      grouped[dateKey] = []
-    }
-
-    grouped[dateKey]
-    .push(item)
-
-  })
-
-  return grouped
-}
-
 function hideDashboardForHistory(){
 
   dashboardHistoryOpen = true
@@ -176,8 +102,8 @@ async function showDashboardHistory(type){
       row:item=>`
       <tr>
         <td>${item.kode || "-"}</td>
-        <td>Rp ${formatRupiah(item.total_bayar)}</td>
-        <td>${formatJam(item.checkout_at)}</td>
+        <td>Rp ${window.dashboardShared .formatRupiah(item.total_bayar)}</td>
+        <td>${window.dashboardShared .formatJam(item.checkout_at)}</td>
       </tr>
       `
     })
@@ -224,12 +150,12 @@ async function showDashboardHistory(type){
         <td>${item.nama || "-"}</td>
         <td>${item.motor || "-"}</td>
         <td>
-          Rp ${formatRupiah(
+          Rp ${window.dashboardShared .formatRupiah(
             item.last_paid_amount
           )}
         </td>
         <td>
-          ${formatJam(item.last_paid_at)}
+          ${window.dashboardShared .formatJam(item.last_paid_at)}
         </td>
       </tr>
       `
@@ -354,7 +280,7 @@ let mode =
 
       <td>
 Rp ${
-formatRupiah(
+window.dashboardShared .formatRupiah(
 
 type==="stok-income"
 
@@ -374,7 +300,7 @@ type==="stok-income"
 </td>
 
       <td>
-        ${formatJam(
+        ${window.dashboardShared .formatJam(
           item.created_at
         )}
       </td>
@@ -517,7 +443,7 @@ window.dashboardShared
 
         <td>
           Rp ${
-            formatRupiah(
+            window.dashboardShared .formatRupiah(
               type==="titipan-income"
               ? masuk
               : keluar
@@ -526,7 +452,7 @@ window.dashboardShared
         </td>
 
         <td>
-          ${formatJam(
+          ${window.dashboardShared .formatJam(
             item.created_at
           )}
         </td>
@@ -554,7 +480,7 @@ function renderHistoryTable({
   }
 
   const grouped =
-  groupByTanggal(data,dateKey)
+  window.dashboardShared .groupByTanggal(data,dateKey)
 
   let html = ""
 
@@ -566,7 +492,7 @@ function renderHistoryTable({
 
     html += `
     <div class="historyDate">
-      ${formatTanggal(date)}
+      ${window.dashboardShared .formatTanggal(date)}
     </div>
 
     <table class="historyTable">
