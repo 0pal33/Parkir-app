@@ -289,96 +289,111 @@ async function showDashboardHistory(type){
     return
   }
 
-  /* ===== TITIPAN ===== */
+/* ===== TITIPAN ===== */
 
-  if(type === "titipan-income" ||
-     type === "titipan-expense"){
+if(
+  type === "titipan-income" ||
+  type === "titipan-expense"
+){
 
-    titleEl.innerText =
-    type === "titipan-income"
-    ? "Riwayat Titipan Masuk"
-    : "Riwayat Titipan Keluar"
+  titleEl.innerText =
+  type === "titipan-income"
+  ? "Riwayat Titipan Masuk"
+  : "Riwayat Titipan Keluar"
 
-    const { data: titipan } =
-    await window.supabaseClient
-    .from("titipan_log")
-    .select(`
-      qty,
-      total,
-      created_at,
-      barang_titipan(
-        nama_item,
-        nama_penitip,
-        harga_penitip
-      )
-    `)
-    .eq("jenis","ambil")
-    .gte("created_at",startISO)
-    .lte("created_at",endISO)
-    .order("created_at",{
-      ascending:false
-    })
+  const { data: titipan, error } =
+  await window.supabaseClient
+  .from("titipan_log")
+  .select(`
+    qty,
+    total,
+    created_at,
+    jenis,
+    barang_titipan!inner(
+      nama_item,
+      nama_penitip,
+      harga_jual,
+      harga_penitip
+    )
+  `)
+  .eq("jenis","ambil")
+  .gte("created_at", startISO)
+  .lte("created_at", endISO)
+  .order("created_at",{
+    ascending:false
+  })
 
-    data = titipan || []
-
-    renderHistoryTable({
-      data,
-      content,
-      dateKey:"created_at",
-      columns:[
-        "Nama",
-        "Penitip",
-        type==="titipan-income"
-        ? "Masuk"
-        : "Keluar",
-        "Waktu"
-      ],
-      row:item=>{
-
-        let masuk =
-        Number(item.total || 0)
-
-        let keluar =
-        Number(
-          item.barang_titipan
-          ?.harga_penitip || 0
-        ) * Number(item.qty || 0)
-
-        return `
-        <tr>
-          <td>
-            ${
-              item.barang_titipan
-              ?.nama_item || "-"
-            }
-          </td>
-          <td>
-            ${
-              item.barang_titipan
-              ?.nama_penitip || "-"
-            }
-          </td>
-          <td>
-            Rp ${
-              formatRupiah(
-                type==="titipan-income"
-                ? masuk
-                : keluar
-              )
-            }
-          </td>
-          <td>
-            ${formatJam(
-              item.created_at
-            )}
-          </td>
-        </tr>
-        `
-      }
-    })
-
+  if(error){
+    console.log(error)
+    content.innerHTML =
+    "Gagal mengambil data"
     return
   }
+
+  data = titipan || []
+
+  renderHistoryTable({
+    data,
+    content,
+    dateKey:"created_at",
+    columns:[
+      "Nama",
+      "Penitip",
+      type==="titipan-income"
+      ? "Masuk"
+      : "Keluar",
+      "Waktu"
+    ],
+    row:item=>{
+
+      const titipanData =
+      Array.isArray(item.barang_titipan)
+      ? item.barang_titipan[0]
+      : item.barang_titipan
+
+      const masuk =
+      Number(item.total || 0)
+
+      const keluar =
+      Number(
+        titipanData?.harga_penitip || 0
+      ) * Number(item.qty || 0)
+
+      return `
+      <tr>
+        <td>
+          ${titipanData?.nama_item || "-"}
+        </td>
+
+        <td>
+          ${
+            titipanData
+            ?.nama_penitip || "-"
+          }
+        </td>
+
+        <td>
+          Rp ${
+            formatRupiah(
+              type==="titipan-income"
+              ? masuk
+              : keluar
+            )
+          }
+        </td>
+
+        <td>
+          ${formatJam(
+            item.created_at
+          )}
+        </td>
+      </tr>
+      `
+    }
+  })
+
+  return
+}
 }
 
 function renderHistoryTable({
