@@ -346,6 +346,32 @@ transform:translateX(-50%) scale(0.9);
   box-shadow:0 5px 14px rgba(0,0,0,.2);
 }
 
+body.fp-open::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.25);
+  z-index:99998;
+}
+
+.flatpickr-calendar.open{
+  position: fixed !important;
+  left: 50% !important;
+  top: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  z-index: 99999 !important;
+  margin: 0 !important;
+}
+
+.flatpickr-calendar.open:before,
+.flatpickr-calendar.open:after{
+  display:none !important;
+}
+
+.flatpickr-calendar{
+  width: min(94vw, 380px) !important;
+}
+
 </style>
 </head>
 
@@ -692,32 +718,45 @@ if(IS_DEV && !window.__SUGER_LOADED__){
 </script>
 
 <script>
-
 document.addEventListener("DOMContentLoaded",()=>{
 
-const fp = flatpickr("#filterTanggal", {
-  mode: "range",
-  dateFormat: "Y-m-d",
-  onChange: function(dates){
-  if(dates.length === 0){
-    window.isCustom = false
-    window.selectedDates = []
-    refreshDashboard()
-    return
+  const today = nowWIB ? nowWIB() : new Date()
+
+  const fp = flatpickr("#filterTanggal", {
+    mode: "range",
+    dateFormat: "Y-m-d",
+    maxDate: today,
+    disableMobile: true,
+    position: "auto center",
+    onChange: function(dates){
+      if(dates.length === 0){
+        window.isCustom = false
+        window.selectedDates = []
+        document.getElementById("periodBtn").innerText = "Hari ini"
+        refreshDashboard()
+        return
+      }
+
+      const chosen = dates.filter(d => d <= today)
+
+      if(chosen.length !== dates.length){
+        fp.setDate(chosen, true)
+        alert("Tanggal tidak boleh melewati hari ini")
+        return
+      }
+
+      window.selectedDates = chosen
+      window.isCustom = true
+      document.getElementById("periodBtn").innerText = formatPeriodLabel(chosen)
+      refreshDashboard()
+    }
+  })
+
+  document.getElementById("periodBtn").onclick = ()=>{
+    fp.open()
   }
 
-  window.selectedDates = dates
-  window.isCustom = true
-  refreshDashboard()
-}
 })
-
-document.getElementById("periodBtn").onclick = ()=>{
-  fp.open()
-}
-
-})
-
 </script>
 
 <script>
