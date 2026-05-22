@@ -119,39 +119,45 @@ bulananCount++
 
 // STOK
 ;(stok ?? []).forEach(s=>{
-let val = Number(s.total||0)
+  const barang = stokMap[s.item_id] || null
 
-if(s.jenis==="jual"){
-  income += val
-  stokIncomeTotal += val
-  if(s.nama_item){
-  stokIncomeItems.add(s.nama_item)
-}
-}
+  if(s.jenis === "jual"){
+    const val = window.dashboardShared.calcStokIncome(s, barang)
+    income += val
+    stokIncomeTotal += val
+    if(barang?.nama_item){
+      stokIncomeItems.add(barang.nama_item)
+    }
+  }
 
-if(s.jenis==="pesan"){
-  expense += val
-  stokExpenseTotal += val
-  if(s.nama_item){
-  stokExpenseItems.add(s.nama_item)
-}
-}
+  if(s.jenis === "pesan"){
+    const val = window.dashboardShared.calcStokExpense(s, barang)
+    expense += val
+    stokExpenseTotal += val
+    if(barang?.nama_item){
+      stokExpenseItems.add(barang.nama_item)
+    }
+  }
 })
 
 // TITIPAN
 ;(titipan ?? []).forEach(t=>{
-let val = Number(t.total||0)
+  const barang = titipanMap[t.item_id] || null
 
-if(t.jenis==="ambil"){
-  income += val
-  expense += val
+  if(t.jenis === "ambil"){
+    const masuk = window.dashboardShared.calcTitipanIncome(t, barang)
+    const keluar = window.dashboardShared.calcTitipanExpense(t, barang)
 
-  titipanIncomeTotal += val
-  titipanExpenseTotal += val
-  if(t.nama_item){
-  titipanItems.add(t.nama_item)
-}
-}
+    income += masuk
+    expense += keluar
+
+    titipanIncomeTotal += masuk
+    titipanExpenseTotal += keluar
+
+    if(barang?.nama_item){
+      titipanItems.add(barang.nama_item)
+    }
+  }
 })
 
 // SIMPAN
