@@ -721,6 +721,10 @@ if(IS_DEV && !window.__SUGER_LOADED__){
 document.addEventListener("DOMContentLoaded",()=>{
 
   const today = nowWIB ? nowWIB() : new Date()
+  document.getElementById(
+"periodBtn"
+).innerText =
+"Hari ini"
 
   const fp = flatpickr("#filterTanggal", {
     mode: "range",
@@ -747,7 +751,13 @@ document.addEventListener("DOMContentLoaded",()=>{
 
       window.selectedDates = chosen
       window.isCustom = true
-      document.getElementById("periodBtn").innerText = formatPeriodLabel(chosen)
+      document.getElementById(
+"periodBtn"
+).innerText =
+window.dashboardShared
+.formatPeriodLabel(
+chosen
+)
       refreshDashboard()
     }
   })
