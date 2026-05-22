@@ -748,6 +748,42 @@ document.addEventListener("DOMContentLoaded",()=>{
         alert("Tanggal tidak boleh melewati hari ini")
         return
       }
+      
+      const fp = flatpickr("#filterTanggal", {
+  mode: "range",
+  dateFormat: "Y-m-d",
+  maxDate: today,
+  disableMobile: true,
+  onOpen: function(){
+    document.body.classList.add("fp-open")
+  },
+  onClose: function(){
+    document.body.classList.remove("fp-open")
+  },
+  onChange: function(dates){
+    if(dates.length === 0){
+      window.isCustom = false
+      window.selectedDates = []
+      document.getElementById("periodBtn").innerText = "Hari ini"
+      refreshDashboard()
+      return
+    }
+
+    const chosen = dates.filter(d => d <= today)
+
+    if(chosen.length !== dates.length){
+      fp.setDate(chosen, true)
+      alert("Tanggal tidak boleh melewati hari ini")
+      return
+    }
+
+    window.selectedDates = chosen
+    window.isCustom = true
+    document.getElementById("periodBtn").innerText =
+      window.dashboardShared.formatPeriodLabel(chosen)
+    refreshDashboard()
+  }
+})
 
       window.selectedDates = chosen
       window.isCustom = true
