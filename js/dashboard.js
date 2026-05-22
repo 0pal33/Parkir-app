@@ -67,6 +67,41 @@ let {data:titipan} = await window.supabaseClient
 .gte("created_at", startISO)
 .lte("created_at", endISO)
 
+/* ===== MASTER STOK ===== */
+
+let {
+  data: stokBarang
+} = await window.supabaseClient
+.from("stok_barang")
+.select(`
+  id,
+  nama_item,
+  harga_beli,
+  harga_jual
+`)
+
+const stokMap =
+window.dashboardShared
+.createMap(stokBarang)
+
+/* ===== MASTER TITIPAN ===== */
+
+let {
+  data: barangTitipan
+} = await window.supabaseClient
+.from("barang_titipan")
+.select(`
+  id,
+  nama_item,
+  nama_penitip,
+  harga_jual,
+  harga_penitip
+`)
+
+const titipanMap =
+window.dashboardShared
+.createMap(barangTitipan)
+
 window.dashboardRows = {
   parkir: parkir ?? [],
   bulanan: bulanan ?? [],
