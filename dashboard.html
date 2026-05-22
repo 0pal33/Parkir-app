@@ -531,39 +531,6 @@ function goPetugas(){
 window.location.href="index.html"
 }
 
-function formatLabel(){
-  if(!isCustom || selectedDates.length === 0){
-    return "Hari ini"
-  }
-
-  let a = selectedDates[0]
-  let b = selectedDates[1] || a
-
-  const bulan = ["Jan","Feb","Mar","Apr","Mei","Jun","Jul","Agu","Sep","Okt","Nov","Des"]
-
-  let d1 = a.getDate()
-  let m1 = bulan[a.getMonth()]
-  let y1 = String(a.getFullYear()).slice(-2)
-
-  let d2 = b.getDate()
-  let m2 = bulan[b.getMonth()]
-  let y2 = String(b.getFullYear()).slice(-2)
-
-  if(a.getTime() === b.getTime()){
-    return `${d1} ${m1} ${y1}`
-  }
-
-  if(a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth()){
-    return `${d1} - ${d2} ${m2} ${y2}`
-  }
-
-  if(a.getFullYear() === b.getFullYear()){
-    return `${d1} ${m1} - ${d2} ${m2} ${y2}`
-  }
-
-  return `${d1} ${m1} ${y1} - ${d2} ${m2} ${y2}`
-}
-
 async function loadTitipanDetail(btn){
 
 // reset semua button
@@ -671,7 +638,7 @@ function setupRealtime(){
   .subscribe()
 }
 
-window.onload = () => {
+window.addEventListener("load", () => {
 
   setupRealtime()
 
@@ -684,7 +651,7 @@ window.onload = () => {
     document.getElementById("menuContainer").appendChild(btn)
   }
 
-}
+})
 
 </script>
 
@@ -721,17 +688,20 @@ if(IS_DEV && !window.__SUGER_LOADED__){
 document.addEventListener("DOMContentLoaded",()=>{
 
   const today = nowWIB ? nowWIB() : new Date()
-  document.getElementById(
-"periodBtn"
-).innerText =
-"Hari ini"
+
+  document.getElementById("periodBtn").innerText = "Hari ini"
 
   const fp = flatpickr("#filterTanggal", {
     mode: "range",
     dateFormat: "Y-m-d",
     maxDate: today,
     disableMobile: true,
-    position: "auto center",
+    onOpen: function(){
+      document.body.classList.add("fp-open")
+    },
+    onClose: function(){
+      document.body.classList.remove("fp-open")
+    },
     onChange: function(dates){
       if(dates.length === 0){
         window.isCustom = false
@@ -748,52 +718,12 @@ document.addEventListener("DOMContentLoaded",()=>{
         alert("Tanggal tidak boleh melewati hari ini")
         return
       }
-      
-      const fp = flatpickr("#filterTanggal", {
-  mode: "range",
-  dateFormat: "Y-m-d",
-  maxDate: today,
-  disableMobile: true,
-  onOpen: function(){
-    document.body.classList.add("fp-open")
-  },
-  onClose: function(){
-    document.body.classList.remove("fp-open")
-  },
-  onChange: function(dates){
-    if(dates.length === 0){
-      window.isCustom = false
-      window.selectedDates = []
-      document.getElementById("periodBtn").innerText = "Hari ini"
-      refreshDashboard()
-      return
-    }
-
-    const chosen = dates.filter(d => d <= today)
-
-    if(chosen.length !== dates.length){
-      fp.setDate(chosen, true)
-      alert("Tanggal tidak boleh melewati hari ini")
-      return
-    }
-
-    window.selectedDates = chosen
-    window.isCustom = true
-    document.getElementById("periodBtn").innerText =
-      window.dashboardShared.formatPeriodLabel(chosen)
-    refreshDashboard()
-  }
-})
 
       window.selectedDates = chosen
       window.isCustom = true
-      document.getElementById(
-"periodBtn"
-).innerText =
-window.dashboardShared
-.formatPeriodLabel(
-chosen
-)
+      document.getElementById("periodBtn").innerText =
+        window.dashboardShared.formatPeriodLabel(chosen)
+
       refreshDashboard()
     }
   })
