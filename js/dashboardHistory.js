@@ -301,20 +301,18 @@ if(
   ? "Riwayat Titipan Masuk"
   : "Riwayat Titipan Keluar"
 
-  const { data: titipan, error } =
-  await window.supabaseClient
+  /* ambil log dulu */
+  const {
+    data: titipanLog,
+    error: logError
+  } = await window.supabaseClient
   .from("titipan_log")
   .select(`
+    item_id,
     qty,
     total,
     created_at,
-    jenis,
-    barang_titipan!inner(
-      nama_item,
-      nama_penitip,
-      harga_jual,
-      harga_penitip
-    )
+    jenis
   `)
   .eq("jenis","ambil")
   .gte("created_at", startISO)
@@ -323,14 +321,57 @@ if(
     ascending:false
   })
 
-  if(error){
-    console.log(error)
+  if(logError){
+    console.log(logError)
     content.innerHTML =
     "Gagal mengambil data"
     return
   }
 
-  data = titipan || []
+  if(!titipanLog?.length){
+    content.innerHTML =
+    "<p>Tidak ada data</p>"
+    return
+  }
+
+  /* ambil semua barang titipan */
+  const {
+    data: barangTitipan,
+    error: barangError
+  } = await window.supabaseClient
+  .from("barang_titipan")
+  .select(`
+    id,
+    nama_item,
+    nama_penitip,
+    harga_jual,
+    harga_penitip
+  `)
+
+  if(barangError){
+    console.log(barangError)
+    content.innerHTML =
+    "Gagal mengambil data"
+    return
+  }
+
+  /* mapping biar cepat */
+  const titipanMap = {}
+
+  ;(barangTitipan || [])
+  .forEach(item=>{
+    titipanMap[item.id] = item
+  })
+
+  data = titipanLog.map(log=>({
+
+    ...log,
+
+    barang:
+    titipanMap[log.item_id]
+    || null
+
+  }))
 
   renderHistoryTable({
     data,
@@ -344,31 +385,30 @@ if(
       : "Keluar",
       "Waktu"
     ],
+
     row:item=>{
 
-      const titipanData =
-      Array.isArray(item.barang_titipan)
-      ? item.barang_titipan[0]
-      : item.barang_titipan
+      const barang =
+      item.barang || {}
 
       const masuk =
       Number(item.total || 0)
 
       const keluar =
       Number(
-        titipanData?.harga_penitip || 0
+        barang.harga_penitip || 0
       ) * Number(item.qty || 0)
 
       return `
       <tr>
         <td>
-          ${titipanData?.nama_item || "-"}
+          ${barang.nama_item || "-"}
         </td>
 
         <td>
           ${
-            titipanData
-            ?.nama_penitip || "-"
+            barang.nama_penitip
+            || "-"
           }
         </td>
 
@@ -393,7 +433,6 @@ if(
   })
 
   return
-}
 }
 
 function renderHistoryTable({
