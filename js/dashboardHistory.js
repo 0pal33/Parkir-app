@@ -358,22 +358,16 @@ formatRupiah(
 
 type==="stok-income"
 
-? (
-Number(
-item.barang
-?.harga_jual || 0
-)
-*
-Number(item.qty || 0)
+? window.dashboardShared
+.calcStokIncome(
+  item,
+  item.barang
 )
 
-: (
-Number(
-item.barang
-?.harga_beli || 0
-)
-*
-Number(item.qty || 0)
+: window.dashboardShared
+.calcStokExpense(
+  item,
+  item.barang
 )
 
 )}
@@ -498,14 +492,18 @@ if(
 Number(item.qty || 0)
 
 const masuk =
-Number(
-  barang.harga_jual || 0
-) * qty
+window.dashboardShared
+.calcTitipanIncome(
+  item,
+  barang
+)
 
 const keluar =
-Number(
-  barang.harga_penitip || 0
-) * qty
+window.dashboardShared
+.calcTitipanExpense(
+  item,
+  barang
+)
 
       return `
       <tr>
