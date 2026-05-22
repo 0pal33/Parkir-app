@@ -19,51 +19,6 @@ new Date().toLocaleString("en-US",{timeZone:"Asia/Jakarta"})
 )
 }
 
-function formatPeriodLabel(dates){
-  if(!dates || dates.length === 0){
-    return "Hari ini"
-  }
-
-  const bulan = ["Jan","Feb","Mar","Apr","Mei","Jun","Jul","Agu","Sep","Okt","Nov","Des"]
-
-  const a = dates[0]
-  const b = dates[1] || a
-
-  const d1 = a.getDate()
-  const m1 = bulan[a.getMonth()]
-  const y1 = String(a.getFullYear()).slice(-2)
-
-  const d2 = b.getDate()
-  const m2 = bulan[b.getMonth()]
-  const y2 = String(b.getFullYear()).slice(-2)
-
-  const sameDay =
-    a.getFullYear() === b.getFullYear() &&
-    a.getMonth() === b.getMonth() &&
-    a.getDate() === b.getDate()
-
-  const sameMonthYear =
-    a.getFullYear() === b.getFullYear() &&
-    a.getMonth() === b.getMonth()
-
-  const sameYear =
-    a.getFullYear() === b.getFullYear()
-
-  if(sameDay){
-    return `${d1} ${m1} ${y1}`
-  }
-
-  if(sameMonthYear){
-    return `${d1} - ${d2} ${m2} ${y2}`
-  }
-
-  if(sameYear){
-    return `${d1} ${m1} - ${d2} ${m2} ${y2}`
-  }
-
-  return `${d1} ${m1} ${y1} - ${d2} ${m2} ${y2}`
-}
-
 async function loadDashboard(){
 
 let today = nowWIB()
