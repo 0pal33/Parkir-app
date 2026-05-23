@@ -20,8 +20,7 @@ window.dashboardShared = {
   ========================= */
 
   formatRupiah(n){
-    return Number(n || 0)
-    .toLocaleString("id-ID")
+    return Number(n || 0).toLocaleString("id-ID")
   },
 
   formatJam(dateString){
@@ -43,7 +42,7 @@ window.dashboardShared = {
   formatTanggal(dateString){
 
     const [year,month,day] =
-    dateString.split("-")
+    String(dateString).split("-")
 
     const d = new Date(
       Number(year),
@@ -68,16 +67,18 @@ window.dashboardShared = {
 
     const grouped = {}
 
-    data.forEach(item=>{
+    ;(data || []).forEach(item=>{
+
+      const value = item?.[key]
+      if(!value) return
 
       const wibDate =
       new Date(
-        new Date(item[key])
+        new Date(value)
         .toLocaleString(
           "en-US",
           {
-            timeZone:
-            "Asia/Jakarta"
+            timeZone:"Asia/Jakarta"
           }
         )
       )
@@ -91,8 +92,7 @@ window.dashboardShared = {
         grouped[dateKey] = []
       }
 
-      grouped[dateKey]
-      .push(item)
+      grouped[dateKey].push(item)
 
     })
 
@@ -116,139 +116,131 @@ window.dashboardShared = {
       "Okt","Nov","Des"
     ]
 
-    const a = dates[0]
-    const b = dates[1] || a
+    const sorted = [...dates].sort((a,b)=>a-b)
+
+    const a = sorted[0]
+    const b = sorted[sorted.length - 1]
 
     const d1 = a.getDate()
     const m1 = bulan[a.getMonth()]
-    const y1 =
-    String(a.getFullYear())
-    .slice(-2)
+    const y1 = String(a.getFullYear()).slice(-2)
 
     const d2 = b.getDate()
     const m2 = bulan[b.getMonth()]
-    const y2 =
-    String(b.getFullYear())
-    .slice(-2)
+    const y2 = String(b.getFullYear()).slice(-2)
 
     const sameDay =
-      a.getFullYear() ===
-      b.getFullYear()
-
-      &&
-
-      a.getMonth() ===
-      b.getMonth()
-
-      &&
-
-      a.getDate() ===
-      b.getDate()
+      a.getFullYear() === b.getFullYear() &&
+      a.getMonth() === b.getMonth() &&
+      a.getDate() === b.getDate()
 
     const sameMonthYear =
-      a.getFullYear() ===
-      b.getFullYear()
-
-      &&
-
-      a.getMonth() ===
-      b.getMonth()
+      a.getFullYear() === b.getFullYear() &&
+      a.getMonth() === b.getMonth()
 
     const sameYear =
-      a.getFullYear() ===
-      b.getFullYear()
+      a.getFullYear() === b.getFullYear()
 
     if(sameDay){
       return `${d1} ${m1} ${y1}`
     }
 
     if(sameMonthYear){
-      return `
-      ${d1} - ${d2}
-      ${m2} ${y2}
-      `.replace(/\s+/g," ")
-      .trim()
+      return `${d1} - ${d2} ${m2} ${y2}`
     }
 
     if(sameYear){
-      return `
-      ${d1} ${m1}
-      - ${d2}
-      ${m2} ${y2}
-      `.replace(/\s+/g," ")
-      .trim()
+      return `${d1} ${m1} - ${d2} ${m2} ${y2}`
     }
 
-    return `
-    ${d1} ${m1} ${y1}
-    - ${d2}
-    ${m2} ${y2}
-    `.replace(/\s+/g," ")
-    .trim()
+    return `${d1} ${m1} ${y1} - ${d2} ${m2} ${y2}`
+  },
+
+  /* =========================
+     PARKIR / BULANAN
+  ========================= */
+
+  calcParkirIncome(log){
+
+    if(log?.total_bayar !== null && log?.total_bayar !== undefined){
+      return Number(log.total_bayar || 0)
+    }
+
+    if(
+      typeof hitungTarifParkir === "function" &&
+      typeof hitungDurasiParkir === "function" &&
+      log?.checkin_at &&
+      log?.checkout_at
+    ){
+      return Number(
+        hitungTarifParkir(
+          hitungDurasiParkir(
+            new Date(log.checkin_at),
+            new Date(log.checkout_at)
+          )
+        ) || 0
+      )
+    }
+
+    return 0
+  },
+
+  calcBulananIncome(log){
+    return Number(log?.last_paid_amount || 0)
   },
 
   /* =========================
      STOK
+     - gunakan log.total sebagai sumber utama
+     - fallback ke harga × qty hanya kalau total kosong
   ========================= */
 
   calcStokIncome(log, barang){
 
-    const qty =
-    Number(log?.qty || 0)
+    const total = Number(log?.total || 0)
+    if(total > 0) return total
 
-    const hargaJual =
-    Number(
-      barang?.harga_jual || 0
-    )
+    const qty = Number(log?.qty || 0)
+    const hargaJual = Number(barang?.harga_jual || 0)
 
     return hargaJual * qty
   },
 
   calcStokExpense(log, barang){
 
-    const qty =
-    Number(log?.qty || 0)
+    const total = Number(log?.total || 0)
+    if(total > 0) return total
 
-    const hargaBeli =
-    Number(
-      barang?.harga_beli || 0
-    )
+    const qty = Number(log?.qty || 0)
+    const hargaBeli = Number(barang?.harga_beli || 0)
 
     return hargaBeli * qty
   },
 
   /* =========================
      TITIPAN
+     - gunakan log.total sebagai sumber utama
+     - fallback ke harga × qty kalau perlu
   ========================= */
 
-  calcTitipanIncome(
-    log,
-    barang
-  ){
+  calcTitipanIncome(log, barang){
 
-    const qty =
-    Number(log?.qty || 0)
+    const total = Number(log?.total || 0)
+    if(total > 0) return total
 
-    const hargaJual =
-    Number(
-      barang?.harga_jual || 0
-    )
+    const qty = Number(log?.qty || 0)
+    const hargaJual = Number(barang?.harga_jual || 0)
 
     return hargaJual * qty
   },
 
-  calcTitipanExpense(
-    log,
-    barang
-  ){
+  calcTitipanExpense(log, barang){
 
-    const qty =
-    Number(log?.qty || 0)
+    const total = Number(log?.total || 0)
+    if(total > 0) return total
 
-    const hargaPenitip =
-    Number(
-      barang?.harga_penitip || 0
-    )
+    const qty = Number(log?.qty || 0)
+    const hargaPenitip = Number(barang?.harga_penitip || 0)
 
     return hargaPenitip * qty
   }
