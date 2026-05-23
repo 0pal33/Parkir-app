@@ -79,6 +79,7 @@ async function showDashboardHistory(type){
     .select(`
       kode,
       total_bayar,
+      checkin_at,
       checkout_at
     `)
     .eq("status","off")
@@ -102,8 +103,10 @@ async function showDashboardHistory(type){
       row:item=>`
       <tr>
         <td>${item.kode || "-"}</td>
-        <td>Rp ${window.dashboardShared .formatRupiah(item.total_bayar)}</td>
-        <td>${window.dashboardShared .formatJam(item.checkout_at)}</td>
+        <td>Rp ${window.dashboardShared.formatRupiah(
+          window.dashboardShared.calcParkirIncome(item)
+        )}</td>
+        <td>${window.dashboardShared.formatJam(item.checkout_at)}</td>
       </tr>
       `
     })
@@ -115,8 +118,7 @@ async function showDashboardHistory(type){
 
   if(type === "bulanan"){
 
-    titleEl.innerText =
-    "Riwayat Bulanan"
+    titleEl.innerText = "Riwayat Bulanan"
 
     const { data: bulanan } =
     await window.supabaseClient
@@ -150,12 +152,12 @@ async function showDashboardHistory(type){
         <td>${item.nama || "-"}</td>
         <td>${item.motor || "-"}</td>
         <td>
-          Rp ${window.dashboardShared .formatRupiah(
-            item.last_paid_amount
+          Rp ${window.dashboardShared.formatRupiah(
+            window.dashboardShared.calcBulananIncome(item)
           )}
         </td>
         <td>
-          ${window.dashboardShared .formatJam(item.last_paid_at)}
+          ${window.dashboardShared.formatJam(item.last_paid_at)}
         </td>
       </tr>
       `
@@ -164,305 +166,233 @@ async function showDashboardHistory(type){
     return
   }
 
-/* ===== STOK ===== */
+  /* ===== STOK ===== */
 
-if(
-  type === "stok-income" ||
-  type === "stok-expense"
-){
+  if(type === "stok-income" ||
+     type === "stok-expense"){
 
-let mode =
-  type === "stok-income"
-  ? "jual"
-  : "pesan"
+    let mode =
+      type === "stok-income"
+      ? "jual"
+      : "pesan"
 
-  titleEl.innerText =
-  type === "stok-income"
-  ? "Riwayat Stok Masuk"
-  : "Riwayat Stok Keluar"
+    titleEl.innerText =
+      type === "stok-income"
+      ? "Riwayat Stok Masuk"
+      : "Riwayat Stok Keluar"
 
-  /* ambil log */
-  const {
-    data: stokLog,
-    error: logError
-  } = await window.supabaseClient
-  .from("stok_log")
-  .select(`
-    item_id,
-    qty,
-    total,
-    created_at,
-    jenis
-  `)
-  .eq("jenis", mode)
-  .gte("created_at",startISO)
-  .lte("created_at",endISO)
-  .order("created_at",{
-    ascending:false
-  })
+    const {
+      data: stokLog,
+      error: logError
+    } = await window.supabaseClient
+    .from("stok_log")
+    .select(`
+      item_id,
+      qty,
+      total,
+      created_at,
+      jenis
+    `)
+    .eq("jenis", mode)
+    .gte("created_at",startISO)
+    .lte("created_at",endISO)
+    .order("created_at",{
+      ascending:false
+    })
 
-  if(logError){
-    console.log(logError)
-    content.innerHTML =
-    "Gagal mengambil data"
-    return
-  }
+    if(logError){
+      console.log(logError)
+      content.innerHTML = "Gagal mengambil data"
+      return
+    }
 
-  if(!stokLog?.length){
-    content.innerHTML =
-    "<p>Tidak ada data</p>"
-    return
-  }
+    if(!stokLog?.length){
+      content.innerHTML = "<p>Tidak ada data</p>"
+      return
+    }
 
-  /* ambil master stok */
-  const {
-    data: stokBarang,
-    error: barangError
-  } = await window.supabaseClient
-  .from("stok_barang")
-  .select(`
-  id,
-  nama_item,
-  harga_beli,
-  harga_jual
-`)
+    const {
+      data: stokBarang,
+      error: barangError
+    } = await window.supabaseClient
+    .from("stok_barang")
+    .select(`
+      id,
+      nama_item,
+      harga_beli,
+      harga_jual
+    `)
 
-  if(barangError){
-    console.log(barangError)
-    content.innerHTML =
-    "Gagal mengambil data"
-    return
-  }
+    if(barangError){
+      console.log(barangError)
+      content.innerHTML = "Gagal mengambil data"
+      return
+    }
 
-  const stokMap = {}
+    const stokMap = window.dashboardShared.createMap(stokBarang)
 
-  ;(stokBarang || [])
-  .forEach(item=>{
-    stokMap[item.id] = item
-  })
+    data = stokLog.map(log=>({
+      ...log,
+      barang: stokMap[log.item_id] || null
+    }))
 
-  data = stokLog.map(log=>({
+    renderHistoryTable({
+      data,
+      content,
+      dateKey:"created_at",
+      columns:[
+        "Nama",
+        "Total",
+        type==="stok-income" ? "Masuk" : "Keluar",
+        "Waktu"
+      ],
 
-    ...log,
-
-    barang:
-    stokMap[log.item_id]
-    || null
-
-  }))
-
-  renderHistoryTable({
-    data,
-    content,
-    dateKey:"created_at",
-    columns:[
-      "Nama",
-      "Total",
-      type==="stok-income"
-      ? "Masuk"
-      : "Keluar",
-      "Waktu"
-    ],
-
-    row:item=>`
-    <tr>
-
-      <td>
-        ${
-          item.barang
-          ?.nama_item || "-"
-        }
-      </td>
-
-      <td>
-        ${item.qty || 0}
-      </td>
-
-      <td>
-Rp ${
-window.dashboardShared .formatRupiah(
-
-type==="stok-income"
-
-? window.dashboardShared
-.calcStokIncome(
-  item,
-  item.barang
-)
-
-: window.dashboardShared
-.calcStokExpense(
-  item,
-  item.barang
-)
-
-)}
-</td>
-
-      <td>
-        ${window.dashboardShared .formatJam(
-          item.created_at
-        )}
-      </td>
-
-    </tr>
-    `
-  })
-
-  return
-}
-
-/* ===== TITIPAN ===== */
-
-if(
-  type === "titipan-income" ||
-  type === "titipan-expense"
-){
-
-  titleEl.innerText =
-  type === "titipan-income"
-  ? "Riwayat Titipan Masuk"
-  : "Riwayat Titipan Keluar"
-
-  /* ambil log dulu */
-  const {
-    data: titipanLog,
-    error: logError
-  } = await window.supabaseClient
-  .from("titipan_log")
-  .select(`
-    item_id,
-    qty,
-    total,
-    created_at,
-    jenis
-  `)
-  .eq("jenis","ambil")
-  .gte("created_at", startISO)
-  .lte("created_at", endISO)
-  .order("created_at",{
-    ascending:false
-  })
-
-  if(logError){
-    console.log(logError)
-    content.innerHTML =
-    "Gagal mengambil data"
-    return
-  }
-
-  if(!titipanLog?.length){
-    content.innerHTML =
-    "<p>Tidak ada data</p>"
-    return
-  }
-
-  /* ambil semua barang titipan */
-  const {
-    data: barangTitipan,
-    error: barangError
-  } = await window.supabaseClient
-  .from("barang_titipan")
-  .select(`
-    id,
-    nama_item,
-    nama_penitip,
-    harga_jual,
-    harga_penitip
-  `)
-
-  if(barangError){
-    console.log(barangError)
-    content.innerHTML =
-    "Gagal mengambil data"
-    return
-  }
-
-  /* mapping biar cepat */
-  const titipanMap = {}
-
-  ;(barangTitipan || [])
-  .forEach(item=>{
-    titipanMap[item.id] = item
-  })
-
-  data = titipanLog.map(log=>({
-
-    ...log,
-
-    barang:
-    titipanMap[log.item_id]
-    || null
-
-  }))
-
-  renderHistoryTable({
-    data,
-    content,
-    dateKey:"created_at",
-    columns:[
-      "Nama",
-      "Penitip",
-      type==="titipan-income"
-      ? "Masuk"
-      : "Keluar",
-      "Waktu"
-    ],
-
-    row:item=>{
-
-      const barang =
-      item.barang || {}
-
-const masuk =
-window.dashboardShared
-.calcTitipanIncome(
-  item,
-  barang
-)
-
-const keluar =
-window.dashboardShared
-.calcTitipanExpense(
-  item,
-  barang
-)
-
-      return `
+      row:item=>`
       <tr>
         <td>
-          ${barang.nama_item || "-"}
+          ${item.barang?.nama_item || "-"}
         </td>
 
         <td>
-          ${
-            barang.nama_penitip
-            || "-"
-          }
+          ${item.qty || 0}
         </td>
 
         <td>
-          Rp ${
-            window.dashboardShared .formatRupiah(
-              type==="titipan-income"
-              ? masuk
-              : keluar
-            )
-          }
-        </td>
-
-        <td>
-          ${window.dashboardShared .formatJam(
-            item.created_at
+          Rp ${window.dashboardShared.formatRupiah(
+            type==="stok-income"
+            ? window.dashboardShared.calcStokIncome(item, item.barang)
+            : window.dashboardShared.calcStokExpense(item, item.barang)
           )}
+        </td>
+
+        <td>
+          ${window.dashboardShared.formatJam(item.created_at)}
         </td>
       </tr>
       `
-    }
-  })
+    })
 
-  return
-}
+    return
+  }
+
+  /* ===== TITIPAN ===== */
+
+  if(type === "titipan-income" ||
+     type === "titipan-expense"){
+
+    titleEl.innerText =
+      type === "titipan-income"
+      ? "Riwayat Titipan Masuk"
+      : "Riwayat Titipan Keluar"
+
+    const {
+      data: titipanLog,
+      error: logError
+    } = await window.supabaseClient
+    .from("titipan_log")
+    .select(`
+      item_id,
+      qty,
+      total,
+      created_at,
+      jenis
+    `)
+    .eq("jenis","ambil")
+    .gte("created_at", startISO)
+    .lte("created_at", endISO)
+    .order("created_at",{
+      ascending:false
+    })
+
+    if(logError){
+      console.log(logError)
+      content.innerHTML = "Gagal mengambil data"
+      return
+    }
+
+    if(!titipanLog?.length){
+      content.innerHTML = "<p>Tidak ada data</p>"
+      return
+    }
+
+    const {
+      data: barangTitipan,
+      error: barangError
+    } = await window.supabaseClient
+    .from("barang_titipan")
+    .select(`
+      id,
+      nama_item,
+      nama_penitip,
+      harga_jual,
+      harga_penitip
+    `)
+
+    if(barangError){
+      console.log(barangError)
+      content.innerHTML = "Gagal mengambil data"
+      return
+    }
+
+    const titipanMap = window.dashboardShared.createMap(barangTitipan)
+
+    data = titipanLog.map(log=>({
+      ...log,
+      barang: titipanMap[log.item_id] || null
+    }))
+
+    renderHistoryTable({
+      data,
+      content,
+      dateKey:"created_at",
+      columns:[
+        "Nama",
+        "Penitip",
+        type==="titipan-income" ? "Masuk" : "Keluar",
+        "Waktu"
+      ],
+
+      row:item=>{
+
+        const barang =
+        item.barang || {}
+
+        const masuk =
+        window.dashboardShared.calcTitipanIncome(item, barang)
+
+        const keluar =
+        window.dashboardShared.calcTitipanExpense(item, barang)
+
+        return `
+        <tr>
+          <td>
+            ${barang.nama_item || "-"}
+          </td>
+
+          <td>
+            ${barang.nama_penitip || "-"}
+          </td>
+
+          <td>
+            Rp ${
+              window.dashboardShared.formatRupiah(
+                type==="titipan-income"
+                ? masuk
+                : keluar
+              )
+            }
+          </td>
+
+          <td>
+            ${window.dashboardShared.formatJam(item.created_at)}
+          </td>
+        </tr>
+        `
+      }
+    })
+
+    return
+  }
 }
 
 function renderHistoryTable({
@@ -474,25 +404,24 @@ function renderHistoryTable({
 }){
 
   if(!data.length){
-    content.innerHTML =
-    "<p>Tidak ada data</p>"
+    content.innerHTML = "<p>Tidak ada data</p>"
     return
   }
 
   const grouped =
-  window.dashboardShared .groupByTanggal(data,dateKey)
+  window.dashboardShared.groupByTanggal(data,dateKey)
 
   let html = ""
 
   Object.keys(grouped)
-.sort((a,b)=>
-  new Date(b) - new Date(a)
-)
-.forEach(date=>{
+  .sort((a,b)=>
+    new Date(b) - new Date(a)
+  )
+  .forEach(date=>{
 
     html += `
     <div class="historyDate">
-      ${window.dashboardShared .formatTanggal(date)}
+      ${window.dashboardShared.formatTanggal(date)}
     </div>
 
     <table class="historyTable">
