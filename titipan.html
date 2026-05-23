@@ -13,146 +13,306 @@
 
 <style>
 body{
-font-family:Arial;
-background:#f2f2f2;
-margin:0;
-padding:20px;
-padding-bottom:140px;
+  font-family:Arial;
+  background:#f2f2f2;
+  margin:0;
+  padding:20px;
+  padding-bottom:140px;
 }
 
 h3{
-text-align:center;
-margin-top:0;
+  text-align:center;
+  margin-top:0;
 }
 
 input{
-width:100%;
-padding:12px;
-margin-bottom:10px;
-box-sizing:border-box;
-border-radius:10px;
-border:1px solid #ccc;
-font-size:16px;
+  width:100%;
+  padding:12px;
+  margin-bottom:10px;
+  box-sizing:border-box;
+  border-radius:10px;
+  border:1px solid #ccc;
+  font-size:16px;
 }
 
 button{
-border:none;
-border-radius:10px;
-padding:10px 14px;
-font-size:15px;
-cursor:pointer;
+  border:none;
+  border-radius:10px;
+  padding:10px 14px;
+  font-size:15px;
+  cursor:pointer;
 }
 
 .green{background:#2ecc71;color:#fff;}
 .blue{background:#3498db;color:#fff;}
 .red{background:#e74c3c;color:#fff;}
 .orange{background:#f39c12;color:#fff;}
+.gray{background:#95a5a6;color:#fff;}
 
 .item{
-background:#fff;
-padding:12px;
-border-radius:12px;
-margin-bottom:10px;
-display:flex;
-justify-content:space-between;
-align-items:center;
-gap:10px;
+  background:#fff;
+  padding:12px;
+  border-radius:12px;
+  margin-bottom:10px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  box-shadow:0 2px 8px rgba(0,0,0,.05);
 }
 
-.nama{font-weight:bold;font-size:16px;}
-.kecil{font-size:13px;color:#666;}
-.qty{font-size:22px;font-weight:bold;}
+.nama{
+  font-weight:bold;
+  font-size:16px;
+}
+
+.kecil{
+  font-size:13px;
+  color:#666;
+}
+
+.qty{
+  font-size:22px;
+  font-weight:bold;
+  min-width:42px;
+  text-align:center;
+}
 
 .box{
-background:#fff;
-padding:15px;
-border-radius:12px;
-margin-bottom:12px;
+  background:#fff;
+  padding:15px;
+  border-radius:12px;
+  margin-bottom:12px;
+  box-shadow:0 2px 8px rgba(0,0,0,.05);
 }
 
-.check{
-display:flex;
-gap:8px;
-align-items:center;
-margin-bottom:10px;
-font-weight:bold;
+.dashboard{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  margin-bottom:12px;
+}
+
+.card{
+  background:#fff;
+  padding:14px;
+  border-radius:12px;
+  text-align:center;
+  box-shadow:0 2px 8px rgba(0,0,0,.05);
+}
+
+.cardTitle{
+  font-size:13px;
+  color:#666;
+  margin-bottom:6px;
+}
+
+.cardValue{
+  font-size:22px;
+  font-weight:bold;
+  color:#27ae60;
 }
 
 #formArea,#aksiArea{
-display:none;
+  display:none;
 }
 
 .floatingTambah{
-position:fixed;
-right:20px;
-bottom:20px;
-width:60px;
-height:60px;
-border-radius:50%;
-font-size:30px;
-padding:0;
+  position:fixed;
+  right:20px;
+  bottom:20px;
+  width:60px;
+  height:60px;
+  border-radius:50%;
+  font-size:30px;
+  padding:0;
+  box-shadow:0 4px 12px rgba(0,0,0,.18);
 }
 
 .floatingLog{
-position:fixed;
-right:20px;
-bottom:90px;
-width:60px;
-height:60px;
-border-radius:50%;
-font-size:24px;
-padding:0;
+  position:fixed;
+  right:20px;
+  bottom:90px;
+  width:60px;
+  height:60px;
+  border-radius:50%;
+  font-size:24px;
+  padding:0;
+  box-shadow:0 4px 12px rgba(0,0,0,.18);
+}
+
+.floatingBack{
+  position:fixed;
+  left:20px;
+  bottom:20px;
+  width:60px;
+  height:60px;
+  border-radius:50%;
+  font-size:24px;
+  padding:0;
+  box-shadow:0 4px 12px rgba(0,0,0,.18);
+}
+
+.rowBtn{
+  display:flex;
+  gap:8px;
+  margin-bottom:10px;
+}
+
+.rowBtn button{
+  flex:1;
+}
+
+.check{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-bottom:10px;
+  font-weight:bold;
+  background:#fafafa;
+  padding:10px 12px;
+  border-radius:12px;
+  border:1px solid #eee;
+}
+
+.check input[type="checkbox"]{
+  width:22px;
+  height:22px;
+  margin:0;
+  flex:0 0 auto;
+}
+
+.aksiItem{
+  background:#fff;
+  border:1px solid #eee;
+  border-radius:14px;
+  padding:12px;
+  margin-bottom:12px;
+  box-shadow:0 2px 8px rgba(0,0,0,.04);
+}
+
+.aksiHead{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:10px;
+}
+
+.aksiCheck{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  font-weight:bold;
+  font-size:16px;
+  margin:0;
+}
+
+.aksiCheck input[type="checkbox"]{
+  width:22px;
+  height:22px;
+  margin:0;
+}
+
+.aksiPanel{
+  display:none;
+  background:#f8f8f8;
+  border-radius:12px;
+  padding:12px;
+}
+
+.aksiPanel input{
+  margin-bottom:10px;
+}
+
+.actionBtns{
+  display:flex;
+  gap:8px;
+}
+
+.actionBtns button{
+  min-width:46px;
+  height:40px;
+  padding:0 10px;
+}
+
+.listActionBtns{
+  display:flex;
+  gap:8px;
+  align-items:center;
+}
+
+.listActionBtns .blue,
+.listActionBtns .red{
+  min-width:52px;
+  height:40px;
+  padding:0 10px;
 }
 
 .logMasuk{border-left:5px solid #2ecc71;}
 .logAmbil{border-left:5px solid #e74c3c;}
 .logHarga{border-left:5px solid #f1c40f;}
 
-.rowBtn{
-display:flex;
-gap:8px;
-margin-bottom:10px;
+.tableWrap{
+  overflow-x:auto;
+  margin-bottom:12px;
 }
 
-.rowBtn button{
-flex:1;
+.tbl{
+  width:100%;
+  border-collapse:collapse;
+  font-size:14px;
+  background:#fff;
+  border-radius:12px;
+  overflow:hidden;
 }
 
-.dashboard{
-display:grid;
-grid-template-columns:1fr 1fr;
-gap:10px;
-margin-bottom:12px;
+.tbl th,.tbl td{
+  border:1px solid #ddd;
+  padding:8px;
+  text-align:center;
 }
 
-.card{
-background:#fff;
-padding:14px;
-border-radius:12px;
-text-align:center;
+.tbl th{
+  background:#f7f7f7;
+  font-weight:bold;
 }
 
-.cardTitle{
-font-size:13px;
-color:#666;
-margin-bottom:6px;
+.tbl input{
+  margin:0;
+  padding:6px;
+  width:75px;
+  font-size:14px;
 }
 
-.cardValue{
-font-size:22px;
-font-weight:bold;
-color:#27ae60;
+.tbl input[type="checkbox"]{
+  width:20px;
+  height:20px;
+  padding:0;
+  margin:0;
 }
 
-.floatingBack{
-position:fixed;
-left:20px;
-bottom:20px;
-width:60px;
-height:60px;
-border-radius:50%;
-font-size:24px;
-padding:0;
+.kecilBox{
+  color:#777;
+  font-size:13px;
+}
+
+@media (max-width:420px){
+  .dashboard{
+    grid-template-columns:1fr 1fr;
+  }
+
+  .cardValue{
+    font-size:20px;
+  }
+
+  .item{
+    align-items:center;
+  }
+
+  .listActionBtns{
+    flex-direction:column;
+  }
 }
 </style>
 
@@ -162,17 +322,15 @@ padding:0;
 <h3 id="judul">Titip Jajan</h3>
 
 <div class="dashboard">
+  <div class="card">
+    <div class="cardTitle">Terjual Hari Ini</div>
+    <div class="cardValue" id="dashQty">0 pcs</div>
+  </div>
 
-<div class="card">
-<div class="cardTitle">Terjual Hari Ini</div>
-<div class="cardValue" id="dashQty">0 pcs</div>
-</div>
-
-<div class="card">
-<div class="cardTitle">Bayar Penitip</div>
-<div class="cardValue" id="dashTotal">Rp 0</div>
-</div>
-
+  <div class="card">
+    <div class="cardTitle">Bayar Penitip</div>
+    <div class="cardValue" id="dashTotal">Rp 0</div>
+  </div>
 </div>
 
 <input id="searchBox" placeholder="Cari barang / penitip..." oninput="renderList()">
@@ -182,40 +340,49 @@ padding:0;
 <div id="aksiArea"></div>
 
 <button class="floatingBack red" onclick="location.href='index.html'">🏠</button>
-
 <button class="floatingTambah green" onclick="formTambah()">+</button>
 
 <script>
+if(!window.DATA) window.DATA = []
+if(window.CURRENT === undefined) window.CURRENT = null
 
-if(!window.DATA) window.DATA=[]
-if(window.CURRENT===undefined) window.CURRENT=null
+let saveLock = false
 
-let saveLock=false
+function isAdmin(){
+  return localStorage.getItem("adminLogin") === "true"
+}
+
+function escapeJS(str){
+  return String(str || "")
+    .replace(/\\/g, "\\\\")
+    .replace(/'/g, "\\'")
+    .replace(/\n/g, " ")
+    .replace(/\r/g, " ")
+}
 
 async function loadDashboard(){
 
-let today=new Date()
-today.setHours(0,0,0,0)
+  let today = new Date()
+  today.setHours(0,0,0,0)
 
-const {data,error}=await window.supabaseClient
-.from("titipan_log")
-.select("*")
-.eq("jenis","ambil")
-.gte("created_at",today.toISOString())
+  const {data, error} = await window.supabaseClient
+    .from("titipan_log")
+    .select("*")
+    .eq("jenis", "ambil")
+    .gte("created_at", today.toISOString())
 
-if(error) return
+  if(error) return
 
-let qty=0
-let total=0
+  let qty = 0
+  let total = 0
 
-data.forEach(i=>{
-qty += Number(i.qty||0)
-total += Number(i.total||0)
-})
+  ;(data || []).forEach(i=>{
+    qty += Number(i.qty || 0)
+    total += Number(i.total || 0)
+  })
 
-dashQty.innerText=qty+" pcs"
-dashTotal.innerText="Rp "+total.toLocaleString("id-ID")
-
+  dashQty.innerText = qty + " pcs"
+  dashTotal.innerText = "Rp " + total.toLocaleString("id-ID")
 }
 
 /* =======================
@@ -224,21 +391,20 @@ LOAD DATA
 
 async function loadData(){
 
-await loadDashboard()
+  await loadDashboard()
 
-const {data,error}=await window.supabaseClient
-.from("barang_titipan")
-.select("*")
-.order("nama_item")
+  const {data, error} = await window.supabaseClient
+    .from("barang_titipan")
+    .select("*")
+    .order("nama_item", {ascending:true})
 
-if(error){
-alert(error.message)
-return
-}
+  if(error){
+    alert(error.message)
+    return
+  }
 
-window.DATA=data||[]
-renderList()
-
+  window.DATA = data || []
+  renderList()
 }
 
 /* =======================
@@ -247,50 +413,46 @@ LIST
 
 function renderList(){
 
-judul.style.display="block"
-searchBox.style.display="block"
-listArea.style.display="block"
-formArea.style.display="none"
-aksiArea.style.display="none"
+  judul.style.display = "block"
+  searchBox.style.display = "block"
+  listArea.style.display = "block"
+  formArea.style.display = "none"
+  aksiArea.style.display = "none"
 
-let cari=searchBox.value.toLowerCase()
-let html=""
+  let cari = searchBox.value.toLowerCase()
+  let html = ""
 
-let hasil=window.DATA.filter(i=>
-(i.nama_item||"").toLowerCase().includes(cari) ||
-(i.nama_penitip||"").toLowerCase().includes(cari)
-)
+  let hasil = window.DATA.filter(i=>
+    (i.nama_item || "").toLowerCase().includes(cari) ||
+    (i.nama_penitip || "").toLowerCase().includes(cari)
+  )
 
-if(hasil.length===0){
-html="<div class='box'>Tidak ada data</div>"
-}
+  if(hasil.length === 0){
+    html = "<div class='box'>Tidak ada data</div>"
+  }
 
-hasil.forEach(i=>{
+  hasil.forEach(i=>{
+    let warna = Number(i.qty || 0) <= 0 ? "#ffd6d6" : "#fff"
 
-let warna=i.qty<=0 ? "#ffd6d6" : "#fff"
+    html += `
+      <div class="item" style="background:${warna}">
+        <div style="flex:1;min-width:0">
+          <div class="nama">${i.nama_item || "-"}</div>
+          <div class="kecil">${i.nama_penitip || "-"}</div>
+          <div class="kecil">Jual Rp ${Number(i.harga_jual || 0).toLocaleString('id-ID')}</div>
+        </div>
 
-html+=`
-<div class="item" style="background:${warna}">
+        <div class="qty">${i.qty || 0}</div>
 
-<div style="flex:1">
-<div class="nama">${i.nama_item}</div>
-<div class="kecil">${i.nama_penitip}</div>
-<div class="kecil">
-Jual Rp ${Number(i.harga_jual||0).toLocaleString('id-ID')}
-</div>
-</div>
+        <div class="listActionBtns">
+          <button class="blue" onclick="formAksi('${i.id}')">📥</button>
+          ${isAdmin() ? `<button class="red" onclick="hapusBarang('${i.id}','${escapeJS(i.nama_item)}','${escapeJS(i.nama_penitip)}')">🗑</button>` : ""}
+        </div>
+      </div>
+    `
+  })
 
-<div class="qty">${i.qty}</div>
-
-<button class="blue" onclick="formAksi('${i.id}')">📥</button>
-
-</div>
-`
-
-})
-
-listArea.innerHTML=html
-
+  listArea.innerHTML = html
 }
 
 /* =======================
@@ -299,78 +461,140 @@ FORM TAMBAH
 
 function formTambah(){
 
-judul.style.display="none"
-searchBox.style.display="none"
-listArea.style.display="none"
-formArea.style.display="block"
+  judul.style.display = "none"
+  searchBox.style.display = "none"
+  listArea.style.display = "none"
+  formArea.style.display = "block"
 
-formArea.innerHTML=`
+  formArea.innerHTML = `
+    <div class="box">
+      <h3>Tambah Barang</h3>
 
-<div class="box">
+      <input id="t_nama" placeholder="Nama barang">
+      <input id="t_penitip" placeholder="Nama penitip">
+      <input id="t_qty" type="number" placeholder="Jumlah titip">
+      <input id="t_jual" type="number" placeholder="Harga jual">
+      <input id="t_pen" type="number" placeholder="Harga penitip">
 
-<h3>Tambah Barang</h3>
+      <div class="kecilBox" style="margin:8px 0 12px">
+        Kalau nama barang + penitip sama sudah ada, sistem akan menawarkan penggabungan data agar tidak dobel.
+      </div>
 
-<input id="t_nama" placeholder="Nama barang">
-<input id="t_penitip" placeholder="Nama penitip">
-<input id="t_qty" type="number" placeholder="Jumlah titip">
-<input id="t_jual" type="number" placeholder="Harga jual">
-<input id="t_pen" type="number" placeholder="Harga penitip">
-
-<button class="green" onclick="simpanTambah()">Simpan</button>
-<button class="red" onclick="renderList()">Batal</button>
-
-</div>
-`
-
+      <div class="rowBtn">
+        <button class="green" onclick="simpanTambah()">Simpan</button>
+        <button class="red" onclick="renderList()">Batal</button>
+      </div>
+    </div>
+  `
 }
 
 async function simpanTambah(){
 
-if(saveLock) return
-saveLock=true
+  if(saveLock) return
+  saveLock = true
 
-let nama=t_nama.value.trim()
-let penitip=t_penitip.value.trim()
-let qty=parseInt(t_qty.value||0)
-let jual=parseInt(t_jual.value||0)
-let pen=parseInt(t_pen.value||0)
+  try{
+    let nama = t_nama.value.trim().replace(/\s+/g, " ")
+    let penitip = t_penitip.value.trim().replace(/\s+/g, " ")
+    let qty = parseInt(t_qty.value || 0)
+    let jual = parseInt(t_jual.value || 0)
+    let pen = parseInt(t_pen.value || 0)
 
-if(!nama || !penitip || qty<=0){
-alert("Lengkapi data")
-saveLock=false
-return
-}
+    if(!nama || !penitip || qty <= 0){
+      alert("Lengkapi data")
+      return
+    }
 
-const {data,error}=await window.supabaseClient
-.from("barang_titipan")
-.insert({
-nama_item:nama,
-nama_penitip:penitip,
-qty:qty,
-harga_jual:jual,
-harga_penitip:pen
-})
-.select()
-.single()
+    if(jual < 0 || pen < 0){
+      alert("Harga tidak valid")
+      return
+    }
 
-if(error){
-alert(error.message)
-saveLock=false
-return
-}
+    const {data: existing, error: cekError} = await window.supabaseClient
+      .from("barang_titipan")
+      .select("*")
+      .eq("nama_item", nama)
+      .eq("nama_penitip", penitip)
+      .limit(1)
 
-await window.supabaseClient
-.from("titipan_log")
-.insert({
-item_id:data.id,
-jenis:"masuk",
-qty:qty,
-total:0
-})
+    if(cekError){
+      alert(cekError.message)
+      return
+    }
 
-saveLock=false
-loadData()
+    if(existing && existing.length > 0){
+      const old = existing[0]
 
+      const gabung = confirm(
+        "Barang dengan nama dan penitip yang sama sudah ada.\n\nGabungkan qty ke data lama?"
+      )
+
+      if(gabung){
+        const updateQty = Number(old.qty || 0) + qty
+
+        const {error: updateError} = await window.supabaseClient
+          .from("barang_titipan")
+          .update({
+            qty: updateQty,
+            harga_jual: jual,
+            harga_penitip: pen,
+            updated_at: new Date().toISOString()
+          })
+          .eq("id", old.id)
+
+        if(updateError){
+          alert(updateError.message)
+          return
+        }
+
+        await window.supabaseClient
+          .from("titipan_log")
+          .insert({
+            item_id: old.id,
+            jenis: "masuk",
+            qty: qty,
+            total: 0
+          })
+
+        loadData()
+        return
+      }
+
+      alert("Simpan dibatalkan supaya tidak membuat duplikat.")
+      return
+    }
+
+    const {data, error} = await window.supabaseClient
+      .from("barang_titipan")
+      .insert({
+        nama_item: nama,
+        nama_penitip: penitip,
+        qty: qty,
+        harga_jual: jual,
+        harga_penitip: pen
+      })
+      .select()
+      .single()
+
+    if(error){
+      alert(error.message)
+      return
+    }
+
+    await window.supabaseClient
+      .from("titipan_log")
+      .insert({
+        item_id: data.id,
+        jenis: "masuk",
+        qty: qty,
+        total: 0
+      })
+
+    loadData()
+
+  } finally {
+    saveLock = false
+  }
 }
 
 /* =======================
@@ -379,65 +603,83 @@ FORM AKSI
 
 function formAksi(id){
 
-window.CURRENT=window.DATA.find(x=>x.id==id)
-if(!window.CURRENT) return
+  window.CURRENT = window.DATA.find(x=>x.id == id)
+  if(!window.CURRENT) return
 
-judul.style.display="none"
-searchBox.style.display="none"
-listArea.style.display="none"
-aksiArea.style.display="block"
+  judul.style.display = "none"
+  searchBox.style.display = "none"
+  listArea.style.display = "none"
+  aksiArea.style.display = "block"
 
-aksiArea.innerHTML=`
+  aksiArea.innerHTML = `
+    <div class="box">
+      <h3 style="margin-bottom:16px">${window.CURRENT.nama_item || "-"}</h3>
 
-<div class="box">
+      <div class="aksiItem">
+        <div class="aksiHead">
+          <label class="aksiCheck">
+            <input type="checkbox" id="c_ambil" onchange="toggleAksi()">
+            <span>Ambil</span>
+          </label>
+        </div>
 
-<h3>${window.CURRENT.nama_item}</h3>
+        <div id="boxAmbil" class="aksiPanel">
+          <input id="laku" type="number" placeholder="Barang terjual">
+          <input id="bayar" readonly placeholder="Bayar penitip">
+        </div>
+      </div>
 
-<div class="check">
-<input type="checkbox" id="c_ambil" onchange="toggleAksi()"> Ambil
-</div>
+      <div class="aksiItem">
+        <div class="aksiHead">
+          <label class="aksiCheck">
+            <input type="checkbox" id="c_harga" onchange="toggleAksi()">
+            <span>Update Harga</span>
+          </label>
+        </div>
 
-<div id="boxAmbil" style="display:none">
-<input id="laku" type="number" placeholder="Barang terjual">
-<input id="bayar" readonly placeholder="Bayar penitip">
-</div>
+        <div id="boxHarga" class="aksiPanel">
+          <input id="u_jual" type="number" value="${Number(window.CURRENT.harga_jual || 0)}" placeholder="Harga jual">
+          <input id="u_pen" type="number" value="${Number(window.CURRENT.harga_penitip || 0)}" placeholder="Harga penitip">
+        </div>
+      </div>
 
-<div class="check">
-<input type="checkbox" id="c_harga" onchange="toggleAksi()"> Update Harga
-</div>
+      <div class="aksiItem">
+        <div class="aksiHead">
+          <label class="aksiCheck">
+            <input type="checkbox" id="c_nitip" onchange="toggleAksi()">
+            <span>Nitip Lagi</span>
+          </label>
+        </div>
 
-<div id="boxHarga" style="display:none">
-<input id="u_jual" type="number" value="${window.CURRENT.harga_jual}">
-<input id="u_pen" type="number" value="${window.CURRENT.harga_penitip}">
-</div>
+        <div id="boxNitip" class="aksiPanel">
+          <input id="n_qty" type="number" placeholder="Qty baru">
+        </div>
+      </div>
 
-<div class="check">
-<input type="checkbox" id="c_nitip" onchange="toggleAksi()"> Nitip Lagi
-</div>
+      <div class="rowBtn">
+        <button class="green" onclick="prosesAksi()">✓</button>
+        <button class="red" onclick="renderList()">Batal</button>
+      </div>
+    </div>
+  `
 
-<div id="boxNitip" style="display:none">
-<input id="n_qty" type="number" placeholder="Qty baru">
-</div>
+  laku.oninput = function(){
+    let val = parseInt(laku.value || 0)
+    bayar.value = "Rp " + (val * Number(window.CURRENT.harga_penitip || 0)).toLocaleString('id-ID')
+  }
 
-<button class="green" onclick="prosesAksi()">✓</button>
-<button class="red" onclick="renderList()">Batal</button>
-
-</div>
-`
-
-laku.oninput=function(){
-let val=parseInt(laku.value||0)
-bayar.value="Rp "+(val*window.CURRENT.harga_penitip).toLocaleString('id-ID')
-}
-
+  toggleAksi()
 }
 
 function toggleAksi(){
 
-boxAmbil.style.display=c_ambil.checked?"block":"none"
-boxHarga.style.display=c_harga.checked?"block":"none"
-boxNitip.style.display=c_nitip.checked?"block":"none"
+  const ambil = c_ambil.checked
+  const harga = c_harga.checked
+  const nitip = c_nitip.checked
 
+  boxAmbil.style.display = ambil ? "block" : "none"
+  boxHarga.style.display = harga ? "block" : "none"
+  boxNitip.style.display = nitip ? "block" : "none"
 }
 
 /* =======================
@@ -446,238 +688,264 @@ PROSES
 
 async function prosesAksi(){
 
-if(saveLock) return
-saveLock=true
+  if(saveLock) return
+  saveLock = true
 
-let ambil=c_ambil.checked
-let harga=c_harga.checked
-let nitip=c_nitip.checked
+  try{
+    let ambil = c_ambil.checked
+    let harga = c_harga.checked
+    let nitip = c_nitip.checked
 
-if(!ambil && !harga && !nitip){
-alert("Pilih aksi dulu")
-saveLock=false
-return
-}
+    if(!ambil && !harga && !nitip){
+      alert("Pilih aksi dulu")
+      return
+    }
 
-let updateData={}
-let logs=[]
+    let updateData = {}
+    let logs = []
 
-if(ambil){
+    if(ambil){
+      let terjual = parseInt(laku.value || 0)
 
-let terjual=parseInt(laku.value||0)
+      if(terjual <= 0){
+        alert("Isi jumlah terjual")
+        return
+      }
 
-if(terjual<=0){
-alert("Isi jumlah terjual")
-saveLock=false
-return
-}
+      if(terjual > Number(window.CURRENT.qty || 0)){
+        alert("Melebihi stok")
+        return
+      }
 
-if(terjual>window.CURRENT.qty){
-alert("Melebihi stok")
-saveLock=false
-return
-}
+      // TITIPAN: pendapatan = harga jual, pengeluaran = bayar penitip.
+      // Di log ini kita simpan nilai bayar penitip karena itu yang benar-benar keluar.
+      let totalBayarPenitip = terjual * Number(window.CURRENT.harga_penitip || 0)
 
-let total=terjual * window.CURRENT.harga_penitip
+      logs.push({
+        item_id: window.CURRENT.id,
+        jenis: "ambil",
+        qty: terjual,
+        total: totalBayarPenitip
+      })
 
-logs.push({
-item_id:window.CURRENT.id,
-jenis:"ambil",
-qty:terjual,
-total:total
-})
+      if(!nitip){
+        updateData.qty = Number(window.CURRENT.qty || 0) - terjual
+      }
+    }
 
-if(!nitip){
-updateData.qty=window.CURRENT.qty-terjual
-}
+    if(nitip){
+      let q = parseInt(n_qty.value || 0)
 
-}
+      if(q <= 0){
+        alert("Isi qty baru")
+        return
+      }
 
-if(nitip){
+      updateData.qty = q
 
-let q=parseInt(n_qty.value||0)
+      logs.push({
+        item_id: window.CURRENT.id,
+        jenis: "masuk",
+        qty: q,
+        total: 0
+      })
+    }
 
-if(q<=0){
-alert("Isi qty baru")
-saveLock=false
-return
-}
+    if(harga){
+      updateData.harga_jual = parseInt(u_jual.value || 0)
+      updateData.harga_penitip = parseInt(u_pen.value || 0)
 
-updateData.qty=q
+      logs.push({
+        item_id: window.CURRENT.id,
+        jenis: "harga",
+        qty: 0,
+        total: 0
+      })
+    }
 
-logs.push({
-item_id:window.CURRENT.id,
-jenis:"masuk",
-qty:q,
-total:0
-})
+    updateData.updated_at = new Date().toISOString()
 
-}
+    const {error} = await window.supabaseClient
+      .from("barang_titipan")
+      .update(updateData)
+      .eq("id", window.CURRENT.id)
 
-if(harga){
+    if(error){
+      alert(error.message)
+      return
+    }
 
-updateData.harga_jual=parseInt(u_jual.value||0)
-updateData.harga_penitip=parseInt(u_pen.value||0)
+    for(let log of logs){
+      await window.supabaseClient
+        .from("titipan_log")
+        .insert(log)
+    }
 
-logs.push({
-item_id:window.CURRENT.id,
-jenis:"harga",
-qty:0,
-total:0
-})
+    loadData()
 
-}
-
-updateData.updated_at=new Date()
-
-const {error}=await window.supabaseClient
-.from("barang_titipan")
-.update(updateData)
-.eq("id",window.CURRENT.id)
-
-if(error){
-alert(error.message)
-saveLock=false
-return
-}
-
-for(let log of logs){
-
-await window.supabaseClient
-.from("titipan_log")
-.insert(log)
-
-}
-
-saveLock=false
-loadData()
-
+  } finally {
+    saveLock = false
+  }
 }
 
 /* =======================
-LOG PREMIUM
+HAPUS BARANG
+======================= */
+
+async function hapusBarang(id, nama, penitip){
+
+  if(!isAdmin()) return
+
+  const ok = confirm(
+    "Hapus barang titipan ini?\n\n" +
+    nama + "\n" + penitip +
+    "\n\nSemua log titipan milik item ini juga akan ikut dihapus."
+  )
+
+  if(!ok) return
+
+  const {error: logError} = await window.supabaseClient
+    .from("titipan_log")
+    .delete()
+    .eq("item_id", id)
+
+  if(logError){
+    alert("Gagal hapus log: " + logError.message)
+    return
+  }
+
+  const {error} = await window.supabaseClient
+    .from("barang_titipan")
+    .delete()
+    .eq("id", id)
+
+  if(error){
+    alert("Gagal hapus barang: " + error.message)
+    return
+  }
+
+  if(window.CURRENT && window.CURRENT.id === id){
+    window.CURRENT = null
+    aksiArea.style.display = "none"
+  }
+
+  loadData()
+}
+
+/* =======================
+LOG
 ======================= */
 
 async function showLog(mode="today"){
 
-judul.style.display="none"
-searchBox.style.display="none"
-listArea.style.display="none"
-formArea.style.display="none"
-aksiArea.style.display="block"
+  judul.style.display = "none"
+  searchBox.style.display = "none"
+  listArea.style.display = "none"
+  formArea.style.display = "none"
+  aksiArea.style.display = "block"
 
-aksiArea.innerHTML="<div class='box'>Loading...</div>"
+  aksiArea.innerHTML = "<div class='box'>Loading...</div>"
 
-let q=window.supabaseClient
-.from("titipan_log")
-.select("*")
-.order("created_at",{ascending:false})
-.limit(100)
+  const {data, error} = await window.supabaseClient
+    .from("titipan_log")
+    .select("*")
+    .order("created_at", {ascending:false})
+    .limit(100)
 
-const {data,error}=await q
+  if(error){
+    aksiArea.innerHTML = "<div class='box'>Gagal load log</div>"
+    return
+  }
 
-if(error){
-aksiArea.innerHTML="<div class='box'>Gagal load log</div>"
-return
-}
+  let now = new Date()
+  let totalHari = 0
+  let trxHari = 0
 
-let now=new Date()
-let totalHari=0
-let trxHari=0
+  let html = `
+    <div class="box">
+      <h3>Riwayat</h3>
 
-let html=`
-<div class="box">
+      <div class="rowBtn">
+        <button class="blue" onclick="showLog('today')">Hari Ini</button>
+        <button class="orange" onclick="showLog('week')">7 Hari</button>
+        <button class="green" onclick="showLog('all')">Semua</button>
+      </div>
+  `
 
-<h3>Riwayat</h3>
+  ;(data || []).forEach(i=>{
+    let t = new Date(i.created_at)
+    let diff = (now - t) / 86400000
 
-<div class="rowBtn">
-<button class="blue" onclick="showLog('today')">Hari Ini</button>
-<button class="orange" onclick="showLog('week')">7 Hari</button>
-<button class="green" onclick="showLog('all')">Semua</button>
-</div>
-`
+    if(mode === "today" && t.toDateString() !== now.toDateString()) return
+    if(mode === "week" && diff > 7) return
 
-data.forEach(i=>{
+    if(t.toDateString() === now.toDateString()){
+      trxHari++
+      if(i.jenis === "ambil"){
+        totalHari += Number(i.total || 0)
+      }
+    }
 
-let t=new Date(i.created_at)
-let diff=(now-t)/86400000
+    let item = window.DATA.find(x=>x.id == i.item_id)
 
-if(mode==="today" && t.toDateString()!==now.toDateString()) return
-if(mode==="week" && diff>7) return
+    let nama = item ? item.nama_item : "-"
+    let penitip = item ? item.nama_penitip : "-"
 
-if(t.toDateString()===now.toDateString()){
-trxHari++
-if(i.jenis==="ambil"){
-totalHari+=Number(i.total||0)
-}
-}
+    let cls = "logMasuk"
+    let icon = "🟢"
 
-let item=window.DATA.find(x=>x.id==i.item_id)
+    if(i.jenis === "ambil"){
+      cls = "logAmbil"
+      icon = "🔴"
+    }
 
-let nama=item ? item.nama_item : "-"
-let penitip=item ? item.nama_penitip : "-"
+    if(i.jenis === "harga"){
+      cls = "logHarga"
+      icon = "🟡"
+    }
 
-let cls="logMasuk"
-let icon="🟢"
+    html += `
+      <div class="box ${cls}">
+        <b>${icon} ${i.jenis}</b><br>
+        ${nama} - ${penitip}<br>
+        Qty: ${i.qty || 0} |
+        Rp ${Number(i.total || 0).toLocaleString('id-ID')}<br>
+        <span class="kecil">${t.toLocaleString('id-ID')}</span>
+      </div>
+    `
+  })
 
-if(i.jenis==="ambil"){
-cls="logAmbil"
-icon="🔴"
-}
+  html += `
+      <div class="box">
+        <b>Total bayar penitip hari ini</b><br>
+        Rp ${totalHari.toLocaleString('id-ID')}<br><br>
 
-if(i.jenis==="harga"){
-cls="logHarga"
-icon="🟡"
-}
+        <b>Total transaksi hari ini</b><br>
+        ${trxHari}
+      </div>
 
-html+=`
-<div class="box ${cls}">
-<b>${icon} ${i.jenis}</b><br>
-${nama} - ${penitip}<br>
-Qty: ${i.qty} |
-Rp ${Number(i.total||0).toLocaleString('id-ID')}<br>
-<span class="kecil">
-${t.toLocaleString('id-ID')}
-</span>
-</div>
-`
+      <button class="red" onclick="renderList()">Kembali</button>
+    </div>
+  `
 
-})
-
-html+=`
-<div class="box">
-<b>Total bayar penitip hari ini</b><br>
-Rp ${totalHari.toLocaleString('id-ID')}<br><br>
-
-<b>Total transaksi hari ini</b><br>
-${trxHari}
-</div>
-
-<button class="red" onclick="renderList()">Kembali</button>
-
-</div>
-`
-
-aksiArea.innerHTML=html
-
+  aksiArea.innerHTML = html
 }
 
 loadData()
-
 </script>
 
 <script>
 if(IS_DEV && !window.__SUGER_LOADED__){
-window.__SUGER_LOADED__=true
-const s=document.createElement("script")
-s.src="https://suger-cdn.vercel.app/suger-dev.js"
-document.body.appendChild(s)
+  window.__SUGER_LOADED__ = true
+  const s = document.createElement("script")
+  s.src = "https://suger-cdn.vercel.app/suger-dev.js"
+  document.body.appendChild(s)
 }
 </script>
 
 <script>
 if('serviceWorker' in navigator){
-navigator.serviceWorker.register('sw.js')
+  navigator.serviceWorker.register('sw.js')
 }
 </script>
 
