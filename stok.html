@@ -273,13 +273,17 @@ opacity:0.3;
 <input id="searchBox" placeholder="Cari barang..." oninput="StokUI.renderList()">
 
 <div class="rowBtn" style="margin-bottom:8px;">
-<button id="btnFilterStok" class="green">Stok</button>
-<button id="btnFilterNon" class="gray">nonStok</button>
+  <button id="btnFilterStok" class="green">Stok</button>
+  <button id="btnFilterNon" class="gray">nonStok</button>
+</div>
+
+<div class="rowBtn" style="margin-bottom:8px;">
+  <button id="btnAudit" class="orange">Audit Restok</button>
+  <button id="btnBatal" class="red">Batal Pesanan</button>
 </div>
 
 <div class="rowBtn" style="margin-bottom:12px;">
-<button id="btnAudit" class="orange">Audit Restok</button>
-<button id="btnBatal" class="red">Batal Pesanan</button>
+  <button id="btnResetQty" class="orange">Reset Qty Stok</button>
 </div>
 
 <div id="listArea"></div>
@@ -323,6 +327,7 @@ document.querySelector(".floating .blue").onclick = ()=> StokCore.openPesan()
 // tombol audit & batal
 document.getElementById("btnAudit").onclick = ()=> StokCore.showAuditRestok()
 document.getElementById("btnBatal").onclick = ()=> StokCore.batalPesanan()
+document.getElementById("btnResetQty").onclick = ()=> StokCore.resetQtyStok()
 
 })
 </script>
