@@ -37,7 +37,7 @@ a.getMonth()===b.getMonth() &&
 a.getDate()===b.getDate()
 },
 
-async loadData(){
+async loadData(skipNonStokReset=false){
 
 const {data,error}=await window.supabaseClient
 .from("stok_barang")
@@ -52,7 +52,9 @@ return
 
 STOK.DATA = data || []
 
-await this.resetNonStokHarian()
+if(!skipNonStokReset){
+  await this.resetNonStokHarian()
+}
 
 StokUI.renderList()
 this.loadDashboard()
@@ -374,22 +376,31 @@ formArea.innerHTML=`
 <h3>Tambah Barang</h3>
 
 <input id="f_nama" placeholder="Nama barang">
-<input id="f_beli" type="number" placeholder="Harga beli">
-<input id="f_awal" type="number" placeholder="Masukkan stok barang saat ini">
 
-<div class="checkLine">
-<input type="checkbox" id="f_dihitung" checked onchange="StokCore.toggleHitung()">
-<span>Barang dihitung</span>
+<div id="wrapBeli">
+  <input id="f_beli" type="number" placeholder="Harga beli">
 </div>
 
-<div id="boxHitung">
-<input id="f_jual" type="number" placeholder="Harga jual">
-<input id="f_qtypesan" type="number" placeholder="Jumlah tiap restok">
+<div id="wrapAwal">
+  <input id="f_awal" type="number" placeholder="Masukkan stok barang saat ini">
+</div>
+
+<div class="checkLine">
+  <input type="checkbox" id="f_dihitung" checked onchange="StokCore.toggleHitung()">
+  <span>Barang dihitung</span>
+</div>
+
+<div id="wrapJual">
+  <input id="f_jual" type="number" placeholder="Harga jual">
+</div>
+
+<div id="wrapQtypesan">
+  <input id="f_qtypesan" type="number" placeholder="Jumlah tiap restok">
 </div>
 
 <div class="rowBtn">
-<button class="green" onclick="StokCore.simpanBarang()">Simpan</button>
-<button class="red" onclick="StokUI.renderList()">Batal</button>
+  <button class="green" onclick="StokCore.simpanBarang()">Simpan</button>
+  <button class="red" onclick="StokUI.renderList()">Batal</button>
 </div>
 
 </div>
@@ -399,10 +410,24 @@ StokCore.toggleHitung()
 },
 
 toggleHitung(){
-  const box = document.getElementById("boxHitung")
+
   const check = document.getElementById("f_dihitung")
-  if(!box || !check) return
-  box.style.display = check.checked ? "block" : "none"
+  const wrapBeli = document.getElementById("wrapBeli")
+  const wrapAwal = document.getElementById("wrapAwal")
+  const wrapJual = document.getElementById("wrapJual")
+  const wrapQtypesan = document.getElementById("wrapQtypesan")
+
+  if(!check || !wrapBeli || !wrapAwal || !wrapJual || !wrapQtypesan){
+    return
+  }
+
+  const dihitung = check.checked
+
+  wrapBeli.style.display = dihitung ? "block" : "none"
+  wrapAwal.style.display = dihitung ? "block" : "none"
+  wrapQtypesan.style.display = dihitung ? "block" : "none"
+
+  wrapJual.style.display = "block"
 },
 
 async simpanBarang(){
@@ -410,58 +435,115 @@ async simpanBarang(){
 if(window.loadingSimpan) return
 window.loadingSimpan = true
 
-const nama = document.getElementById("f_nama").value.trim()
-const beli = parseInt(document.getElementById("f_beli").value || 0)
-const awal = parseInt(document.getElementById("f_awal").value || 0)
-const dihitung = document.getElementById("f_dihitung").checked
+try{
 
-let jual=0
-let qtypesan=1
+  const nama = document.getElementById("f_nama").value.trim()
+  const dihitung = document.getElementById("f_dihitung").checked
 
-if(dihitung){
-jual = parseInt(document.getElementById("f_jual").value || 0)
-qtypesan = parseInt(document.getElementById("f_qtypesan").value || 1)
-}
+  const beli = parseInt(document.getElementById("f_beli").value || 0)
+  const awal = parseInt(document.getElementById("f_awal").value || 0)
+  const jual = parseInt(document.getElementById("f_jual").value || 0)
+  const qtypesan = parseInt(document.getElementById("f_qtypesan").value || 1)
 
-if(!nama){
-  alert("Nama wajib")
+  if(!nama){
+    alert("Nama wajib")
+    return
+  }
+
+  if(jual < 0){
+    alert("Harga jual tidak valid")
+    return
+  }
+
+  if(dihitung){
+    if(beli < 0 || awal < 0 || qtypesan <= 0){
+      alert("Data stok tidak valid")
+      return
+    }
+  }
+
+  const payload = {
+    nama_item: nama,
+    urutan: STOK.DATA.length + 1,
+    qty: dihitung ? awal : 0,
+    harga_beli: dihitung ? beli : null,
+    harga_jual: jual,
+    qty_pesan: dihitung ? qtypesan : null,
+    barang_dihitung: dihitung,
+    updated_at: new Date().toISOString()
+  }
+
+  const { error } = await window.supabaseClient
+  .from("stok_barang")
+  .insert(payload)
+
+  if(error){
+    alert(error.message)
+    return
+  }
+
+  await StokCore.loadData(true)
+
+}catch(err){
+  alert("Gagal simpan: " + err.message)
+  console.log(err)
+}finally{
   window.loadingSimpan = false
-  return
 }
+},
 
-if(awal < 0 || beli < 0){
-  alert("Harga / stok tidak boleh minus")
-  window.loadingSimpan = false
-  return
-}
+async resetQtyStok(){
 
-if(dihitung && jual < 0){
-  alert("Harga jual tidak valid")
-  window.loadingSimpan = false
-  return
-}
+  const ok = confirm(
+    "Reset qty semua barang stok menjadi 0?\n\nAksi ini tidak akan dihitung sebagai penjualan."
+  )
 
-const {error}=await window.supabaseClient
-.from("stok_barang")
-.insert({
-nama_item:nama,
-urutan: STOK.DATA.length+1,
-qty:awal,
-harga_beli:beli,
-harga_jual:jual,
-qty_pesan:qtypesan,
-barang_dihitung:dihitung,
-updated_at:new Date().toISOString()
-})
+  if(!ok) return
 
-if(error){
-  alert(error.message)
-  window.loadingSimpan = false
-  return
-}
+  try{
 
-window.loadingSimpan = false
-StokCore.loadData()
+    const { data: items, error } = await window.supabaseClient
+    .from("stok_barang")
+    .select("id")
+    .eq("barang_dihitung", true)
+
+    if(error){
+      alert("Gagal ambil data stok: " + error.message)
+      return
+    }
+
+    if(!items || items.length === 0){
+      alert("Tidak ada barang stok yang bisa direset")
+      return
+    }
+
+    const ids = items.map(item => item.id)
+
+    const { error: updateError } = await window.supabaseClient
+    .from("stok_barang")
+    .update({
+      qty: 0,
+      updated_at: new Date().toISOString()
+    })
+    .in("id", ids)
+
+    if(updateError){
+      alert("Gagal reset qty: " + updateError.message)
+      return
+    }
+
+    STOK.LAST_UNDO = null
+    STOK.LAST_ORDER = []
+    localStorage.removeItem("STOK.LAST_ORDER")
+
+    await StokCore.loadData(true)
+
+    alert("Qty stok berhasil direset ke 0")
+
+  }catch(err){
+    alert("Gagal reset qty stok: " + err.message)
+    console.log(err)
+  }
 },
 
 openPesan(){
@@ -863,6 +945,8 @@ qty:0,
 updated_at:new Date().toISOString()
 })
 .eq("id",i.id)
+
+i.qty = 0
 
 }
 
