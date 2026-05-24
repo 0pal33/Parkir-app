@@ -219,14 +219,11 @@ window.dashboardShared = {
 
   /* =========================
      TITIPAN
-     - gunakan log.total sebagai sumber utama
-     - fallback ke harga × qty kalau perlu
+     - pendapatan = harga jual × qty
+     - pengeluaran = total payout penitip / harga penitip × qty
   ========================= */
 
   calcTitipanIncome(log, barang){
-
-    const total = Number(log?.total || 0)
-    if(total > 0) return total
 
     const qty = Number(log?.qty || 0)
     const hargaJual = Number(barang?.harga_jual || 0)
