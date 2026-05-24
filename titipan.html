@@ -10,7 +10,8 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
-<script src="js/dashboardShared.js"></script>
+<script src="js/titipanCore.js"></script>
+<script src="js/titipanUI.js"></script>
 
 <style>
 body{
@@ -275,18 +276,21 @@ button{
 <button class="floatingLog orange" onclick="TitipanCore.showLog('today')">📋</button>
 <button class="floatingTambah green" onclick="TitipanUI.formTambah()">+</button>
 
-<script src="js/titipanCore.js"></script>
-<script src="js/titipanUI.js"></script>
-
 <script>
 document.addEventListener("DOMContentLoaded", async ()=>{
 
   const { data } = await window.supabaseClient.auth.getSession()
 
-  if(localStorage.getItem("adminLogin") !== "true" || !data.session){
+  if(!data.session){
     alert("Akses ditolak")
     location.href="index.html"
     return
+  }
+
+  // Dashboard summary hanya untuk admin.
+  if(localStorage.getItem("adminLogin") !== "true"){
+    const dash = document.querySelector(".dashboard")
+    if(dash) dash.style.display = "none"
   }
 
   await TitipanCore.loadData()
