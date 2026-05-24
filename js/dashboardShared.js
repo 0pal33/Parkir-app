@@ -146,14 +146,14 @@ window.dashboardShared = {
     }
 
     if(sameMonthYear){
-      return `${d1} - ${d2} ${m2} ${y2}`
+      return `${d1} - ${d2} ${m2} ${y2}`.replace(/\s+/g, " ").trim()
     }
 
     if(sameYear){
-      return `${d1} ${m1} - ${d2} ${m2} ${y2}`
+      return `${d1} ${m1} - ${d2} ${m2} ${y2}`.replace(/\s+/g, " ").trim()
     }
 
-    return `${d1} ${m1} ${y1} - ${d2} ${m2} ${y2}`
+    return `${d1} ${m1} ${y1} - ${d2} ${m2} ${y2}`.replace(/\s+/g, " ").trim()
   },
 
   /* =========================
@@ -191,8 +191,6 @@ window.dashboardShared = {
 
   /* =========================
      STOK
-     - gunakan log.total sebagai sumber utama
-     - fallback ke harga × qty hanya kalau total kosong
   ========================= */
 
   calcStokIncome(log, barang){
@@ -219,8 +217,6 @@ window.dashboardShared = {
 
   /* =========================
      TITIPAN
-     - pendapatan = harga jual × qty
-     - pengeluaran = total payout penitip / harga penitip × qty
   ========================= */
 
   calcTitipanIncome(log, barang){
