@@ -66,7 +66,17 @@ window.TitipanCore = {
 
   async loadData(){
 
-    await this.loadDashboard()
+    if(this.isAdmin()){
+      await this.loadDashboard()
+    }else{
+      const qtyEl = document.getElementById("dashQty")
+      const totalEl = document.getElementById("dashTotal")
+      const dash = document.querySelector(".dashboard")
+
+      if(dash) dash.style.display = "none"
+      if(qtyEl) qtyEl.innerText = "0 pcs"
+      if(totalEl) totalEl.innerText = "Rp 0"
+    }
 
     const { data, error } = await window.supabaseClient
       .from("barang_titipan")
