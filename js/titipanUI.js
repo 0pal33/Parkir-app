@@ -1,13 +1,10 @@
 window.TitipanUI = {
-
   setAdminView(isAdmin){
     const dash = document.getElementById("dashboardBox")
     const adminOnly = document.querySelectorAll(".adminOnly")
-
-    if(dash){
+    if (dash) {
       dash.style.display = isAdmin ? "grid" : "none"
     }
-
     adminOnly.forEach(el => {
       el.style.display = isAdmin ? "" : "none"
     })
@@ -20,33 +17,33 @@ window.TitipanUI = {
     const formArea = document.getElementById("formArea")
     const aksiArea = document.getElementById("aksiArea")
 
-    if(judul) judul.style.display = "block"
-    if(search) search.style.display = "block"
-    if(listArea) listArea.style.display = "block"
-    if(formArea) formArea.style.display = "none"
-    if(aksiArea) aksiArea.style.display = "none"
+    if (judul) judul.style.display = "block"
+    if (search) search.style.display = "block"
+    if (listArea) listArea.style.display = "block"
+    if (formArea) formArea.style.display = "none"
+    if (aksiArea) aksiArea.style.display = "none"
   },
 
   showSection(section){
     const listArea = document.getElementById("listArea")
     const formArea = document.getElementById("formArea")
     const aksiArea = document.getElementById("aksiArea")
-    const search = document.getElementById("searchBox")
 
-    if(listArea) listArea.style.display = section === "list" ? "block" : "none"
-    if(formArea) formArea.style.display = section === "form" ? "block" : "none"
-    if(aksiArea) aksiArea.style.display = section === "aksi" ? "block" : "none"
-    if(search) search.style.display = section === "list" ? "block" : "none"
+    if (listArea) listArea.style.display = section === "list" ? "block" : "none"
+    if (formArea) formArea.style.display = section === "form" ? "block" : "none"
+    if (aksiArea) aksiArea.style.display = section === "aksi" ? "block" : "none"
 
     const judul = document.getElementById("judul")
-    if(judul) judul.style.display = "block"
+    const search = document.getElementById("searchBox")
+    if (judul) judul.style.display = "block"
+    if (search) search.style.display = section === "list" ? "block" : "none"
   },
 
   renderList(rows){
     const listArea = document.getElementById("listArea")
-    if(!listArea) return
+    if (!listArea) return
 
-    if(!rows || rows.length === 0){
+    if (!rows || rows.length === 0) {
       listArea.innerHTML = `<div class="box">Tidak ada data</div>`
       return
     }
@@ -54,22 +51,19 @@ window.TitipanUI = {
     let html = ""
 
     rows.forEach(item => {
-      const qty = Number(item.qty || 0)
+      const fotoBarang = item.foto_barang || item.foto_penitip || ""
       const autoHarga = TitipanShared.rekomendasiHargaJual(item.harga_penitip)
       const hargaDisplay = Number(item.harga_jual || 0)
-      const lastMasuk = TitipanState.lastMasukMap?.[item.id] || null
-
-      const thumbSrc = item.foto_barang || ""
-      const thumbHtml = thumbSrc
-        ? `<img src="${thumbSrc}" alt="foto barang">`
+      const thumbHtml = fotoBarang
+        ? `<img src="${fotoBarang}" alt="foto">`
         : `<span>📷</span>`
 
-      const cardClick = TitipanShared.isAdmin()
+      const rowClick = TitipanShared.isAdmin()
         ? `TitipanCore.openPenitipPhoto('${item.id}')`
         : `TitipanCore.openBarangPhoto('${item.id}')`
 
       html += `
-        <div class="item" style="background:${qty <= 0 ? "#ffd6d6" : "#fff"}" onclick="${cardClick}">
+        <div class="item" onclick="${rowClick}">
           <div class="thumb" onclick="event.stopPropagation(); TitipanCore.openBarangPhoto('${item.id}')">
             ${thumbHtml}
           </div>
@@ -79,18 +73,18 @@ window.TitipanUI = {
             <div class="kecil">${TitipanShared.escapeHtml(item.nama_penitip || "-")}</div>
             <div class="kecil">
               Jual Rp ${Number(hargaDisplay || 0).toLocaleString("id-ID")}
-              ${hargaDisplay === autoHarga ? ` <span class="autoTag">rekomendasi</span>` : ""}
+              ${hargaDisplay === autoHarga ? `<span class="autoTag">rekomendasi</span>` : ""}
             </div>
-            ${TitipanShared.formatLastMasuk(lastMasuk)}
+            ${TitipanShared.formatLastMasuk(window.LAST_MASUK_MAP?.[item.id])}
           </div>
 
-          <div class="qty">${qty}</div>
+          <div class="qty">${Number(item.qty || 0)}</div>
 
           <div class="listActionBtns" onclick="event.stopPropagation()">
-            <button class="blue" title="Kedatangan" onclick="TitipanCore.startArrivalFlow('${TitipanShared.escapeJs(item.nama_penitip || "")}','${item.id}')">📥</button>
+            <button class="blue" title="Kedatangan" onclick="TitipanCore.startArrivalFlow('${TitipanShared.escapeJs(item.nama_penitip || "")}','${TitipanShared.escapeJs(item.id)}')">📥</button>
             <button class="green" title="Nitip Lagi" onclick="TitipanCore.startTambahFlow('${TitipanShared.escapeJs(item.nama_penitip || "")}')">＋</button>
-            <button class="orange" title="Update Harga" onclick="TitipanCore.openUpdateHarga('${item.id}')">✎</button>
-            ${TitipanShared.isAdmin() ? `<button class="red" title="Hapus" onclick="TitipanCore.hapusBarang('${item.id}')">🗑</button>` : ""}
+            <button class="orange" title="Update Harga" onclick="TitipanCore.openUpdateHarga('${TitipanShared.escapeJs(item.id)}')">✎</button>
+            ${TitipanShared.isAdmin() ? `<button class="red" title="Hapus" onclick="TitipanCore.hapusBarang('${TitipanShared.escapeJs(item.id)}')">🗑</button>` : ""}
           </div>
         </div>
       `
@@ -99,9 +93,9 @@ window.TitipanUI = {
     listArea.innerHTML = html
   },
 
-  renderTambahForm({draft}){
+  renderTambahForm({ draft }){
     const formArea = document.getElementById("formArea")
-    if(!formArea) return
+    if (!formArea) return
 
     const fotoThumb = draft?.foto_penitip
       ? `<img src="${draft.foto_penitip}" alt="foto penitip" class="photoThumb">`
@@ -109,6 +103,7 @@ window.TitipanUI = {
 
     const itemsCount = draft?.items?.length || 0
     const lastPenitip = draft?.penitip || ""
+    const lockPenitip = !!draft?.lockPenitip
 
     formArea.innerHTML = `
       <div class="box">
@@ -122,13 +117,15 @@ window.TitipanUI = {
           </div>
         </div>
 
-        <input id="t_penitip" placeholder="Nama penitip" value="${TitipanShared.escapeHtml(lastPenitip)}" ${lastPenitip ? "readonly" : ""}>
+        <input id="t_penitip" placeholder="Nama penitip" value="${TitipanShared.escapeHtml(lastPenitip)}" ${lockPenitip ? "readonly" : ""}>
         <input id="t_nama" placeholder="Nama barang">
         <input id="t_qty" type="number" placeholder="Jumlah titip">
         <input id="t_pen" type="number" placeholder="Harga penitip">
-        <input id="t_jual" type="number" placeholder="Harga jual" data-manual="0" style="color:#999">
+        <input id="t_jual" type="number" placeholder="Harga jual" style="color:#999">
 
-        <div class="kecilBox" id="t_rekomLabel" style="margin:6px 0 12px"></div>
+        <div class="kecilBox" id="t_rekomLabel" style="margin:6px 0 12px">
+          ${TitipanShared.recommendedLabel(document.getElementById("t_penitip")?.value || "")}
+        </div>
 
         <div class="rowBtn">
           <button class="green" onclick="TitipanCore.saveTambahItem()">Simpan</button>
@@ -141,30 +138,31 @@ window.TitipanUI = {
       </div>
     `
 
-    const penInput = document.getElementById("t_pen")
-    const jualInput = document.getElementById("t_jual")
-    const labelEl = document.getElementById("t_rekomLabel")
-
-    TitipanShared.bindAutoHarga(penInput, jualInput, labelEl)
+    TitipanShared.bindAutoHarga(
+      document.getElementById("t_pen"),
+      document.getElementById("t_jual"),
+      document.getElementById("t_rekomLabel")
+    )
   },
 
-  renderArrivalForm({draft}){
+  renderArrivalForm({ draft }){
     const formArea = document.getElementById("formArea")
-    if(!formArea) return
+    if (!formArea) return
 
     const fotoThumb = draft?.foto_bukti
       ? `<img src="${draft.foto_bukti}" alt="foto bukti" class="photoThumb">`
       : `<div class="photoThumb placeholder">📷</div>`
 
-    const pen = TitipanShared.normalizeText(draft?.penitip || "")
     const filteredItems = (TitipanState.data || []).filter(item =>
-      TitipanShared.normalizeText(item.nama_penitip || "") === pen
+      TitipanShared.normalizeText(item.nama_penitip) === TitipanShared.normalizeText(draft?.penitip || "")
     )
 
     const options = filteredItems.map(item => {
       const selected = draft?.preselectItemId === item.id ? "selected" : ""
       return `<option value="${item.id}" ${selected}>${TitipanShared.escapeHtml(item.nama_item)} | stok ${Number(item.qty || 0)}</option>`
     }).join("")
+
+    const lockPenitip = !!draft?.lockPenitip
 
     formArea.innerHTML = `
       <div class="box">
@@ -178,18 +176,16 @@ window.TitipanUI = {
           </div>
         </div>
 
-        <input id="a_penitip" placeholder="Nama penitip" value="${TitipanShared.escapeHtml(draft?.penitip || "")}" ${draft?.penitip ? "readonly" : ""}>
-
-        <select id="a_barang">
+        <input id="a_penitip" placeholder="Nama penitip" value="${TitipanShared.escapeHtml(draft?.penitip || "")}" ${lockPenitip ? "readonly" : ""}>
+        <select id="a_barang" style="width:100%;padding:12px;border-radius:10px;border:1px solid #ccc;font-size:16px;margin-bottom:10px;background:#fff">
           <option value="">Pilih barang</option>
           ${options}
         </select>
-
         <input id="a_qty" type="number" placeholder="Barang terjual">
         <input id="a_bayar" readonly placeholder="Bayar penitip">
 
         <div class="kecilBox" style="margin:6px 0 12px">
-          Daftar barang otomatis difilter berdasarkan penitip yang sama.
+          Daftar barang otomatis terfilter berdasarkan penitip yang sama.
         </div>
 
         <div class="rowBtn">
@@ -213,18 +209,16 @@ window.TitipanUI = {
     }
 
     const refreshOptions = () => {
-      const penNorm = TitipanShared.normalizeText(penInput.value)
+      const pen = TitipanShared.normalizeText(penInput.value)
       const filtered = (TitipanState.data || []).filter(item =>
-        TitipanShared.normalizeText(item.nama_penitip || "") === penNorm
+        TitipanShared.normalizeText(item.nama_penitip) === pen
       )
 
-      barangSelect.innerHTML =
-        `<option value="">Pilih barang</option>` +
-        filtered.map(item => {
-          return `<option value="${item.id}">${TitipanShared.escapeHtml(item.nama_item)} | stok ${Number(item.qty || 0)}</option>`
-        }).join("")
+      barangSelect.innerHTML = `<option value="">Pilih barang</option>` + filtered.map(item => {
+        return `<option value="${item.id}">${TitipanShared.escapeHtml(item.nama_item)} | stok ${Number(item.qty || 0)}</option>`
+      }).join("")
 
-      if(draft?.preselectItemId){
+      if (draft?.preselectItemId) {
         barangSelect.value = draft.preselectItemId
       }
 
@@ -240,24 +234,20 @@ window.TitipanUI = {
 
   renderLoading(text){
     const aksiArea = document.getElementById("aksiArea")
-    if(aksiArea) aksiArea.innerHTML = `<div class="box">${TitipanShared.escapeHtml(text)}</div>`
+    if (aksiArea) aksiArea.innerHTML = `<div class="box">${TitipanShared.escapeHtml(text)}</div>`
   },
 
-  openSummary({title, body, buttons}){
+  openSummary({ title, body, buttons }){
     const card = document.getElementById("modalCard")
     const overlay = document.getElementById("modalOverlay")
-    if(!card || !overlay) return
+    if (!card || !overlay) return
 
     overlay.style.display = "flex"
     card.innerHTML = `
       <div class="modalTitle">${TitipanShared.escapeHtml(title || "")}</div>
       <div class="modalBody">${body || ""}</div>
       <div class="rowBtn" style="margin-top:12px">
-        ${(buttons || []).map((btn, idx) => `
-          <button class="${btn.className || "blue"}" data-btn-index="${idx}">
-            ${TitipanShared.escapeHtml(btn.label)}
-          </button>
-        `).join("")}
+        ${(buttons || []).map((btn, idx) => `<button class="${btn.className || "blue"}" data-btn-index="${idx}">${TitipanShared.escapeHtml(btn.label)}</button>`).join("")}
       </div>
     `
 
@@ -268,10 +258,10 @@ window.TitipanUI = {
     })
   },
 
-  openCamera({title, subtitle, confirmLabel="✓", backLabel="Kembali"}){
+  openCamera({ title, subtitle, confirmLabel = "✓", backLabel = "Kembali" }){
     const card = document.getElementById("modalCard")
     const overlay = document.getElementById("modalOverlay")
-    if(!card || !overlay) return
+    if (!card || !overlay) return
 
     overlay.style.display = "flex"
     card.innerHTML = `
@@ -287,10 +277,10 @@ window.TitipanUI = {
     `
   },
 
-  openPhotoOverlay({title, subtitle, src}){
+  openPhotoOverlay({ title, subtitle, src }){
     const card = document.getElementById("modalCard")
     const overlay = document.getElementById("modalOverlay")
-    if(!card || !overlay) return
+    if (!card || !overlay) return
 
     overlay.style.display = "flex"
     card.innerHTML = `
@@ -303,11 +293,11 @@ window.TitipanUI = {
     `
   },
 
-  openUpdateHarga({item}){
+  openUpdateHarga({ item }){
     const rekom = TitipanShared.rekomendasiHargaJual(item.harga_penitip)
     const card = document.getElementById("modalCard")
     const overlay = document.getElementById("modalOverlay")
-    if(!card || !overlay) return
+    if (!card || !overlay) return
 
     overlay.style.display = "flex"
     card.innerHTML = `
@@ -316,32 +306,31 @@ window.TitipanUI = {
 
       <input id="u_item_id" type="hidden" value="${item.id}">
       <input id="u_penitip" type="number" value="${Number(item.harga_penitip || 0)}" placeholder="Harga penitip">
-      <input id="u_jual" type="number" value="${Number(item.harga_jual || rekom || 0)}" placeholder="Harga jual" data-manual="${Number(item.harga_jual || 0) === rekom ? "0" : "1"}" style="color:${Number(item.harga_jual || 0) === rekom ? "#999" : "#111"}">
+      <input id="u_jual" type="number" value="${Number(item.harga_jual || rekom)}" placeholder="Harga jual" style="color:${Number(item.harga_jual || 0) === rekom ? "#999" : "#111"}">
 
-      <div class="kecilBox" id="u_rekomLabel" style="margin:6px 0 12px"></div>
+      <div class="kecilBox" style="margin:6px 0 12px" id="u_rekomLabel">Rekomendasi: Rp ${rekom.toLocaleString("id-ID")}</div>
 
       <div class="rowBtn">
         <button class="green" onclick="TitipanCore.saveUpdateHarga()">Simpan</button>
         <button class="red" onclick="TitipanUI.closeModal()">Batal</button>
       </div>
     `
-
-    const penInput = document.getElementById("u_penitip")
-    const jualInput = document.getElementById("u_jual")
-    const labelEl = document.getElementById("u_rekomLabel")
-
-    TitipanShared.bindAutoHarga(penInput, jualInput, labelEl)
+    TitipanShared.bindAutoHarga(
+      document.getElementById("u_penitip"),
+      document.getElementById("u_jual"),
+      document.getElementById("u_rekomLabel")
+    )
   },
 
   closeModal(){
     const overlay = document.getElementById("modalOverlay")
-    if(overlay) overlay.style.display = "none"
+    if (overlay) overlay.style.display = "none"
     TitipanCore.stopCamera()
   },
 
   showToast(text){
     const toast = document.getElementById("toast")
-    if(!toast) return
+    if (!toast) return
     toast.innerText = text
     toast.style.display = "block"
     clearTimeout(window.__titipanToastTimeout)
@@ -352,7 +341,7 @@ window.TitipanUI = {
 
   renderLogNormal(rows){
     const aksiArea = document.getElementById("aksiArea")
-    if(!aksiArea) return
+    if (!aksiArea) return
 
     let html = `
       <div class="box">
@@ -385,10 +374,10 @@ window.TitipanUI = {
 
   renderLogAdmin(rows){
     const aksiArea = document.getElementById("aksiArea")
-    if(!aksiArea) return
+    if (!aksiArea) return
 
     const grouped = TitipanShared.groupBySession(rows)
-    const keys = Object.keys(grouped).sort((a,b) => {
+    const keys = Object.keys(grouped).sort((a, b) => {
       const aa = grouped[a][0]
       const bb = grouped[b][0]
       return new Date(bb.created_at || 0) - new Date(aa.created_at || 0)
@@ -444,5 +433,4 @@ window.TitipanUI = {
     html += `</div>`
     aksiArea.innerHTML = html
   }
-
 }
