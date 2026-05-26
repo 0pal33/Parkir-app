@@ -34,31 +34,40 @@ window.TitipanCore = {
   },
 
   async loadData(){
-    const {data, error} = await window.supabaseClient
+
+  await loadDashboard()
+
+  const [{ data: barang }, { data: logs }] = await Promise.all([
+    window.supabaseClient
       .from("barang_titipan")
-      .select(`
-        id,
-        session_id,
-        nama_item,
-        nama_penitip,
-        qty,
-        harga_jual,
-        harga_penitip,
-        foto_penitip,
-        foto_barang,
-        created_at,
-        updated_at
-      `)
-      .order("created_at", {ascending:false})
+      .select("*")
+      .order("nama_item", { ascending: true }),
 
-    if(error){
-      alert("Gagal load data: " + error.message)
-      return
+    window.supabaseClient
+      .from("titipan_log")
+      .select("item_id, qty, created_at")
+      .eq("jenis", "masuk")
+      .order("created_at", { ascending: false })
+  ])
+
+  if(!barang){
+    window.DATA = []
+    window.LAST_MASUK_MAP = {}
+    renderList()
+    return
+  }
+
+  window.DATA = barang || []
+
+  window.LAST_MASUK_MAP = {}
+  ;(logs || []).forEach(log => {
+    if(!window.LAST_MASUK_MAP[log.item_id]){
+      window.LAST_MASUK_MAP[log.item_id] = log
     }
+  })
 
-    TitipanState.data = data || []
-    this.renderList()
-  },
+  renderList()
+},
 
   async renderDashboard(){
     const dash = document.getElementById("dashboardBox")
@@ -109,6 +118,41 @@ window.TitipanCore = {
       </div>
     `
   },
+  
+function formatLastMasuk(log){
+  if(!log) return `<div class="kecilBox">Terakhir masuk: -</div>`
+
+  const d = new Date(log.created_at)
+
+  const hari = d.toLocaleDateString("id-ID", {
+    weekday: "long",
+    timeZone: "Asia/Jakarta"
+  })
+
+  const tanggal = d.toLocaleDateString("id-ID", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    timeZone: "Asia/Jakarta"
+  })
+
+  const jam = d.toLocaleTimeString("id-ID", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+    timeZone: "Asia/Jakarta"
+  })
+
+  return `
+    <div class="kecilBox" style="margin-top:4px">
+      <div><b>Terakhir masuk</b></div>
+      <div>${Number(log.qty || 0)} pcs</div>
+      <div>${hari}</div>
+      <div>${tanggal}</div>
+      <div>${jam} WIB</div>
+    </div>
+  `
+},
 
   renderList(){
     TitipanUI.renderHome()
@@ -121,6 +165,25 @@ window.TitipanCore = {
       const pen = TitipanShared.normalizeText(item.nama_penitip)
       return !term || nama.includes(term) || pen.includes(term)
     })
+    const lastMasuk = window.LAST_MASUK_MAP?.[i.id]
+
+html += `
+  <div class="item" style="background:${warna}">
+    <div style="flex:1;min-width:0">
+      <div class="nama">${i.nama_item || "-"}</div>
+      <div class="kecil">${i.nama_penitip || "-"}</div>
+      <div class="kecil">Jual Rp ${Number(i.harga_jual || 0).toLocaleString('id-ID')}</div>
+      ${formatLastMasuk(lastMasuk)}
+    </div>
+
+    <div class="qty">${i.qty || 0}</div>
+
+    <div class="listActionBtns">
+      <button class="blue" onclick="formAksi('${i.id}')">📥</button>
+      ${isAdmin() ? `<button class="red" onclick="hapusBarang('${i.id}','${escapeJS(i.nama_item)}','${escapeJS(i.nama_penitip)}')">🗑</button>` : ""}
+    </div>
+  </div>
+`
 
     TitipanUI.renderList(rows)
   },
@@ -190,6 +253,7 @@ window.TitipanCore = {
     const qty = TitipanShared.clampQty(document.getElementById("t_qty")?.value)
     const hargaPenitip = TitipanShared.clampQty(document.getElementById("t_pen")?.value)
     const hargaJual = TitipanShared.clampQty(document.getElementById("t_jual")?.value)
+    
 
     if(!nama || !penitip || qty <= 0){
       alert("Nama barang, nama penitip, dan qty wajib diisi")
