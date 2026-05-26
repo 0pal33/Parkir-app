@@ -8,7 +8,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
-<script src="js/dashboardShared.js"></script>
 <script src="js/titipanShared.js"></script>
 <script src="js/titipanCore.js"></script>
 <script src="js/titipanUI.js"></script>
@@ -215,6 +214,10 @@ button{
   margin-bottom:12px;
 }
 
+.modalBody{
+  font-size:15px;
+}
+
 .summaryText{
   font-size:15px;
   line-height:1.6;
@@ -332,7 +335,7 @@ button{
 
 <h3 id="judul">Titip Jajan</h3>
 
-<div id="dashboardBox" class="dashboard adminOnly">
+<div id="dashboardBox" class="dashboard">
   <div class="card">
     <div class="cardTitle">Terjual Hari Ini</div>
     <div class="cardValue" id="dashQty">0 pcs</div>
