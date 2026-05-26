@@ -1,15 +1,15 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="manifest" href="manifest.json">
-
 <title>Titip Jajan</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
+<script src="js/dashboardShared.js"></script>
+<script src="js/titipanShared.js"></script>
 <script src="js/titipanCore.js"></script>
 <script src="js/titipanUI.js"></script>
 
@@ -18,8 +18,7 @@ body{
   font-family:Arial;
   background:#f2f2f2;
   margin:0;
-  padding:20px;
-  padding-bottom:140px;
+  padding:20px 12px 140px;
 }
 
 h3{
@@ -27,7 +26,7 @@ h3{
   margin-top:0;
 }
 
-input{
+input, select{
   width:100%;
   padding:12px;
   margin-bottom:10px;
@@ -35,6 +34,7 @@ input{
   border-radius:10px;
   border:1px solid #ccc;
   font-size:16px;
+  background:#fff;
 }
 
 button{
@@ -50,35 +50,6 @@ button{
 .red{background:#e74c3c;color:#fff;}
 .orange{background:#f39c12;color:#fff;}
 .gray{background:#95a5a6;color:#fff;}
-
-.item{
-  background:#fff;
-  padding:12px;
-  border-radius:12px;
-  margin-bottom:10px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:10px;
-  box-shadow:0 2px 8px rgba(0,0,0,.05);
-}
-
-.nama{
-  font-weight:bold;
-  font-size:16px;
-}
-
-.kecil{
-  font-size:13px;
-  color:#666;
-}
-
-.qty{
-  font-size:22px;
-  font-weight:bold;
-  min-width:42px;
-  text-align:center;
-}
 
 .box{
   background:#fff;
@@ -119,6 +90,198 @@ button{
   display:none;
 }
 
+.rowBtn{
+  display:flex;
+  gap:8px;
+  margin-bottom:10px;
+}
+
+.rowBtn button{
+  flex:1;
+}
+
+.item{
+  background:#fff;
+  padding:12px;
+  border-radius:14px;
+  margin-bottom:10px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  box-shadow:0 2px 8px rgba(0,0,0,.05);
+  transition:.15s;
+  cursor:pointer;
+}
+
+.item:hover{
+  transform:translateY(-1px);
+}
+
+.nama{font-weight:bold;font-size:16px;}
+.kecil{font-size:13px;color:#666;}
+.kecilBox{color:#777;font-size:13px;}
+.qty{font-size:22px;font-weight:bold;min-width:42px;text-align:center;}
+
+.listActionBtns{
+  display:flex;
+  gap:8px;
+  align-items:center;
+}
+
+.listActionBtns button{
+  min-width:42px;
+  height:38px;
+  padding:0 10px;
+}
+
+.thumb{
+  width:46px;
+  height:46px;
+  border-radius:12px;
+  background:#eef2f7;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+  flex:0 0 auto;
+}
+
+.thumb img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+.autoTag{
+  font-size:11px;
+  color:#888;
+}
+
+.photoThumb{
+  width:56px;
+  height:56px;
+  border-radius:14px;
+  object-fit:cover;
+  background:#eef2f7;
+  display:block;
+}
+
+.photoThumb.placeholder{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:22px;
+}
+
+.photoBig{
+  width:100%;
+  max-height:70vh;
+  object-fit:contain;
+  border-radius:14px;
+  background:#111;
+}
+
+#modalOverlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.68);
+  z-index:99999;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:18px;
+}
+
+.modalCard{
+  width:min(100%, 520px);
+  background:#fff;
+  border-radius:18px;
+  padding:16px;
+  box-shadow:0 18px 42px rgba(0,0,0,.28);
+}
+
+.modalTitle{
+  font-size:18px;
+  font-weight:bold;
+  text-align:center;
+  margin-bottom:6px;
+}
+
+.modalSub{
+  font-size:13px;
+  color:#666;
+  text-align:center;
+  margin-bottom:12px;
+}
+
+.summaryText{
+  font-size:15px;
+  line-height:1.6;
+  white-space:pre-wrap;
+}
+
+.summaryTotal{
+  font-weight:bold;
+  font-size:15px;
+  margin-top:10px;
+}
+
+.summaryQuestion{
+  margin-top:10px;
+  font-size:14px;
+}
+
+.cameraWrap{
+  background:#000;
+  border-radius:14px;
+  overflow:hidden;
+  margin:10px 0 12px;
+}
+
+.cameraWrap video{
+  width:100%;
+  display:block;
+  max-height:60vh;
+  object-fit:cover;
+}
+
+.groupCard{
+  margin-bottom:14px;
+  padding:12px;
+  background:#fff;
+  border-radius:14px;
+  box-shadow:0 2px 8px rgba(0,0,0,.05);
+}
+
+.groupHead{
+  display:flex;
+  gap:12px;
+  align-items:center;
+}
+
+.groupPhoto{
+  width:56px;
+  height:56px;
+  border-radius:14px;
+  background:#eef2f7;
+  overflow:hidden;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex:0 0 auto;
+}
+
+.groupPhoto img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+.logMasuk{border-left:5px solid #2ecc71;}
+.logAmbil{border-left:5px solid #e74c3c;}
+.logHarga{border-left:5px solid #f1c40f;}
+
 .floatingTambah{
   position:fixed;
   right:20px;
@@ -155,106 +318,33 @@ button{
   box-shadow:0 4px 12px rgba(0,0,0,.18);
 }
 
-.rowBtn{
-  display:flex;
-  gap:8px;
-  margin-bottom:10px;
-}
-
-.rowBtn button{
-  flex:1;
-}
-
-.aksiItem{
-  background:#fff;
-  border:1px solid #eee;
-  border-radius:14px;
-  padding:12px;
-  margin-bottom:12px;
-  box-shadow:0 2px 8px rgba(0,0,0,.04);
-}
-
-.aksiHead{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:12px;
-  margin-bottom:10px;
-}
-
-.aksiCheck{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  font-weight:bold;
-  font-size:16px;
-  margin:0;
-}
-
-.aksiCheck input[type="checkbox"]{
-  width:22px;
-  height:22px;
-  margin:0;
-}
-
-.aksiPanel{
+#toast{
+  position:fixed;
+  left:50%;
+  bottom:92px;
+  transform:translateX(-50%);
+  background:rgba(0,0,0,.82);
+  color:#fff;
+  padding:10px 14px;
+  border-radius:10px;
   display:none;
-  background:#f8f8f8;
-  border-radius:12px;
-  padding:12px;
-}
-
-.aksiPanel input{
-  margin-bottom:10px;
-}
-
-.listActionBtns{
-  display:flex;
-  gap:8px;
-  align-items:center;
-}
-
-.listActionBtns .blue,
-.listActionBtns .red{
-  min-width:52px;
-  height:40px;
-  padding:0 10px;
-}
-
-.logMasuk{border-left:5px solid #2ecc71;}
-.logAmbil{border-left:5px solid #e74c3c;}
-.logHarga{border-left:5px solid #f1c40f;}
-
-.kecilBox{
-  color:#777;
+  z-index:100000;
   font-size:13px;
 }
 
 @media (max-width:420px){
-  .dashboard{
-    grid-template-columns:1fr 1fr;
-  }
-
-  .cardValue{
-    font-size:20px;
-  }
-
-  .item{
-    align-items:center;
-  }
-
-  .listActionBtns{
-    flex-direction:column;
-  }
+  .dashboard{grid-template-columns:1fr 1fr}
+  .cardValue{font-size:20px}
+  .listActionBtns{flex-direction:column}
+  .item{align-items:center}
 }
 </style>
-
 </head>
 <body>
 
 <h3 id="judul">Titip Jajan</h3>
 
-<div class="dashboard">
+<div id="dashboardBox" class="dashboard">
   <div class="card">
     <div class="cardTitle">Terjual Hari Ini</div>
     <div class="cardValue" id="dashQty">0 pcs</div>
@@ -266,35 +356,37 @@ button{
   </div>
 </div>
 
-<input id="searchBox" placeholder="Cari barang / penitip..." oninput="TitipanUI.renderList()">
+<div class="rowBtn">
+  <button id="btnTambah" class="green">Tambah Barang</button>
+  <button id="btnKedatangan" class="blue">Kedatangan Penitip</button>
+  <button id="btnLog" class="orange">Riwayat</button>
+</div>
+
+<input id="searchBox" placeholder="Cari barang / penitip..." oninput="TitipanCore.renderList()">
 
 <div id="listArea"></div>
 <div id="formArea"></div>
 <div id="aksiArea"></div>
 
-<button class="floatingBack red" onclick="location.href='index.html'">🏠</button>
-<button class="floatingLog orange" onclick="TitipanCore.showLog('today')">📋</button>
-<button class="floatingTambah green" onclick="TitipanUI.formTambah()">+</button>
+<button id="btnHome" class="floatingBack red">🏠</button>
+<button id="floatingTambah" class="floatingTambah green" onclick="TitipanCore.startTambahFlow()">+</button>
+<button id="floatingLog" class="floatingLog orange" onclick="TitipanCore.showLog('today')">📄</button>
+
+<div id="modalOverlay">
+  <div id="modalCard" class="modalCard"></div>
+</div>
+
+<div id="toast"></div>
 
 <script>
-document.addEventListener("DOMContentLoaded", async ()=>{
-
-  const { data } = await window.supabaseClient.auth.getSession()
-
-  if(!data.session){
-    alert("Akses ditolak")
-    location.href="index.html"
+window.addEventListener("DOMContentLoaded", async ()=>{
+  if(!window.supabaseClient){
+    alert("Supabase belum siap")
     return
   }
 
-  // Dashboard summary hanya untuk admin.
-  if(localStorage.getItem("adminLogin") !== "true"){
-    const dash = document.querySelector(".dashboard")
-    if(dash) dash.style.display = "none"
-  }
-
-  await TitipanCore.loadData()
-
+  TitipanUI.setAdminView(TitipanShared.isAdmin())
+  await TitipanCore.init()
 })
 </script>
 
@@ -308,8 +400,8 @@ if(IS_DEV && !window.__SUGER_LOADED__){
 </script>
 
 <script>
-if('serviceWorker' in navigator){
-  navigator.serviceWorker.register('sw.js')
+if("serviceWorker" in navigator){
+  navigator.serviceWorker.register("sw.js")
 }
 </script>
 

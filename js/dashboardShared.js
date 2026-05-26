@@ -8,8 +8,10 @@ window.dashboardShared = {
 
     const map = {}
 
-    data.forEach(item=>{
-      map[item.id] = item
+    ;(data || []).forEach(item=>{
+      if(item && item.id !== undefined && item.id !== null){
+        map[item.id] = item
+      }
     })
 
     return map
@@ -41,21 +43,20 @@ window.dashboardShared = {
 
   formatTanggal(dateString){
 
-    const [year,month,day] =
-    String(dateString).split("-")
+    const parts = String(dateString || "").split("-")
+    const year = Number(parts[0] || 0)
+    const month = Number(parts[1] || 1)
+    const day = Number(parts[2] || 1)
 
-    const d = new Date(
-      Number(year),
-      Number(month)-1,
-      Number(day)
-    )
+    const d = new Date(year, month - 1, day)
 
     return d.toLocaleDateString(
       "id-ID",
       {
         day:"numeric",
         month:"long",
-        year:"numeric"
+        year:"numeric",
+        timeZone:"Asia/Jakarta"
       }
     )
   },
@@ -84,9 +85,7 @@ window.dashboardShared = {
       )
 
       const dateKey =
-      wibDate
-      .toISOString()
-      .split("T")[0]
+      wibDate.toISOString().split("T")[0]
 
       if(!grouped[dateKey]){
         grouped[dateKey] = []
@@ -217,6 +216,8 @@ window.dashboardShared = {
 
   /* =========================
      TITIPAN
+     - pendapatan = harga jual × qty
+     - pengeluaran = total log payout penitip
   ========================= */
 
   calcTitipanIncome(log, barang){
