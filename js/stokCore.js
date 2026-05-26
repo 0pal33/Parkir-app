@@ -463,15 +463,15 @@ try{
   }
 
   const payload = {
-    nama_item: nama,
-    urutan: STOK.DATA.length + 1,
-    qty: dihitung ? awal : 0,
-    harga_beli: dihitung ? beli : null,
-    harga_jual: jual,
-    qty_pesan: dihitung ? qtypesan : null,
-    barang_dihitung: dihitung,
-    updated_at: new Date().toISOString()
-  }
+  nama_item: nama,
+  urutan: STOK.DATA.length + 1,
+  qty: dihitung ? awal : 0,
+  harga_beli: dihitung ? beli : null,
+  harga_jual: jual,
+  qty_pesan: dihitung ? qtypesan : null,
+  barang_dihitung: dihitung,
+  updated_at: new Date().toISOString()
+}
 
   const { error } = await window.supabaseClient
   .from("stok_barang")
@@ -927,33 +927,30 @@ alert("Pesanan terakhir dibatalkan")
 
 async resetNonStokHarian(){
 
-let now = this.nowWIB()
-let lastReset = localStorage.getItem("STOK.LAST_RESET")
+  const now = StokShared.nowWIB()
+  const today = StokShared.wibDateKey(now)
+  const lastReset = localStorage.getItem("STOK.LAST_RESET")
 
-let today = now.toISOString().slice(0,10)
+  if(lastReset === today) return
 
-if(lastReset === today) return
+  for(const i of STOK.DATA){
 
-for (let i of STOK.DATA){
+    if(i.barang_dihitung === false && Number(i.qty || 0) !== 0){
 
-if(i.barang_dihitung === false && i.qty !== 0){
+      await window.supabaseClient
+      .from("stok_barang")
+      .update({
+        qty: 0,
+        updated_at: new Date().toISOString()
+      })
+      .eq("id", i.id)
 
-await window.supabaseClient
-.from("stok_barang")
-.update({
-qty:0,
-updated_at:new Date().toISOString()
-})
-.eq("id",i.id)
+      i.qty = 0
+    }
 
-i.qty = 0
+  }
 
-}
-
-}
-
-localStorage.setItem("STOK.LAST_RESET", today)
-
+  localStorage.setItem("STOK.LAST_RESET", today)
 }
 
 
