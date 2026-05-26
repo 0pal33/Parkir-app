@@ -3,10 +3,12 @@ window.TitipanUI = {
   setAdminView(isAdmin){
     const dash = document.getElementById("dashboardBox")
     const adminOnly = document.querySelectorAll(".adminOnly")
+
     if(dash){
       dash.style.display = isAdmin ? "grid" : "none"
     }
-    adminOnly.forEach(el=>{
+
+    adminOnly.forEach(el => {
       el.style.display = isAdmin ? "" : "none"
     })
   },
@@ -17,6 +19,7 @@ window.TitipanUI = {
     const listArea = document.getElementById("listArea")
     const formArea = document.getElementById("formArea")
     const aksiArea = document.getElementById("aksiArea")
+
     if(judul) judul.style.display = "block"
     if(search) search.style.display = "block"
     if(listArea) listArea.style.display = "block"
@@ -28,15 +31,15 @@ window.TitipanUI = {
     const listArea = document.getElementById("listArea")
     const formArea = document.getElementById("formArea")
     const aksiArea = document.getElementById("aksiArea")
+    const search = document.getElementById("searchBox")
 
     if(listArea) listArea.style.display = section === "list" ? "block" : "none"
     if(formArea) formArea.style.display = section === "form" ? "block" : "none"
     if(aksiArea) aksiArea.style.display = section === "aksi" ? "block" : "none"
+    if(search) search.style.display = section === "list" ? "block" : "none"
 
     const judul = document.getElementById("judul")
-    const search = document.getElementById("searchBox")
     if(judul) judul.style.display = "block"
-    if(search) search.style.display = section === "list" ? "block" : "none"
   },
 
   renderList(rows){
@@ -50,14 +53,23 @@ window.TitipanUI = {
 
     let html = ""
 
-    rows.forEach(item=>{
-      const fotoBarang = item.foto_barang || item.foto_penitip || ""
+    rows.forEach(item => {
+      const qty = Number(item.qty || 0)
       const autoHarga = TitipanShared.rekomendasiHargaJual(item.harga_penitip)
       const hargaDisplay = Number(item.harga_jual || 0)
-      const thumbHtml = fotoBarang ? `<img src="${fotoBarang}" alt="foto">` : `<span>📷</span>`
+      const lastMasuk = TitipanState.lastMasukMap?.[item.id] || null
+
+      const thumbSrc = item.foto_barang || ""
+      const thumbHtml = thumbSrc
+        ? `<img src="${thumbSrc}" alt="foto barang">`
+        : `<span>📷</span>`
+
+      const cardClick = TitipanShared.isAdmin()
+        ? `TitipanCore.openPenitipPhoto('${item.id}')`
+        : `TitipanCore.openBarangPhoto('${item.id}')`
 
       html += `
-        <div class="item" onclick="${TitipanShared.isAdmin() ? `TitipanCore.openPenitipPhoto('${item.id}')` : `TitipanCore.openBarangPhoto('${item.id}')`}">
+        <div class="item" style="background:${qty <= 0 ? "#ffd6d6" : "#fff"}" onclick="${cardClick}">
           <div class="thumb" onclick="event.stopPropagation(); TitipanCore.openBarangPhoto('${item.id}')">
             ${thumbHtml}
           </div>
@@ -65,14 +77,18 @@ window.TitipanUI = {
           <div style="flex:1;min-width:0">
             <div class="nama">${TitipanShared.escapeHtml(item.nama_item || "-")}</div>
             <div class="kecil">${TitipanShared.escapeHtml(item.nama_penitip || "-")}</div>
-            <div class="kecil">Jual Rp ${Number(hargaDisplay || 0).toLocaleString("id-ID")}${hargaDisplay === autoHarga ? ` <span class="autoTag">rekomendasi</span>` : ""}</div>
+            <div class="kecil">
+              Jual Rp ${Number(hargaDisplay || 0).toLocaleString("id-ID")}
+              ${hargaDisplay === autoHarga ? ` <span class="autoTag">rekomendasi</span>` : ""}
+            </div>
+            ${TitipanShared.formatLastMasuk(lastMasuk)}
           </div>
 
-          <div class="qty">${Number(item.qty || 0)}</div>
+          <div class="qty">${qty}</div>
 
           <div class="listActionBtns" onclick="event.stopPropagation()">
-            <button class="blue" title="Kedatangan" onclick="TitipanCore.startArrivalFlow('${TitipanShared.escapeHtml(item.nama_penitip || "")}','${item.id}')">📥</button>
-            <button class="green" title="Nitip Lagi" onclick="TitipanCore.startTambahFlow('${TitipanShared.escapeHtml(item.nama_penitip || "")}')">＋</button>
+            <button class="blue" title="Kedatangan" onclick="TitipanCore.startArrivalFlow('${TitipanShared.escapeJs(item.nama_penitip || "")}','${item.id}')">📥</button>
+            <button class="green" title="Nitip Lagi" onclick="TitipanCore.startTambahFlow('${TitipanShared.escapeJs(item.nama_penitip || "")}')">＋</button>
             <button class="orange" title="Update Harga" onclick="TitipanCore.openUpdateHarga('${item.id}')">✎</button>
             ${TitipanShared.isAdmin() ? `<button class="red" title="Hapus" onclick="TitipanCore.hapusBarang('${item.id}')">🗑</button>` : ""}
           </div>
@@ -110,9 +126,9 @@ window.TitipanUI = {
         <input id="t_nama" placeholder="Nama barang">
         <input id="t_qty" type="number" placeholder="Jumlah titip">
         <input id="t_pen" type="number" placeholder="Harga penitip">
-        <input id="t_jual" type="number" placeholder="Harga jual" style="color:#999">
+        <input id="t_jual" type="number" placeholder="Harga jual" data-manual="0" style="color:#999">
 
-        <div class="kecilBox" style="margin:6px 0 12px">${TitipanShared.recommendedLabel(document.getElementById("t_penitip")?.value || "")}</div>
+        <div class="kecilBox" id="t_rekomLabel" style="margin:6px 0 12px"></div>
 
         <div class="rowBtn">
           <button class="green" onclick="TitipanCore.saveTambahItem()">Simpan</button>
@@ -127,7 +143,9 @@ window.TitipanUI = {
 
     const penInput = document.getElementById("t_pen")
     const jualInput = document.getElementById("t_jual")
-    TitipanShared.bindAutoHarga(penInput, jualInput)
+    const labelEl = document.getElementById("t_rekomLabel")
+
+    TitipanShared.bindAutoHarga(penInput, jualInput, labelEl)
   },
 
   renderArrivalForm({draft}){
@@ -138,8 +156,9 @@ window.TitipanUI = {
       ? `<img src="${draft.foto_bukti}" alt="foto bukti" class="photoThumb">`
       : `<div class="photoThumb placeholder">📷</div>`
 
+    const pen = TitipanShared.normalizeText(draft?.penitip || "")
     const filteredItems = (TitipanState.data || []).filter(item =>
-      TitipanShared.normalizeText(item.nama_penitip) === TitipanShared.normalizeText(draft?.penitip || "")
+      TitipanShared.normalizeText(item.nama_penitip || "") === pen
     )
 
     const options = filteredItems.map(item => {
@@ -160,14 +179,18 @@ window.TitipanUI = {
         </div>
 
         <input id="a_penitip" placeholder="Nama penitip" value="${TitipanShared.escapeHtml(draft?.penitip || "")}" ${draft?.penitip ? "readonly" : ""}>
-        <select id="a_barang" style="width:100%;padding:12px;border-radius:10px;border:1px solid #ccc;font-size:16px;margin-bottom:10px">
+
+        <select id="a_barang">
           <option value="">Pilih barang</option>
           ${options}
         </select>
+
         <input id="a_qty" type="number" placeholder="Barang terjual">
         <input id="a_bayar" readonly placeholder="Bayar penitip">
 
-        <div class="kecilBox" style="margin:6px 0 12px">Daftar barang otomatis terfilter berdasarkan penitip yang sama.</div>
+        <div class="kecilBox" style="margin:6px 0 12px">
+          Daftar barang otomatis difilter berdasarkan penitip yang sama.
+        </div>
 
         <div class="rowBtn">
           <button class="green" onclick="TitipanCore.saveArrivalItem()">Simpan</button>
@@ -190,14 +213,16 @@ window.TitipanUI = {
     }
 
     const refreshOptions = () => {
-      const pen = TitipanShared.normalizeText(penInput.value)
+      const penNorm = TitipanShared.normalizeText(penInput.value)
       const filtered = (TitipanState.data || []).filter(item =>
-        TitipanShared.normalizeText(item.nama_penitip) === pen
+        TitipanShared.normalizeText(item.nama_penitip || "") === penNorm
       )
 
-      barangSelect.innerHTML = `<option value="">Pilih barang</option>` + filtered.map(item => {
-        return `<option value="${item.id}">${TitipanShared.escapeHtml(item.nama_item)} | stok ${Number(item.qty || 0)}</option>`
-      }).join("")
+      barangSelect.innerHTML =
+        `<option value="">Pilih barang</option>` +
+        filtered.map(item => {
+          return `<option value="${item.id}">${TitipanShared.escapeHtml(item.nama_item)} | stok ${Number(item.qty || 0)}</option>`
+        }).join("")
 
       if(draft?.preselectItemId){
         barangSelect.value = draft.preselectItemId
@@ -228,7 +253,11 @@ window.TitipanUI = {
       <div class="modalTitle">${TitipanShared.escapeHtml(title || "")}</div>
       <div class="modalBody">${body || ""}</div>
       <div class="rowBtn" style="margin-top:12px">
-        ${(buttons || []).map((btn, idx) => `<button class="${btn.className || "blue"}" data-btn-index="${idx}">${TitipanShared.escapeHtml(btn.label)}</button>`).join("")}
+        ${(buttons || []).map((btn, idx) => `
+          <button class="${btn.className || "blue"}" data-btn-index="${idx}">
+            ${TitipanShared.escapeHtml(btn.label)}
+          </button>
+        `).join("")}
       </div>
     `
 
@@ -287,16 +316,21 @@ window.TitipanUI = {
 
       <input id="u_item_id" type="hidden" value="${item.id}">
       <input id="u_penitip" type="number" value="${Number(item.harga_penitip || 0)}" placeholder="Harga penitip">
-      <input id="u_jual" type="number" value="${Number(item.harga_jual || rekom)}" placeholder="Harga jual" style="color:${Number(item.harga_jual || 0) === rekom ? "#999" : "#111"}">
+      <input id="u_jual" type="number" value="${Number(item.harga_jual || rekom || 0)}" placeholder="Harga jual" data-manual="${Number(item.harga_jual || 0) === rekom ? "0" : "1"}" style="color:${Number(item.harga_jual || 0) === rekom ? "#999" : "#111"}">
 
-      <div class="kecilBox" style="margin:6px 0 12px" id="u_rekomLabel">Rekomendasi: Rp ${rekom.toLocaleString("id-ID")}</div>
+      <div class="kecilBox" id="u_rekomLabel" style="margin:6px 0 12px"></div>
 
       <div class="rowBtn">
         <button class="green" onclick="TitipanCore.saveUpdateHarga()">Simpan</button>
         <button class="red" onclick="TitipanUI.closeModal()">Batal</button>
       </div>
     `
-    TitipanShared.bindAutoHarga(document.getElementById("u_penitip"), document.getElementById("u_jual"))
+
+    const penInput = document.getElementById("u_penitip")
+    const jualInput = document.getElementById("u_jual")
+    const labelEl = document.getElementById("u_rekomLabel")
+
+    TitipanShared.bindAutoHarga(penInput, jualInput, labelEl)
   },
 
   closeModal(){
@@ -311,7 +345,7 @@ window.TitipanUI = {
     toast.innerText = text
     toast.style.display = "block"
     clearTimeout(window.__titipanToastTimeout)
-    window.__titipanToastTimeout = setTimeout(()=>{
+    window.__titipanToastTimeout = setTimeout(() => {
       toast.style.display = "none"
     }, 1800)
   },
@@ -330,8 +364,8 @@ window.TitipanUI = {
         </div>
     `
 
-    rows.forEach(row=>{
-      const item = (TitipanState.data || []).find(x=>x.id === row.item_id) || {}
+    rows.forEach(row => {
+      const item = (TitipanState.data || []).find(x => x.id === row.item_id) || {}
       const cls = row.jenis === "ambil" ? "logAmbil" : row.jenis === "masuk" ? "logMasuk" : "logHarga"
       const label = row.jenis === "ambil" ? "Ambil" : row.jenis === "masuk" ? "Masuk" : "Harga"
 
@@ -354,7 +388,7 @@ window.TitipanUI = {
     if(!aksiArea) return
 
     const grouped = TitipanShared.groupBySession(rows)
-    const keys = Object.keys(grouped).sort((a,b)=>{
+    const keys = Object.keys(grouped).sort((a,b) => {
       const aa = grouped[a][0]
       const bb = grouped[b][0]
       return new Date(bb.created_at || 0) - new Date(aa.created_at || 0)
@@ -370,7 +404,7 @@ window.TitipanUI = {
         </div>
     `
 
-    keys.forEach(key=>{
+    keys.forEach(key => {
       const group = TitipanShared.sortByCreatedAtAsc(grouped[key])
       const head = group[0] || {}
       const photo = head.foto_bukti || head.foto_penitip || ""
@@ -389,8 +423,8 @@ window.TitipanUI = {
           </div>
       `
 
-      group.forEach(row=>{
-        const it = (TitipanState.data || []).find(x=>x.id === row.item_id) || {}
+      group.forEach(row => {
+        const it = (TitipanState.data || []).find(x => x.id === row.item_id) || {}
         const label = row.jenis === "ambil" ? "Ambil" : row.jenis === "masuk" ? "Masuk" : "Harga"
         const cls = row.jenis === "ambil" ? "logAmbil" : row.jenis === "masuk" ? "logMasuk" : "logHarga"
 
