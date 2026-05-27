@@ -247,14 +247,11 @@ CHECKOUT
 
 window.checkout = async function(k){
 
-const {error}=await window.supabaseClient
-.from("parkir")
-.update({
-status:"off",
-checkout_at:new Date()
+const {error}=await window.supabaseClient.rpc("checkout_parkir", {
+  p_parkir_id: idParkir,
+  p_checkout_at: new Date().toISOString(),
+  p_total_bayar: totalBayar
 })
-.eq("kode",k)
-.eq("status","on")
 
 if(error){
 alert("Gagal checkout")
