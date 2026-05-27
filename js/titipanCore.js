@@ -482,9 +482,9 @@ window.TitipanCore = {
   },
 
   continueArrival(){
-    TitipanUI.closeModal()
-    this.renderArrivalForm()
-  },
+  TitipanUI.closeModal()
+  TitipanUI.renderArrivalForm({ draft: TitipanState.arrivalDraft })
+},
 
   beginArrivalPhotoStep(){
     const draft = TitipanState.arrivalDraft
