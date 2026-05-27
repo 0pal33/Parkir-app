@@ -108,6 +108,20 @@ window.TitipanShared = {
     const step = Math.ceil(p / 1000) + 1
     return Math.max(2, step) * 1000
   },
+  
+  recommendedLabel(hargaPenitip){
+  const h = Number(hargaPenitip || 0)
+
+  if(!h){
+    return "Rekomendasi otomatis akan muncul di sini"
+  }
+
+  const rekom =
+  TitipanShared.rekomendasiHargaJual(h)
+
+  return `Rekomendasi: Rp ${Number(rekom || 0)
+    .toLocaleString("id-ID")}`
+},
 
   bindAutoHarga(penitipInput, jualInput, labelEl){
     if (!penitipInput || !jualInput) return
