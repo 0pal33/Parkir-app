@@ -75,14 +75,13 @@ async function showDashboardHistory(type){
 
     const { data: parkir } =
     await window.supabaseClient
-    .from("parkir")
+    .from("parkir_history")
     .select(`
       kode,
       total_bayar,
       checkin_at,
       checkout_at
     `)
-    .eq("status","off")
     .gte("checkout_at",startISO)
     .lte("checkout_at",endISO)
     .order("checkout_at",{
