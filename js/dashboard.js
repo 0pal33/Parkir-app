@@ -5,7 +5,8 @@ window.dashboardRows = {
   parkir: [],
   bulanan: [],
   stok: [],
-  titipan: []
+  titipan: [],
+  parkirHistory: []
 }
 
 function rupiah(n){
@@ -41,10 +42,9 @@ async function loadDashboard(){
   let startISO = start.toISOString()
   let endISO = end.toISOString()
 
-  let {data:parkir} = await window.supabaseClient
-  .from("parkir")
-  .select("checkout_at, checkin_at, total_bayar")
-  .eq("status","off")
+  let {data:parkirHistory} = await window.supabaseClient
+  .from("parkir_history")
+  .select("kode, checkin_at, checkout_at, total_bayar")
   .gte("checkout_at", startISO)
   .lte("checkout_at", endISO)
 
@@ -94,10 +94,11 @@ async function loadDashboard(){
   const titipanMap = window.dashboardShared.createMap(barangTitipan)
 
   window.dashboardRows = {
-    parkir: parkir ?? [],
+    parkir: [],
     bulanan: bulanan ?? [],
     stok: stok ?? [],
     titipan: titipan ?? [],
+    parkirHistory: parkirHistory ?? [],
     stokMap,
     titipanMap
   }
@@ -124,7 +125,7 @@ async function loadDashboard(){
   let titipanItems = new Set()
 
   // PARKIR
-  ;(parkir ?? []).forEach(p=>{
+  ;(parkirHistory ?? []).forEach(p=>{
     let tarif = window.dashboardShared.calcParkirIncome(p)
 
     income += tarif
