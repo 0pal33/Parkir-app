@@ -1,13 +1,19 @@
 window.loadReminder = async function(){
 
-if(!document.getElementById("bottomButtons").innerHTML.includes("Start Scanning")){
+let bottom = document.getElementById("bottomButtons")
+let box = document.getElementById("reminderBox")
+
+if(!bottom || !box) return
+
+if(!bottom.innerHTML.includes("Start Scanning")){
+box.innerHTML=""
 return
 }
 
-const {data}=await supabase
-.from('bulanan')
-.select('*')
-.eq('status','aktif')
+const {data} = await window.supabaseClient
+.from("bulanan")
+.select("*")
+.eq("status","aktif")
 
 if(!data) return
 
@@ -29,45 +35,38 @@ target = new Date(year,month,p.jatuh_tempo)
 }
 
 let todayDate = new Date(year,month,today)
-let targetDate = new Date(target.getFullYear(),target.getMonth(),target.getDate())
+let targetDate = new Date(
+target.getFullYear(),
+target.getMonth(),
+target.getDate()
+)
 
 let diff = Math.floor((targetDate - todayDate)/86400000)
 
-if(diff <=5 && diff >=0){
+if(diff <= 5 && diff >= 0){
 
 let text=""
 
 if(diff===0) text="Hari ini"
 else if(diff===1) text="Besok"
-else text=diff+" hari lagi"
+else text = diff+" hari lagi"
 
-html+=`
+html += `
 <div style="
 background:#fff3cd;
-padding:10px;
-margin:6px;
+padding:8px;
+margin-top:8px;
 border-radius:10px;
-font-size:14px
+font-size:13px;
 ">
-⚠ <b>${p.nama}</b><br>
-Jatuh tempo ${text}
+⚠ <b>${p.nama}</b> jatuh tempo ${text}
 </div>
 `
+
 }
 
 })
 
-if(html !== ""){
-document.getElementById("resultBox").innerHTML = `
-<h3>Reminder Pembayaran</h3>
-${html}
-`
-}else{
-document.getElementById("resultBox").innerHTML = `
-<div style="color:#777;font-size:14px">
-Tidak ada pembayaran yang mendekati jatuh tempo
-</div>
-`
-}
+box.innerHTML = html
 
 }

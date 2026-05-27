@@ -1,7 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
+
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="manifest" href="manifest.json">
+
 <title>Login Admin</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -41,62 +44,79 @@ cursor:pointer;
 <input id="email" placeholder="Email"><br>
 <input id="password" type="password" placeholder="Password"><br>
 
-<button class="blue" onclick="login()">Login</button>
-<button class="red" onclick="back()">Batal</button>
+<button class="blue" onclick="window.login()">Login</button>
+<button class="red" onclick="window.back()">Batal</button>
 
 <script>
 
-// ✅ redirect kalau sudah login
-if(localStorage.getItem("adminLogin")==="true"){
-window.location.href="index.html"
-}
+window.addEventListener("DOMContentLoaded", ()=>{
 
-// tombol kembali
-window.back = function(){
-location.href="index.html"
-}
+  if(localStorage.getItem("adminLogin")==="true"){
+    window.location.href="index.html"
+  }
 
-// ✅ ENTER = login (dipindah ke sini)
-document.addEventListener("keydown",function(e){
-if(e.key==="Enter"){
-login()
-}
+  window.back = function(){
+    location.href="index.html"
+  }
+
+  window.login = async function(){
+
+    let email=document.getElementById("email").value.trim()
+    let password=document.getElementById("password").value
+    let btn=document.querySelector(".blue")
+
+    if(!email || !password){
+      alert("Isi email dan password")
+      return
+    }
+
+    btn.disabled = true
+    btn.innerText = "Loading..."
+
+    const { error } = await window.supabaseClient.auth.signInWithPassword({
+      email,password
+    })
+
+    if(error){
+      alert("Login gagal")
+      btn.disabled = false
+      btn.innerText = "Login"
+      return
+    }
+
+    alert("Login berhasil")
+
+    localStorage.setItem("adminLogin","true")
+
+    window.location.href="index.html"
+  }
+
+  document.addEventListener("keydown",function(e){
+    if(e.key==="Enter"){
+      window.login()
+    }
+  })
+
 })
 
-// login function
-window.login = async function(){
+</script>
 
-let email=document.getElementById("email").value.trim()
-let password=document.getElementById("password").value
-let btn=document.querySelector(".blue")
+<!-- SUGER DEVTOOL -->
+<script>
+if(IS_DEV && !window.__SUGER_LOADED__){
+  window.__SUGER_LOADED__ = true
 
-if(!email || !password){
-alert("Isi email dan password")
-return
+  const script = document.createElement("script")
+  script.src = "https://suger-cdn.vercel.app/suger-dev.js"
+  document.body.appendChild(script)
 }
+</script>
 
-btn.disabled = true
-btn.innerText = "Loading..."
-
-const { error } = await supabase.auth.signInWithPassword({
-email,password
-})
-
-if(error){
-alert("Login gagal")
-btn.disabled = false
-btn.innerText = "Login"
-return
+<!-- SERVICE WORKER -->
+<script>
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('sw.js')
 }
-
-alert("Login berhasil")
-
-localStorage.setItem("adminLogin","true")
-
-window.location.href="index.html"
-
-}
-
 </script>
 
 </body>

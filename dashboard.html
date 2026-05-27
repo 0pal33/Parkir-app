@@ -3,11 +3,19 @@
 <head>
 
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
 <title>Admin Dashboard</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
 <script src="js/parkirEngine.js"></script>
+<script src="js/dashboardShared.js"></script>
+<script src="js/dashboard.js"></script>
+<script src="js/breakdown.js"></script>
+<script src="js/dashboardHistory.js"></script>
 
 <style>
 body{display:none}
@@ -15,13 +23,68 @@ body{display:none}
 
 <style>
 
+html, body{
+  max-width:100%;
+  overflow-x:hidden;
+}
+
 body{
-font-family:Arial;
-background:#f2f2f2;
-margin:0;
-padding:20px;
-text-align:center;
-padding-bottom:100px;
+  font-family:Arial;
+  background:#f2f2f2;
+  margin:0;
+  padding:20px 12px; /* ⬅️ KURANGI SAMPING */
+  text-align:center;
+  padding-bottom:100px;
+}
+
+*{
+  box-sizing: border-box;
+}
+
+.modernCard{
+  text-align:left;
+}
+
+.label{
+  font-size:12px;
+  color:#888;
+  letter-spacing:1px;
+}
+
+.highlight{
+  font-size:32px;
+  margin:8px 0 15px;
+  color:#2c3e50;
+  font-weight:600; /* ⬅️ BIAR LEBIH "MAHAL" LOOK */
+}
+
+.rowStat{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap; /* ⬅️ BIAR TURUN KALAU SEMPIT */
+}
+
+.stat{
+  flex:1 1 45%; /* ⬅️ RESPONSIVE 2 KOLOM */
+  padding:10px;
+  border-radius:10px;
+  font-size:14px;
+}
+
+.stat b{
+  display:block;
+  margin-top:4px;
+  font-size:16px;
+}
+
+.income{
+  background:#eafaf1;
+  color:#27ae60;
+}
+
+.expense{
+  background:#fdecea;
+  color:#e74c3c;
 }
 
 .top{
@@ -61,9 +124,9 @@ opacity:1;
 }
 
 .slider{
-max-width:520px;
-margin:auto;
-overflow:hidden;
+  width:100%;
+  max-width:520px;
+  margin:auto;
 }
 
 .slides{
@@ -83,14 +146,11 @@ display:none;
 }
 
 .card{
-background:white;
-padding:20px;
-border-radius:15px;
-box-shadow:0 4px 10px rgba(0,0,0,0.1);
-
-min-width:95%;
-flex-shrink:0;
-scroll-snap-align:start;
+  background:white;
+  padding:20px;
+  border-radius:15px;
+  box-shadow:0 4px 10px rgba(0,0,0,0.1);
+  width:100%;
 }
 
 .menu{
@@ -99,6 +159,16 @@ margin:20px auto 0 auto;
 display:flex;
 flex-direction:column;
 gap:10px;
+}
+
+.quickActions{
+  display:flex;
+  gap:10px;
+}
+
+.quickActions .btn{
+  flex:1;
+  margin-top:0;
 }
 
 .big{
@@ -158,6 +228,160 @@ z-index:999;
 transform:translateX(-50%) scale(0.9);
 }
 
+/* CONTAINER */
+.summary{
+  width:100%;
+  max-width:420px;
+  margin:auto;
+  padding:0 2px;
+}
+
+/* TOTAL CARD */
+.totalCard{
+  margin-bottom:10px;
+  padding:16px;
+}
+
+.totalCard .big{
+  font-size:28px;
+}
+
+/* 2 KOLOM */
+.rowBox{
+  display:flex;
+  gap:10px;
+  align-items:stretch;
+  width:100%;
+}
+
+/* CARD KECIL */
+.statCard{
+  flex:1;
+  min-width:0;
+  width:0; /* ⬅️ FIX BIAR GA MELEBAR */
+  padding:16px;
+  border-radius:14px;
+}
+
+/* WARNA */
+.incomeCard{
+  background:#eafaf1;
+  color:#27ae60;
+  box-shadow:0 3px 10px rgba(39,174,96,0.15);
+}
+
+.expenseCard{
+  background:#fdecea;
+  color:#e74c3c;
+  box-shadow:0 3px 10px rgba(231,76,60,0.15);
+}
+
+/* FONT */
+.label{
+  text-align:center;
+}
+
+.statCard .big{
+  font-size:20px;
+  font-weight:600;
+  margin-top:6px;
+}
+
+/* ======================
+   HISTORY FULLSCREEN
+====================== */
+
+#historyFullscreen{
+  position:fixed;
+  inset:0;
+  background:#f2f2f2;
+  z-index:99999;
+  display:none;
+  overflow-y:auto;
+  padding:20px 12px 120px;
+}
+
+#historyTitle{
+  text-align:center;
+  margin-bottom:15px;
+}
+
+.historyDate{
+  font-size:15px;
+  font-weight:bold;
+  margin:18px 0 10px;
+  text-align:left;
+  color:#444;
+}
+
+.historyTable{
+  width:100%;
+  border-collapse:collapse;
+  background:white;
+  border-radius:14px;
+  overflow:hidden;
+  box-shadow:0 2px 8px rgba(0,0,0,.08);
+  margin-bottom:15px;
+}
+
+.historyTable th{
+  background:#f5f5f5;
+  font-size:13px;
+  padding:10px 6px;
+  border-bottom:1px solid #eee;
+}
+
+.historyTable td{
+  padding:10px 6px;
+  border-bottom:1px solid #f1f1f1;
+  font-size:13px;
+}
+
+.historyTable td:last-child,
+.historyTable th:last-child{
+  text-align:right;
+}
+
+.historyBackBtn{
+  position:fixed;
+  bottom:25px;
+  left:50%;
+  transform:translateX(-50%);
+  border:none;
+  border-radius:14px;
+  padding:14px 26px;
+  background:#e74c3c;
+  color:white;
+  font-size:16px;
+  box-shadow:0 5px 14px rgba(0,0,0,.2);
+}
+
+body.fp-open::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.25);
+  z-index:99998;
+}
+
+.flatpickr-calendar.open{
+  position: fixed !important;
+  left: 50% !important;
+  top: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  z-index: 99999 !important;
+  margin: 0 !important;
+}
+
+.flatpickr-calendar.open:before,
+.flatpickr-calendar.open:after{
+  display:none !important;
+}
+
+.flatpickr-calendar{
+  width: min(94vw, 380px) !important;
+}
+
 </style>
 </head>
 
@@ -171,7 +395,7 @@ window.location.replace("index.html")
 return
 }
 
-const { data } = await supabase.auth.getSession()
+const { data } = await window.supabaseClient.auth.getSession()
 
 if(!data.session){
 window.location.replace("index.html")
@@ -196,303 +420,65 @@ document.body.style.display="block"
 
 <div class="slider">
 
-<div class="slides">
+  <button id="periodBtn" class="blue btn" style="margin-bottom:10px">Hari ini 
+  </button>
 
-<div class="card">
+  <input id="filterTanggal" style="display:none">
 
-<h4>Pendapatan Hari Ini</h4>
+<div class="summary">
 
-Checkout : <span id="d1">0</span><br>
-Total Checkout : Rp <span id="t1">0</span><br><br>
+  <!-- TOTAL -->
+  <div class="card totalCard">
+    <div class="label">TOTAL</div>
+    <div class="big highlight" id="grandTotal">Rp 0</div>
+  </div>
 
-Bulanan : <span id="b1">0</span><br>
-Total Bulanan : Rp <span id="bt1">0</span>
+  <!-- ROW 2 KOLOM -->
+  <div class="rowBox">
 
-<div class="big">
-TOTAL Rp <span id="all1">0</span>
-</div>
+   <div class="card statCard incomeCard" onclick="toggleBreakdown('income')">
+      <div class="label">Pendapatan</div>
+      <div class="big" id="incomeTotal">Rp 0</div>
+    </div>
 
-</div>
+    <div class="card statCard expenseCard" onclick="toggleBreakdown('expense')">
+      <div class="label">Pengeluaran</div>
+      <div class="big" id="expenseTotal">Rp 0</div>
+    </div>
 
-<div class="card">
-
-<h4>Pendapatan Minggu Ini</h4>
-
-Checkout : <span id="d2">0</span><br>
-Total Checkout : Rp <span id="t2">0</span><br><br>
-
-Bulanan : <span id="b2">0</span><br>
-Total Bulanan : Rp <span id="bt2">0</span>
-
-<div class="big">
-TOTAL Rp <span id="all2">0</span>
-</div>
+  </div>
 
 </div>
 
-<div class="card">
-
-<h4>Pendapatan Bulan Ini</h4>
-
-Checkout : <span id="d3">0</span><br>
-Total Checkout : Rp <span id="t3">0</span><br><br>
-
-Bulanan : <span id="b3">0</span><br>
-Total Bulanan : Rp <span id="bt3">0</span>
-
-<div class="big">
-TOTAL Rp <span id="all3">0</span>
-</div>
+<div id="breakdownBox" style="display:none; max-width:420px; margin:10px auto;"></div>
 
 </div>
 
-</div> <!-- slides -->
+<div class="menu" id="menuContainer">
 
-<div class="dots">
-<span class="dot active"></span>
-<span class="dot"></span>
-<span class="dot"></span>
-</div>
+  <div class="quickActions">
 
-</div> <!-- slider -->
+    <button
+      class="blue btn"
+      onclick="window.location.href='parkirAktif.html'">
+      Parkir Aktif
+    </button>
 
-<div class="menu">
+    <button
+      class="green btn"
+      onclick="window.location.href='titipanAktif.html'">
+      Titipan Aktif
+    </button>
 
-<button class="blue btn" onclick="window.location='parkirAktif.html'">
-Lihat Parkir Aktif
-</button>
-
-<button class="red btn" onclick="resetData()">
-Reset Data Test
-</button>
+  </div>
 
 </div>
 
 <script>
-  
-let dashboardInterval = null
-
-function rupiah(n){
-n = Number(n) || 0
-return "Rp " + n.toLocaleString('id-ID')
-}
-
-function isSameDay(a,b){
-return a.getFullYear()===b.getFullYear() &&
-       a.getMonth()===b.getMonth() &&
-       a.getDate()===b.getDate()
-}
-  
-function nowWIB(){
-return new Date(
-new Date().toLocaleString("en-US",{timeZone:"Asia/Jakarta"})
-)
-}
-
-async function loadDashboard(){
-  
-console.log("RUN DASHBOARD")
-
-if(document.readyState !== "complete"){
-  console.log("DOM belum siap")
-  return
-}
-
-if(typeof supabase === "undefined"){
-  console.log("Supabase belum siap")
-  return
-}
-
-// loading state
-const ids = [
-"d1","t1","b1","bt1","all1",
-"d2","t2","b2","bt2","all2",
-"d3","t3","b3","bt3","all3"
-]
-
-ids.forEach(id=>{
-  let el = document.getElementById(id)
-  if(el){
-    el.innerText="..."
-  }else{
-    console.log("ELEMENT TIDAK ADA:", id)
-  }
-})
-
-// ambil data
-let parkir = []
-let bulanan = []
-
-// waktu (HARUS DI LUAR TRY)
-let today = nowWIB()
-
-let week = new Date(today)
-week.setDate(today.getDate()-7)
-
-let month = new Date(today)
-month.setMonth(today.getMonth()-1)
-
-try{
-
-const {data:p,error:e1}=await supabase
-.from("parkir")
-.select("checkout_at, checkin_at")
-.eq("status","off")
-.gte("checkout_at", month.toISOString())
-.order("checkout_at", { ascending: false })
-
-
-
-if(e1) throw e1
-
-parkir = p || []
-
-const {data:b,error:e2}=await supabase
-.from("bulanan")
-.select("last_paid_at")
-.not("last_paid_at","is",null)
-
-if(e2) throw e2
-
-bulanan = b || []
-
-}catch(err){
-console.log("ERROR DASHBOARD:",err)
-return
-}
-
-
-// =====================
-// PARKIR
-// =====================
-
-let dayCheckout=0
-let weekCheckout=0
-let monthCheckout=0
-
-let tDay=0
-let tWeek=0
-let tMonth=0
-
-let listParkir = parkir || []
-
-listParkir.forEach(p=>{
-
-let tOut = p.checkout_at 
-  ? new Date(new Date(p.checkout_at).toLocaleString("en-US",{timeZone:"Asia/Jakarta"}))
-  : null
-
-let tIn = p.checkin_at 
-  ? new Date(new Date(p.checkin_at).toLocaleString("en-US",{timeZone:"Asia/Jakarta"}))
-  : null
-
-if(!tOut || !tIn) return
-
-let durasi = hitungDurasiParkir(tIn, tOut)
-let tarif = hitungTarifParkir(durasi)
-
-if(isSameDay(tOut, today)){
-  dayCheckout++
-  tDay += tarif
-}
-
-if(tOut>=week){
-  weekCheckout++
-  tWeek += tarif
-}
-
-if(tOut>=month){
-  monthCheckout++
-  tMonth += tarif
-}
-
-})
-
-// =====================
-// BULANAN
-// =====================
-
-let dayBul=0
-let weekBul=0
-let monthBul=0
-
-let listBulanan = bulanan || []
-listBulanan.forEach(b=>{
-
-let t = b.last_paid_at 
-  ? new Date(new Date(b.last_paid_at).toLocaleString("en-US",{timeZone:"Asia/Jakarta"}))
-  : null
-if(!t || isNaN(t)) return
-
-if(isSameDay(t, today)) dayBul++
-if(t>=week) weekBul++
-if(t>=month) monthBul++
-
-})
-
-let bulTarif=30000
-
-let tbDay=dayBul*bulTarif
-let tbWeek=weekBul*bulTarif
-let tbMonth=monthBul*bulTarif
-
-// =====================
-// ELEMENT
-// =====================
-
-const d1=document.getElementById("d1")
-const t1=document.getElementById("t1")
-const b1=document.getElementById("b1")
-const bt1=document.getElementById("bt1")
-const all1=document.getElementById("all1")
-
-const d2=document.getElementById("d2")
-const t2=document.getElementById("t2")
-const b2=document.getElementById("b2")
-const bt2=document.getElementById("bt2")
-const all2=document.getElementById("all2")
-
-const d3=document.getElementById("d3")
-const t3=document.getElementById("t3")
-const b3=document.getElementById("b3")
-const bt3=document.getElementById("bt3")
-const all3=document.getElementById("all3")
-
-console.log("BEFORE UI UPDATE")
-console.log(tDay, tWeek, tMonth)
-console.log("CEK ELEMENT:", d1, t1, all1)
-
-// =====================
-// UPDATE UI
-// =====================
-// hari ini
-if(d1) d1.innerText = dayCheckout;
-if(t1) t1.innerText = rupiah(tDay);
-if(b1) b1.innerText = dayBul;
-if(bt1) bt1.innerText = rupiah(tbDay);
-if(all1) all1.innerText = rupiah(tDay + tbDay);
-
-// minggu
-if(d2) d2.innerText = weekCheckout;
-if(t2) t2.innerText = rupiah(tWeek);
-if(b2) b2.innerText = weekBul;
-if(bt2) bt2.innerText = rupiah(tbWeek);
-if(all2) all2.innerText = rupiah(tWeek + tbWeek);
-
-// bulan
-if(d3) d3.innerText = monthCheckout;
-if(t3) t3.innerText = rupiah(tMonth);
-if(b3) b3.innerText = monthBul;
-if(bt3) bt3.innerText = rupiah(tbMonth);
-if(all3) all3.innerText = rupiah(tMonth + tbMonth);
-
-
-
-}
 
 async function logout(){
 
-await supabase.auth.signOut()
+await window.supabaseClient.auth.signOut()
 
 localStorage.removeItem("adminLogin")
 
@@ -502,80 +488,195 @@ window.location.replace("admin.html")
 
 async function resetData(){
 
-let konfirmasi=prompt("Ketik RESET")
+let konfirmasi = prompt("Ketik RESET")
 
-if(konfirmasi!=="RESET") return
+if(konfirmasi !== "RESET") return
 
-await supabase.from("parkir").delete().neq("kode","")
+try{
 
-await supabase.from("bulanan").delete().neq("nama","")
+/* parkir */
+await window.supabaseClient
+.from("parkir")
+.delete()
+.neq("kode","")
 
-alert("Database berhasil direset")
+/* bulanan */
+await window.supabaseClient
+.from("bulanan")
+.delete()
+.neq("nama","")
+
+/* stok barang */
+await window.supabaseClient
+.from("stok_barang")
+.delete()
+.neq("nama_item","")
+
+/* log stok */
+await window.supabaseClient
+.from("stok_log")
+.delete()
+.gt("qty",-1)
+
+/* barang titipan */
+await window.supabaseClient
+.from("barang_titipan")
+.delete()
+.neq("nama_item","")
+
+/* log titipan */
+await window.supabaseClient
+.from("titipan_log")
+.delete()
+.gt("qty",-1)
+
+alert("SEMUA DATA TEST BERHASIL DIRESET")
 
 location.reload()
+
+}catch(err){
+
+alert("Gagal reset: " + err.message)
+console.log(err)
+
+}
 
 }
 
 function goPetugas(){
 window.location.href="index.html"
 }
-window.onload = () => {
 
-if(dashboardInterval !== null){
-  clearInterval(dashboardInterval)
+let rtTimeout
+
+function triggerReload(){
+  clearTimeout(rtTimeout)
+  rtTimeout = setTimeout(loadDashboard, 300)
 }
 
-setTimeout(()=>{
-  if(typeof loadDashboard === "function"){
-    loadDashboard()
-    dashboardInterval = setInterval(loadDashboard,10000)
-  }else{
-    console.log("loadDashboard belum siap")
+let realtimeChannel = null
+
+function setupRealtime(){
+
+  if(!window.supabaseClient) return
+
+  // HAPUS channel lama kalau ada
+  if(realtimeChannel){
+    window.supabaseClient.removeChannel(realtimeChannel)
   }
-}, 500)
 
-};
+  realtimeChannel = window.supabaseClient.channel('dashboard-realtime')
 
-
-window.addEventListener("beforeunload",()=>{
-if(dashboardInterval !== null){
-clearInterval(dashboardInterval)
+  realtimeChannel
+  .on('postgres_changes', { event:'*', schema:'public', table:'parkir' }, triggerReload)
+  .on('postgres_changes', { event:'*', schema:'public', table:'bulanan' }, triggerReload)
+  .on('postgres_changes', { event:'*', schema:'public', table:'stok_log' }, triggerReload)
+  .on('postgres_changes', { event:'*', schema:'public', table:'titipan_log' }, triggerReload)
+  .subscribe()
 }
-})
-/* =========================
-   SLIDER DOT INDICATOR
-========================= */
 
-document.addEventListener("DOMContentLoaded",()=>{
+window.addEventListener("load", () => {
 
-const slides = document.querySelector(".slides")
-const dots = document.querySelectorAll(".dot")
+  setupRealtime()
 
-if(!slides || !dots.length) return
+  if(IS_DEV){
+    const btn = document.createElement("button")
+    btn.className = "red btn"
+    btn.innerText = "Reset Data Test"
+    btn.onclick = resetData
 
-let scrollTimer
-
-slides.addEventListener("scroll",()=>{
-
-clearTimeout(scrollTimer)
-
-scrollTimer = setTimeout(()=>{
-
-let cardWidth = slides.querySelector(".card").offsetWidth + 15
-let index = Math.round(slides.scrollLeft / cardWidth)
-
-dots.forEach(d=>d.classList.remove("active"))
-if(dots[index]) dots[index].classList.add("active")
-
-},50)
-
-})
+    document.getElementById("menuContainer").appendChild(btn)
+  }
 
 })
 
 </script>
 
+<div id="historyFullscreen">
+
+  <h3 id="historyTitle">
+    Riwayat
+  </h3>
+
+  <div id="historyContent">
+  </div>
+
+  <button
+  class="historyBackBtn"
+  onclick="showDashboardAgain()">
+    Kembali
+  </button>
+
+</div>
+
 <button id="floatingPetugas" onclick="goPetugas()">👨‍🔧</button>
+
+<script>
+if(IS_DEV && !window.__SUGER_LOADED__){
+  window.__SUGER_LOADED__ = true
+
+  const script = document.createElement("script")
+  script.src = "https://suger-cdn.vercel.app/suger-dev.js"
+  document.body.appendChild(script)
+}
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded",()=>{
+
+  const today = nowWIB ? nowWIB() : new Date()
+
+  document.getElementById("periodBtn").innerText = "Hari ini"
+
+  const fp = flatpickr("#filterTanggal", {
+    mode: "range",
+    dateFormat: "Y-m-d",
+    maxDate: today,
+    disableMobile: true,
+    onOpen: function(){
+      document.body.classList.add("fp-open")
+    },
+    onClose: function(){
+      document.body.classList.remove("fp-open")
+    },
+    onChange: function(dates){
+      if(dates.length === 0){
+        window.isCustom = false
+        window.selectedDates = []
+        document.getElementById("periodBtn").innerText = "Hari ini"
+        refreshDashboard()
+        return
+      }
+
+      const chosen = dates.filter(d => d <= today)
+
+      if(chosen.length !== dates.length){
+        fp.setDate(chosen, true)
+        alert("Tanggal tidak boleh melewati hari ini")
+        return
+      }
+
+      window.selectedDates = chosen
+      window.isCustom = true
+      document.getElementById("periodBtn").innerText =
+        window.dashboardShared.formatPeriodLabel(chosen)
+
+      refreshDashboard()
+    }
+  })
+
+  document.getElementById("periodBtn").onclick = ()=>{
+    fp.open()
+  }
+
+})
+</script>
+
+<script>
+if('serviceWorker' in navigator){
+navigator.serviceWorker.register('sw.js')
+}
+</script>
 
 </body>
 </html>

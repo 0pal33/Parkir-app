@@ -201,3 +201,20 @@ z-index:999;
 .floatingTambah:hover{
 transform:scale(1.05);
 }
+
+.menu-operasional{
+display:flex;
+flex-direction:column;
+gap:12px;
+margin-top:20px;
+}
+
+.menu-operasional button{
+width:220px;
+padding:15px;
+font-size:16px;
+border-radius:12px;
+border:none;
+background:#3498db;
+color:white;
+}

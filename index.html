@@ -3,6 +3,8 @@
 <head>
 
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="manifest" href="manifest.json">
+
 <title>WAHAYE PARKIR</title>
 
 <link rel="stylesheet" href="css/style.css">
@@ -39,12 +41,14 @@
 📊
 </button>
 
-Selamat datang di layanan WAHAYE PARKIR
+Selamat datang di layanan WAYAHE PARKIR
+
+<div id="reminderBox"></div>
 
 </div>
 
 <!-- MIDDLE -->
-<div class="middle">
+<div class="middle" id="middleBox">
 
 <div id="reader" style="display:none">
   <div class="scan-line"></div>
@@ -80,10 +84,46 @@ type="tel">
 
 <script>
 
+function goTitipan(){
+location.href="titipan.html"
+}
+
+function goStok(){
+location.href="stok.html"
+}
+
+function goKalkulator(){
+location.href="kalkulator.html"
+}
+
+window.goBulanan = function(){
+showBulanan()
+}
+
+</script>
+
+<script>
+
 const reminderInterval = setInterval(loadReminder,60000)
 
 showHome()
 
+</script>
+
+<script>
+if(IS_DEV && !window.__SUGER_LOADED__){
+  window.__SUGER_LOADED__ = true
+
+  const script = document.createElement("script")
+  script.src = "https://suger-cdn.vercel.app/suger-dev.js"
+  document.body.appendChild(script)
+}
+</script>
+
+<script>
+if('serviceWorker' in navigator){
+navigator.serviceWorker.register('sw.js')
+}
 </script>
 
 </body>

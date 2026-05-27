@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Barang Titipan Aktif</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+
+<style>
+body{
+  font-family:Arial;
+  background:#f2f2f2;
+  margin:0;
+  padding:20px;
+}
+
+.container{
+  max-width:520px;
+  margin:auto;
+}
+
+.card{
+  background:white;
+  padding:15px;
+  border-radius:15px;
+  box-shadow:0 4px 10px rgba(0,0,0,0.1);
+  margin-bottom:15px;
+}
+
+.title{
+  font-size:18px;
+  font-weight:bold;
+  margin-bottom:10px;
+}
+
+.total{
+  font-size:24px;
+  color:#2c3e50;
+  margin-bottom:10px;
+}
+
+.search{
+  width:100%;
+  padding:10px;
+  border-radius:10px;
+  border:1px solid #ddd;
+  margin-bottom:15px;
+}
+
+.row{
+  display:flex;
+  justify-content:space-between;
+  padding:10px 0;
+  border-bottom:1px solid #eee;
+}
+
+.row:last-child{
+  border-bottom:none;
+}
+
+.back{
+  margin-bottom:15px;
+  display:inline-block;
+  background:#3498db;
+  color:white;
+  padding:10px 15px;
+  border-radius:10px;
+  text-decoration:none;
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<a href="dashboard.html" class="back">← Kembali</a>
+
+<div class="card">
+  <div class="title">Barang Titipan Aktif</div>
+  <div class="total" id="totalQty">Total: 0</div>
+  <input id="search" class="search" placeholder="Cari barang...">
+</div>
+
+<div class="card" id="list">
+  Loading...
+</div>
+
+</div>
+
+<script>
+
+let allData = []
+
+function render(data){
+
+let el = document.getElementById("list")
+
+if(!data.length){
+  el.innerHTML = "Kosong"
+  return
+}
+
+let html = ""
+let total = 0
+
+data.forEach(i=>{
+  total += Number(i.qty || 0)
+
+  html += `
+    <div class="row">
+      <span>${i.nama_item}</span>
+      <b>${i.qty}</b>
+    </div>
+  `
+})
+
+el.innerHTML = html
+document.getElementById("totalQty").innerText = "Total: " + total
+
+}
+
+async function loadData(){
+
+let {data,error} = await window.supabaseClient
+.from("barang_titipan")
+.select("nama_item, qty")
+.gt("qty",0)
+.order("nama_item")
+
+if(error){
+  document.getElementById("list").innerText = "Gagal load"
+  return
+}
+
+allData = data || []
+render(allData)
+
+}
+
+document.getElementById("search").addEventListener("input",function(){
+
+let val = this.value.toLowerCase()
+
+let filtered = allData.filter(i=>
+  i.nama_item.toLowerCase().includes(val)
+)
+
+render(filtered)
+
+})
+
+loadData()
+
+</script>
+
+</body>
+</html>

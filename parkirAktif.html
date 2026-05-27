@@ -3,6 +3,7 @@
 <head>
 
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="manifest" href="manifest.json">
 
 <title>Parkir Aktif</title>
 
@@ -105,7 +106,7 @@ Total parkir aktif 0
 
 async function load(){
 
-const {data}=await supabase
+const {data}=await window.supabaseClient
 .from("parkir")
 .select("*")
 .eq("status","on")
@@ -140,6 +141,22 @@ load()
 
 setInterval(load,5000)
 
+</script>
+
+<script>
+if(IS_DEV && !window.__SUGER_LOADED__){
+  window.__SUGER_LOADED__ = true
+
+  const script = document.createElement("script")
+  script.src = "https://suger-cdn.vercel.app/suger-dev.js"
+  document.body.appendChild(script)
+}
+</script>
+
+<script>
+if('serviceWorker' in navigator){
+navigator.serviceWorker.register('sw.js')
+}
 </script>
 
 </body>

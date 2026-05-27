@@ -4,16 +4,52 @@ window.showBulanan = async function(){
 
 hideAll()
 
-await listBayar()
-document.getElementById("bottomButtons").innerHTML=`
-<button class="red" onclick="showHome()">Kembali</button>
+let mid=document.getElementById("middleBox")
+if(!mid) return
+
+mid.innerHTML=`
+
+<div id="reader" style="display:none">
+<div class="scan-line"></div>
+</div>
+
+<button id="switchCamBtn"
+class="blue"
+onclick="switchCamera()"
+style="display:none">
+📷 Tukar Kamera
+</button>
+
+<div id="manualBox" style="display:none">
+
+Parkir-<br><br>
+
+<input
+id="manualInput"
+maxlength="3"
+inputmode="numeric"
+pattern="[0-9]*"
+type="tel">
+
+<br><br>
+
+<button class="green" onclick="manualOK()">✓</button>
+
+</div>
+
+<div id="resultBox"></div>
+
 `
 
+await listBayar()
+
+document.getElementById("bottomButtons").innerHTML=`
+<button class="red" onclick="showMenuLain()">Kembali</button>
+`
 
 let f=document.querySelector(".floatingTambah")
 if(f) f.remove()
 
-/* buat tombol + floating */
 let btn=document.createElement("button")
 btn.innerText="+"
 btn.className="floatingTambah"
@@ -102,7 +138,7 @@ alert("Tanggal harus 1 - 31")
 return
 }
 
-const { error } = await supabase.from('bulanan').insert({
+const { error } = await window.supabaseClient.from('bulanan').insert({
 
 nama:nama,
 motor:motor,
@@ -132,7 +168,7 @@ window.listBayar = async function(){
 
 document.getElementById("resultBox").innerHTML="Loading..."
 
-const {data,error}=await supabase
+const {data,error}=await window.supabaseClient
 .from('bulanan')
 .select('*')
 .eq('status','aktif')
@@ -153,7 +189,7 @@ if((data || []).length === 0){
 document.getElementById("resultBox").innerHTML="<h3>Belum ada pelanggan</h3>";
 
 document.getElementById("bottomButtons").innerHTML=`
-<button class="red" onclick="showHome()">Kembali</button>
+<button class="red" onclick="showMenuLain()">Kembali</button>
 `;
 
 return;
@@ -166,7 +202,10 @@ let expired=false
 if(p.paid_until){
 let todayDate=new Date()
 let paid=new Date(p.paid_until)
-if(todayDate>paid) expired=true
+todayDate.setHours(0,0,0,0)
+paid.setHours(23,59,59,999)
+
+if(todayDate > paid) expired=true
 }
 
 let bg = expired ? "#ffd6d6" : "#ffffff"
@@ -174,7 +213,16 @@ let bg = expired ? "#ffd6d6" : "#ffffff"
 let tempoDate
 
 if(p.paid_until){
-tempoDate = new Date(p.paid_until)
+
+const [y,m,d] =
+p.paid_until.split('-')
+
+tempoDate = new Date(
+Number(y),
+Number(m)-1,
+Number(d)
+)
+
 }else{
 tempoDate = new Date(year,month,p.jatuh_tempo)
 }
@@ -241,7 +289,7 @@ Edit
 document.getElementById("resultBox").innerHTML=html
 
 document.getElementById("bottomButtons").innerHTML=`
-<button class="red" onclick="showHome()">Kembali</button>
+<button class="red" onclick="showMenuLain()">Kembali</button>
 `
 
 }
@@ -284,7 +332,11 @@ document.getElementById("bottomButtons").innerHTML=`
 window.konfirmasiBayar = async function(id){
 
 let nominalInput = document.getElementById("nominalBayar").value.replace(/\D/g,'') 
-let nominal = Number(nominalInput) * 1000
+let nominal = Number(nominalInput)
+
+if(nominal < 1000){
+nominal *= 1000
+}
 
 if(!nominalInput){
 alert("Masukkan nominal")
@@ -302,7 +354,7 @@ return
 
 /* ambil data pelanggan dulu */
 
-const {data,error:err1} = await supabase
+const {data,error:err1} = await window.supabaseClient
 .from('bulanan')
 .select('jatuh_tempo, paid_until')
 .eq('id',id)
@@ -315,20 +367,83 @@ return
 
 let tempo = data.jatuh_tempo
 
-let baseDate = data.paid_until ? new Date(data.paid_until) : new Date()
+let today = new Date()
 
-let nextMonth = new Date(baseDate.getFullYear(), baseDate.getMonth()+1, tempo)
+let baseDate
 
-/* jika bulan itu tidak punya tanggal tersebut */
-if(nextMonth.getDate() !== tempo){
-nextMonth = new Date(baseDate.getFullYear(), baseDate.getMonth()+2, 0)
+if(data.paid_until){
+
+const paidUntil = new Date(data.paid_until)
+
+const compareToday = new Date(today)
+compareToday.setHours(0,0,0,0)
+
+const comparePaid = new Date(paidUntil)
+comparePaid.setHours(23,59,59,999)
+
+if(compareToday > comparePaid){
+
+baseDate = new Date(
+today.getFullYear(),
+today.getMonth(),
+tempo
+)
+
+if(today.getDate() > tempo){
+baseDate.setMonth(
+baseDate.getMonth() + 1
+)
 }
 
-const {error}=await supabase
+}else{
+baseDate = paidUntil
+}
+
+}else{
+
+baseDate = new Date(
+today.getFullYear(),
+today.getMonth(),
+tempo
+)
+
+if(today.getDate() > tempo){
+baseDate.setMonth(
+baseDate.getMonth() + 1
+)
+}
+}
+
+let targetYear = baseDate.getFullYear()
+let targetMonth = baseDate.getMonth() + 1
+
+let maxDay = new Date(
+targetYear,
+targetMonth + 1,
+0
+).getDate()
+
+let finalDay = Math.min(
+tempo,
+maxDay
+)
+
+let nextMonth = new Date(
+targetYear,
+targetMonth,
+finalDay
+)
+
+const paidUntilString =
+nextMonth.getFullYear() + "-" +
+String(nextMonth.getMonth()+1).padStart(2,'0') + "-" +
+String(nextMonth.getDate()).padStart(2,'0')
+
+const {error}=await window.supabaseClient
 .from('bulanan')
 .update({
-paid_until:nextMonth,
-last_paid_at:new Date(),
+paid_until: paidUntilString,
+last_paid_at:new Date().toISOString(),
 last_paid_amount:nominal
 })
 .eq('id',id)
@@ -344,43 +459,68 @@ listBayar()
 
 }
 
-window.editTempo=function(id,nama,tempo){
+window.editTempo = async function(id,nama,tempo){
 
 hideAll()
 
-document.getElementById("resultBox").innerHTML=`
+const { data, error } = await window.supabaseClient
+.from('bulanan')
+.select('nama,motor')
+.eq('id', id)
+.single()
 
-<h3>Edit Jatuh Tempo</h3>
+if(error){
+alert("Gagal mengambil data pelanggan")
+listBayar()
+return
+}
 
-<div style="font-size:20px;font-weight:bold;margin-bottom:20px">
-${nama}
-</div>
+document.getElementById("resultBox").innerHTML = `
+
+<h3>Edit Pelanggan</h3>
+
+<input
+id="editNama"
+value="${data?.nama || nama}"
+placeholder="Nama"
+autocapitalize="words"
+><br>
+
+<input
+id="editMotor"
+value="${data?.motor || ''}"
+placeholder="Motornya apa?"
+autocapitalize="words"
+><br>
 
 <select id="tempoEdit" style="width:220px;height:45px;font-size:16px">
 
 <option value="">Tanggal baru</option>
 
 ${Array.from({length:31},(_,i)=>`
-<option value="${i+1}" ${tempo==i+1?'selected':''}>${i+1}</option>
+<option value="${i+1}" ${tempo==i+1?'selected':''}>
+${i+1}
+</option>
 `).join('')}
 
 </select>
 
 <br><br>
 
-<button class="green" onclick="simpanTempo('${id}')">Simpan</button>
+<button class="green" onclick="simpanTempo('${id}')">
+Simpan
+</button>
 
-<button class="red" style="margin-top:10px;opacity:0.8"
+<button class="red"
+style="margin-top:10px;opacity:0.8"
 onclick="hapusPelanggan('${id}',\`${nama}\`)">
 Hapus Pelanggan
 </button>
-
 `
 
 document.getElementById("bottomButtons").innerHTML=`
 <button class="red" onclick="listBayar()">Batal</button>
 `
-
 }
 
 window.simpanTempo = async function(id){
@@ -392,20 +532,18 @@ alert("Pilih tanggal")
 return
 }
 
-let today = new Date()
+let nama =
+document.getElementById("editNama").value.trim()
 
-let newDate = new Date(today.getFullYear(), today.getMonth(), tempo)
+let motor =
+document.getElementById("editMotor").value.trim()
 
-/* jika bulan ini tidak punya tanggal tersebut */
-if(newDate.getDate() !== tempo){
-newDate = new Date(today.getFullYear(), today.getMonth()+1, 0)
-}
-
-const {error}=await supabase
+const {error} = await window.supabaseClient
 .from('bulanan')
 .update({
-jatuh_tempo:tempo,
-paid_until:newDate
+nama:nama,
+motor:motor,
+jatuh_tempo:tempo
 })
 .eq('id',id)
 
@@ -430,7 +568,7 @@ let konfirmasi = confirm(
 
 if(!konfirmasi) return
 
-const { error } = await supabase
+const { error } = await window.supabaseClient
 .from('bulanan')
 .delete()
 .eq('id',id)

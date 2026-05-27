@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="manifest" href="manifest.json" />
+  <title>Kalkulator Stok</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+
+  <style>
+    html, body{
+      max-width:100%;
+      overflow-x:hidden;
+    }
+
+    body{
+      font-family: Arial, sans-serif;
+      background:#f2f2f2;
+      margin:0;
+      padding:20px 12px 110px;
+      box-sizing:border-box;
+    }
+
+    *{
+      box-sizing:border-box;
+    }
+
+    .wrap{
+      max-width:520px;
+      margin:0 auto;
+    }
+
+    .top{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:16px;
+    }
+
+    .card{
+      background:#fff;
+      border-radius:16px;
+      box-shadow:0 4px 12px rgba(0,0,0,0.08);
+      padding:16px;
+      margin-bottom:12px;
+      text-align:left;
+    }
+
+    .title{
+      font-size:12px;
+      color:#888;
+      letter-spacing:1px;
+      margin-bottom:6px;
+      text-transform:uppercase;
+    }
+
+    .big{
+      font-size:22px;
+      font-weight:700;
+      color:#2c3e50;
+      margin-top:4px;
+      word-break:break-word;
+    }
+
+    label{
+      display:block;
+      font-size:13px;
+      font-weight:600;
+      margin:10px 0 6px;
+      color:#333;
+    }
+
+    select, input{
+      width:100%;
+      padding:12px;
+      border:1px solid #d7d7d7;
+      border-radius:12px;
+      background:#fff;
+      font-size:15px;
+      outline:none;
+    }
+
+    input[readonly]{
+      background:#fafafa;
+      color:#444;
+    }
+
+    .grid2{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+    }
+
+    .resultRow{
+      display:grid;
+      grid-template-columns:1fr 1fr 1fr;
+      gap:10px;
+    }
+
+    .resultCard{
+      border-radius:14px;
+      padding:14px;
+      color:#fff;
+      min-width:0;
+    }
+
+    .resultCard .name{
+      font-size:12px;
+      opacity:0.92;
+      margin-bottom:4px;
+    }
+
+    .resultCard .value{
+      font-size:18px;
+      font-weight:700;
+      word-break:break-word;
+    }
+
+    .blue{background:#3498db;color:#fff;}
+    .green{background:#2ecc71;color:#fff;}
+    .orange{background:#f39c12;color:#fff;}
+    .red{background:#e74c3c;color:#fff;}
+
+    .muted{
+      font-size:12px;
+      color:#666;
+      margin-top:8px;
+      line-height:1.5;
+    }
+
+    .btn{
+      border:none;
+      border-radius:12px;
+      padding:12px 14px;
+      cursor:pointer;
+      font-size:15px;
+      font-weight:600;
+    }
+
+    .rowActions{
+      display:flex;
+      gap:10px;
+      margin-top:12px;
+    }
+
+    .rowActions .btn{
+      flex:1;
+    }
+
+    .hidden{
+      display:none;
+    }
+
+    .empty{
+      padding:14px;
+      text-align:center;
+      color:#666;
+      background:#fff;
+      border-radius:14px;
+      box-shadow:0 4px 12px rgba(0,0,0,0.08);
+    }
+  </style>
+</head>
+<body>
+
+<script>
+(async () => {
+  if (localStorage.getItem("adminLogin") !== "true") {
+    window.location.replace("index.html");
+    return;
+  }
+
+  const { data } = await window.supabaseClient.auth.getSession();
+  if (!data.session) {
+    window.location.replace("index.html");
+    return;
+  }
+
+  document.body.style.display = "block";
+})();
+</script>
+
+<div class="wrap">
+  <div class="top">
+    <h3 style="margin:0">Kalkulator Stok</h3>
+    <button class="btn blue" onclick="window.location.href='index.html'">Kembali</button>
+  </div>
+
+  <div class="card">
+    <div class="title">Pilih barang</div>
+    <select id="itemSelect"></select>
+    <div class="muted">
+      Nama barang diambil dari daftar stok barang. Harga jual dan harga beli dipakai otomatis di belakang layar.
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="grid2">
+      <div>
+        <label for="stokAwal">Stok awal</label>
+        <input id="stokAwal" type="number" value="0" min="0" inputmode="numeric" />
+      </div>
+
+      <div>
+        <label for="stokSekarang">Stok saat ini</label>
+        <input id="stokSekarang" type="number" value="0" min="0" inputmode="numeric" />
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="title">Harga jual per pcs</div>
+    <div class="big" id="hargaJual">Rp 0</div>
+
+    <div class="title" style="margin-top:14px">Harga beli per pcs</div>
+    <div class="big" id="hargaBeli">Rp 0</div>
+  </div>
+
+  <div class="card">
+    <div class="title">Laba</div>
+    <div class="big" id="laba">Rp 0</div>
+  </div>
+
+  <div class="card hidden" id="infoBox">
+    <div class="title">Info item aktif</div>
+    <div id="infoNama" class="big" style="font-size:18px">-</div>
+  </div>
+</div>
+
+<script>
+let items = [];
+let currentItem = null;
+
+function rupiah(n){
+  n = Number(n) || 0;
+  return "Rp " + n.toLocaleString("id-ID");
+}
+
+function toNumber(val){
+  const n = Number(val);
+  return Number.isFinite(n) ? n : 0;
+}
+
+function normalizeItem(row){
+  return {
+    nama_item: row.nama_item || "",
+    harga_jual: toNumber(row.harga_jual),
+    harga_beli: toNumber(row.harga_beli),
+    qty: toNumber(row.qty),
+    qty_pesan: toNumber(row.qty_pesan),
+    stok_awal: toNumber(row.stok_awal)
+  };
+}
+
+function getSellPerPcs(item){
+  return toNumber(item?.harga_jual);
+}
+
+function getBuyPerPcs(item){
+  if(!item) return 0;
+
+  const totalBuy = toNumber(item.harga_beli);
+  const qtyPesan = toNumber(item.qty_pesan);
+
+  if(totalBuy > 0 && qtyPesan > 0){
+    return totalBuy / qtyPesan;
+  }
+
+  return totalBuy;
+}
+
+function updateUI(){
+  const stokAwal = toNumber(document.getElementById("stokAwal").value);
+  const stokSekarang = toNumber(document.getElementById("stokSekarang").value);
+
+  const selisih = stokAwal - stokSekarang;
+
+  const sellPerPcs = getSellPerPcs(currentItem);
+  const buyPerPcs = getBuyPerPcs(currentItem);
+
+  const totalHargaJual = sellPerPcs * selisih;
+  const totalHargaBeli = buyPerPcs * selisih;
+  const laba = totalHargaJual - totalHargaBeli;
+
+  document.getElementById("hargaJual").innerText = rupiah(totalHargaJual);
+  document.getElementById("hargaBeli").innerText = rupiah(totalHargaBeli);
+  document.getElementById("laba").innerText = rupiah(laba);
+
+  const infoBox = document.getElementById("infoBox");
+  const infoNama = document.getElementById("infoNama");
+
+  if(currentItem){
+    infoBox.classList.remove("hidden");
+    infoNama.innerText = currentItem.nama_item || "-";
+  }else{
+    infoBox.classList.add("hidden");
+  }
+}
+
+function renderSelect(){
+  const select = document.getElementById("itemSelect");
+
+  if(!items.length){
+    select.innerHTML = `<option value="">Tidak ada data stok barang</option>`;
+    currentItem = null;
+    updateUI();
+    return;
+  }
+
+  select.innerHTML = `
+    <option value="">Pilih barang</option>
+    ${items.map((item, idx) => `
+      <option value="${idx}">${item.nama_item}</option>
+    `).join("")}
+  `;
+
+  select.value = "";
+  currentItem = null;
+  updateUI();
+}
+
+async function loadItems(){
+  const { data, error } = await window.supabaseClient
+    .from("stok_barang")
+    .select("nama_item, harga_jual, harga_beli, qty, qty_pesan, stok_awal")
+    .order("nama_item", { ascending: true });
+
+  if(error){
+    alert("Gagal load stok barang: " + error.message);
+    return;
+  }
+
+  items = (data || []).map(normalizeItem);
+  renderSelect();
+}
+
+function bindEvents(){
+  document.getElementById("itemSelect").addEventListener("change", (e) => {
+    const idx = e.target.value;
+    currentItem = idx === "" ? null : items[Number(idx)] || null;
+    updateUI();
+  });
+
+  document.getElementById("stokAwal").addEventListener("input", updateUI);
+  document.getElementById("stokSekarang").addEventListener("input", updateUI);
+}
+
+document.addEventListener("DOMContentLoaded", async () => {
+  bindEvents();
+  await loadItems();
+});
+
+if(IS_DEV && !window.__SUGER_LOADED__){
+  window.__SUGER_LOADED__ = true
+
+  const script = document.createElement("script")
+  script.src = "https://suger-cdn.vercel.app/suger-dev.js"
+  document.body.appendChild(script)
+};
+
+if("serviceWorker" in navigator){
+  navigator.serviceWorker.register("sw.js");
+}
+</script>
+
+</body>
+</html> 

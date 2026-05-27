@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="manifest" href="manifest.json">
+
+<title>Stok Barang</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
+<script src="config.js"></script>
+
+<style>
+body{
+font-family:Arial;
+background:#f2f2f2;
+margin:0;
+padding:20px;
+padding-bottom:140px;
+}
+
+h3{
+text-align:center;
+margin-top:0;
+}
+
+.box{
+background:#fff;
+padding:14px;
+border-radius:14px;
+margin-bottom:12px;
+}
+
+.row2{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:10px;
+margin-bottom:12px;
+}
+
+.card{
+background:#fff;
+padding:14px;
+border-radius:14px;
+text-align:center;
+}
+
+.card small{
+display:block;
+color:#777;
+margin-bottom:6px;
+}
+
+.card b{
+font-size:28px;
+color:#27ae60;
+}
+
+.item{
+background:#fff;
+padding:12px;
+border-radius:14px;
+margin-bottom:10px;
+display:flex;
+align-items:center;
+justify-content:space-between;
+gap:10px;
+}
+
+.item.redbg{
+background:#ffd6d6;
+}
+
+.nama{
+font-weight:bold;
+font-size:18px;
+}
+
+.kecil{
+font-size:13px;
+color:#666;
+}
+
+.qty{
+font-size:28px;
+font-weight:bold;
+min-width:45px;
+text-align:center;
+user-select:none;
+}
+
+button{
+border:none;
+border-radius:12px;
+padding:10px 14px;
+font-size:15px;
+cursor:pointer;
+}
+
+.green{background:#2ecc71;color:#fff;}
+.blue{background:#3498db;color:#fff;}
+.red{background:#e74c3c;color:#fff;}
+.gray{background:#95a5a6;color:#fff;}
+.orange{background:#f39c12;color:#fff;}
+
+input{
+width:100%;
+padding:12px;
+border:1px solid #ccc;
+border-radius:12px;
+font-size:16px;
+box-sizing:border-box;
+margin-bottom:10px;
+}
+
+.smallInput{
+width:90px;
+margin:0;
+padding:8px;
+font-size:15px;
+}
+
+.floating{
+position:fixed;
+right:20px;
+bottom:20px;
+display:flex;
+flex-direction:column;
+gap:10px;
+}
+
+.floating button{
+width:60px;
+height:60px;
+border-radius:50%;
+font-size:24px;
+padding:0;
+}
+
+.topBack{
+position:fixed;
+left:20px;
+bottom:20px;
+width:60px;
+height:60px;
+border-radius:50%;
+font-size:24px;
+padding:0;
+}
+
+#formArea,#pesanArea,#auditArea{
+display:none;
+}
+
+.checkLine{
+display:flex;
+align-items:center;
+gap:10px;
+margin-bottom:10px;
+}
+
+.checkLine input{
+width:22px;
+height:22px;
+margin:0;
+}
+
+.rowBtn{
+display:flex;
+gap:8px;
+flex-wrap:wrap;
+}
+
+.rowBtn button{
+flex:1;
+}
+
+.rightBtn{
+display:flex;
+gap:6px;
+align-items:center;
+}
+
+.menuDots{
+font-size:24px;
+font-weight:bold;
+padding:8px 12px;
+cursor:pointer;
+user-select:none;
+touch-action:manipulation;
+opacity:.7;
+}
+
+.dragging{
+opacity:.5;
+transform:scale(1.02);
+z-index:999;
+position:relative;
+box-shadow:0 10px 20px rgba(0,0,0,.18);
+}
+
+.item{
+transition:.15s;
+touch-action:pan-y;
+}
+
+.tableWrap{
+overflow-x:auto;
+margin-bottom:12px;
+}
+
+.tbl{
+width:100%;
+border-collapse:collapse;
+font-size:14px;
+background:#fff;
+border-radius:12px;
+overflow:hidden;
+}
+
+.tbl th,.tbl td{
+border:1px solid #ddd;
+padding:8px;
+text-align:center;
+}
+
+.tbl th{
+background:#f7f7f7;
+font-weight:bold;
+}
+
+.tbl input{
+margin:0;
+padding:6px;
+width:75px;
+font-size:14px;
+}
+
+.tbl input[type="checkbox"]{
+width:20px;
+height:20px;
+padding:0;
+margin:0;
+}
+
+.sortable-chosen{
+opacity:0.6;
+}
+
+.sortable-ghost{
+opacity:0.3;
+}
+</style>
+</head>
+
+<body>
+
+<h3 id="judul">Stok Barang</h3>
+
+<div class="row2">
+<div class="card">
+<small>Pendapatan Hari Ini</small>
+<b id="pendapatan">Rp 0</b>
+</div>
+
+<div class="card">
+<small>Pengeluaran Hari Ini</small>
+<b id="pengeluaran">Rp 0</b>
+</div>
+</div>
+
+<input id="searchBox" placeholder="Cari barang..." oninput="StokUI.renderList()">
+
+<div class="rowBtn" style="margin-bottom:8px;">
+  <button id="btnFilterStok" class="green">Stok</button>
+  <button id="btnFilterNon" class="gray">nonStok</button>
+</div>
+
+<div class="rowBtn" style="margin-bottom:8px;">
+  <button id="btnAudit" class="orange">Audit Restok</button>
+  <button id="btnBatal" class="red">Batal Pesanan</button>
+</div>
+
+<div class="rowBtn" style="margin-bottom:12px;">
+  <button id="btnResetQty" class="orange">Reset Qty Stok</button>
+</div>
+
+<div id="listArea"></div>
+<div id="formArea"></div>
+<div id="pesanArea"></div>
+<div id="auditArea"></div>
+
+<button class="topBack red" onclick="location.href='index.html'">⌂</button>
+
+<div class="floating">
+<button class="blue">🛒</button>
+<button class="green">＋</button>
+</div>
+
+<script src="js/stokShared.js"></script>
+<script src="js/stokState.js"></script>
+<script src="js/stokCore.js"></script>
+<script src="js/stokUI.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", async ()=>{
+
+const { data } = await window.supabaseClient.auth.getSession()
+
+if(localStorage.getItem("adminLogin") !== "true" || !data.session){
+  alert("Akses ditolak")
+  location.href="index.html"
+  return
+}
+
+await StokCore.loadData()
+
+// tombol filter
+document.getElementById("btnFilterStok").onclick = ()=> StokUI.setFilter("hitung")
+document.getElementById("btnFilterNon").onclick = ()=> StokUI.setFilter("tidak")
+
+// tombol floating
+document.querySelector(".floating .green").onclick = ()=> StokCore.formTambah()
+document.querySelector(".floating .blue").onclick = ()=> StokCore.openPesan()
+
+// tombol audit & batal
+document.getElementById("btnAudit").onclick = ()=> StokCore.showAuditRestok()
+document.getElementById("btnBatal").onclick = ()=> StokCore.batalPesanan()
+document.getElementById("btnResetQty").onclick = ()=> StokCore.resetQtyStok()
+
+})
+</script>
+
+<script>
+if('serviceWorker' in navigator){
+navigator.serviceWorker.register('sw.js')
+}
+</script>
+
+</body>
+</html>
