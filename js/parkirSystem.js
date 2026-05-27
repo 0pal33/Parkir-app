@@ -89,6 +89,8 @@ const {data,error}=await window.supabaseClient
 .select("*")
 .eq("kode",kode)
 .eq("status","on")
+.order("created_at",{ascending:false})
+.limit(1)
 .maybeSingle()
 
 if(error){
@@ -344,6 +346,8 @@ const {data,error}=await window.supabaseClient
 .select("*")
 .eq("kode",k)
 .eq("status","on")
+.order("created_at",{ascending:false})
+.limit(1)
 .maybeSingle()
 
 if(error){
