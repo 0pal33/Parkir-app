@@ -247,20 +247,89 @@ CHECKOUT
 
 window.checkout = async function(k){
 
-const {error}=await window.supabaseClient.rpc("checkout_parkir", {
-  p_parkir_id: idParkir,
-  p_checkout_at: new Date().toISOString(),
-  p_total_bayar: totalBayar
-})
+try{
+
+/* AMBIL DATA PARKIR AKTIF */
+const {data,error} = await window.supabaseClient
+.from("parkir")
+.select("*")
+.eq("kode",k)
+.eq("status","on")
+.order("created_at",{ascending:false})
+.limit(1)
+.maybeSingle()
 
 if(error){
-alert("Gagal checkout")
+alert("Koneksi bermasalah")
 return
 }
 
+if(!data){
+alert("Data parkir tidak ditemukan")
 window.scanLocked=false
-
 await window.onScan(k)
+return
+}
+
+/* HITUNG TARIF */
+let start = new Date(data.checkin_at)
+let now = new Date()
+
+let durasi = hitungDurasiParkir(start, now)
+let tarif = hitungTarifParkir(durasi)
+
+/* JALANKAN RPC */
+const {error:checkoutError} =
+await window.supabaseClient.rpc(
+"checkout_parkir",
+{
+p_parkir_id: data.id,
+p_checkout_at: now.toISOString(),
+p_total_bayar: tarif
+}
+)
+
+if(checkoutError){
+console.error(checkoutError)
+alert("Gagal checkout: " + checkoutError.message)
+return
+}
+
+/* SUCCESS */
+hideAll()
+
+let result=document.getElementById("resultBox")
+
+if(result){
+result.innerHTML=`
+<div style="font-size:20px;font-weight:bold;color:#2ecc71">
+Checkout berhasil ✓
+</div>
+
+<div style="font-size:18px;margin-top:10px">
+${k}
+</div>
+
+<div style="font-size:24px;font-weight:bold;color:#e67e22;margin-top:12px">
+Rp ${formatRupiah(tarif)}
+</div>
+`
+}
+
+document.getElementById("bottomButtons").innerHTML=`
+<button class="orange" onclick="scanUlang()">Scan Ulang</button>
+<button class="blue" onclick="showManual()">Ketik Manual</button>
+<button class="green" onclick="showMenuLain()">Menu Lainnya</button>
+`
+
+}catch(err){
+
+console.error(err)
+alert("Checkout gagal: " + err.message)
+
+}
+
+window.scanLocked=false
 
 }
 
