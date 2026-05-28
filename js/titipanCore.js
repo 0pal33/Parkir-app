@@ -697,53 +697,64 @@ window.TitipanCore = {
   },
 
   async showLog(mode = "today"){
-    TitipanState.logMode = mode
-    TitipanUI.showSection("aksi")
-    TitipanUI.renderLoading("Loading...")
+  TitipanState.logMode = mode
+  TitipanUI.showSection("aksi")
+  TitipanUI.renderLoading("Loading...")
 
-    const { data, error } = await window.supabaseClient
-      .from("titipan_log")
-      .select(`
-        id,
-        item_id,
-        session_id,
-        nama_penitip,
-        foto_penitip,
-        foto_bukti,
-        qty,
-        total,
-        created_at,
-        jenis
-      `)
-      .order("created_at", { ascending: false })
-      .limit(500)
+  const now = TitipanShared.nowWIB()
+  let query = window.supabaseClient
+    .from("titipan_log")
+    .select(`
+      id,
+      item_id,
+      session_id,
+      nama_penitip,
+      foto_penitip,
+      foto_bukti,
+      qty,
+      total,
+      created_at,
+      jenis
+    `)
+    .order("created_at", { ascending: false })
+    .limit(500)
 
-    if (error) {
-      TitipanUI.renderLoading("Gagal load log")
-      return
-    }
+  if(mode === "today"){
+    const range = TitipanShared.getWibDayRange(now)
+    query = query.gte("created_at", range.startISO).lte("created_at", range.endISO)
+  }
 
-    let filtered = data || []
-    const now = TitipanShared.nowWIB()
+  if(mode === "week"){
+    const start = new Date(now)
+    start.setDate(start.getDate() - 6)
+    start.setHours(0,0,0,0)
 
-    filtered = filtered.filter(row => {
-      const t = new Date(row.created_at)
-      if (mode === "today") return TitipanShared.isSameWIBDay(t, now)
-      if (mode === "week") return ((now - t) / 86400000) <= 7
-      return true
-    })
+    const end = new Date(now)
+    end.setHours(23,59,59,999)
 
-    if (!filtered.length) {
-      TitipanUI.renderLoading("Tidak ada data")
-      return
-    }
+    query = query.gte("created_at", start.toISOString()).lte("created_at", end.toISOString())
+  }
 
-    if (TitipanShared.isAdmin()) {
-      TitipanUI.renderLogAdmin(filtered)
-    } else {
-      TitipanUI.renderLogNormal(filtered)
-    }
-  },
+  const { data, error } = await query
+
+  if(error){
+    TitipanUI.renderLoading("Gagal load log")
+    return
+  }
+
+  const rows = data || []
+
+  if(!rows.length){
+    TitipanUI.renderLoading("Tidak ada data")
+    return
+  }
+
+  if(TitipanShared.isAdmin()){
+    TitipanUI.renderLogAdmin(rows)
+  }else{
+    TitipanUI.renderLogNormal(rows)
+  }
+},
 
   async openCameraStep({
     title,
