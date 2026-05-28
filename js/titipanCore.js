@@ -289,10 +289,14 @@ window.TitipanCore = {
         <div class="summaryQuestion">apakah penitip memiliki barang lain untuk dititipkan?</div>
       `,
       buttons: [
-        { label: "Ya", className: "blue", onClick: () => TitipanCore.continueTambah() },
-        { label: "Tidak", className: "green", onClick: () => TitipanCore.beginAddPhotoSequence(0) },
-        { label: "Batal", className: "red", onClick: () => TitipanCore.renderTambahForm() }
-      ]
+  { label: "Ya", className: "blue", onClick: () => TitipanCore.continueTambah() },
+  { label: "Tidak", className: "green", onClick: () => TitipanCore.beginAddPhotoSequence(0) },
+  { label: "Batal", className: "red", onClick: () => {
+      TitipanUI.closeModal()
+      TitipanCore.renderTambahForm()
+    }
+  }
+]
     })
   },
 
@@ -489,10 +493,14 @@ window.TitipanCore = {
         <div class="summaryQuestion">apakah penitip datang untuk barang lainnya?</div>
       `,
       buttons: [
-        { label: "Ya", className: "blue", onClick: () => TitipanCore.continueArrival() },
-        { label: "Tidak", className: "green", onClick: () => TitipanCore.beginArrivalPhotoStep() },
-        { label: "Batal", className: "red", onClick: () => TitipanCore.renderArrivalForm() }
-      ]
+  { label: "Ya", className: "blue", onClick: () => TitipanCore.continueArrival() },
+  { label: "Tidak", className: "green", onClick: () => TitipanCore.beginArrivalPhotoStep() },
+  { label: "Batal", className: "red", onClick: () => {
+      TitipanUI.closeModal()
+      TitipanCore.renderArrivalForm()
+    }
+  }
+]
     })
   },
 
