@@ -289,14 +289,21 @@ window.TitipanCore = {
         <div class="summaryQuestion">apakah penitip memiliki barang lain untuk dititipkan?</div>
       `,
       buttons: [
-  { label: "Ya", className: "blue", onClick: () => TitipanCore.continueTambah() },
-  { label: "Tidak", className: "green", onClick: () => TitipanCore.beginAddPhotoSequence(0) },
-  { label: "Batal", className: "red", onClick: () => {
-      TitipanUI.closeModal()
-      TitipanCore.renderTambahForm()
-    }
-  }
-]
+        { label: "Ya", className: "blue", onClick: () => TitipanCore.continueTambah() },
+        {
+          label: "Tidak",
+          className: "green",
+          onClick: () => TitipanCore.beginAddPhotoSequence(0)
+        },
+        {
+          label: "Batal",
+          className: "red",
+          onClick: () => {
+            TitipanUI.closeModal()
+            TitipanCore.renderTambahForm()
+          }
+        }
+      ]
     })
   },
 
@@ -410,6 +417,20 @@ window.TitipanCore = {
     TitipanUI.renderArrivalForm({ draft: TitipanState.arrivalDraft })
   },
 
+  getRemainingArrivalItems(){
+    const draft = TitipanState.arrivalDraft
+    if (!draft) return []
+
+    const pen = TitipanShared.normalizeText(draft.penitip || "")
+    const chosen = new Set((draft.items || []).map(x => x.item_id))
+
+    return (TitipanState.data || []).filter(item =>
+      TitipanShared.normalizeText(item.nama_penitip || "") === pen &&
+      Number(item.qty || 0) > 0 &&
+      !chosen.has(item.id)
+    )
+  },
+
   async saveArrivalItem(){
     const draft = TitipanState.arrivalDraft
     if (!draft) {
@@ -471,7 +492,13 @@ window.TitipanCore = {
       })
     }
 
-    TitipanCore.showArrivalSummary()
+    const remaining = TitipanCore.getRemainingArrivalItems()
+
+    if (remaining.length > 0) {
+      TitipanCore.showArrivalSummary()
+    } else {
+      TitipanCore.beginArrivalPhotoStep()
+    }
   },
 
   showArrivalSummary(){
@@ -493,14 +520,21 @@ window.TitipanCore = {
         <div class="summaryQuestion">apakah penitip datang untuk barang lainnya?</div>
       `,
       buttons: [
-  { label: "Ya", className: "blue", onClick: () => TitipanCore.continueArrival() },
-  { label: "Tidak", className: "green", onClick: () => TitipanCore.beginArrivalPhotoStep() },
-  { label: "Batal", className: "red", onClick: () => {
-      TitipanUI.closeModal()
-      TitipanCore.renderArrivalForm()
-    }
-  }
-]
+        { label: "Ya", className: "blue", onClick: () => TitipanCore.continueArrival() },
+        {
+          label: "Tidak",
+          className: "green",
+          onClick: () => TitipanCore.beginArrivalPhotoStep()
+        },
+        {
+          label: "Batal",
+          className: "red",
+          onClick: () => {
+            TitipanUI.closeModal()
+            TitipanCore.renderArrivalForm()
+          }
+        }
+      ]
     })
   },
 
@@ -523,7 +557,7 @@ window.TitipanCore = {
         TitipanCore.commitArrivalDraft()
       },
       onBack: () => {
-        TitipanCore.showArrivalSummary()
+        TitipanCore.renderArrivalForm()
       }
     })
   },
@@ -543,13 +577,11 @@ window.TitipanCore = {
         if (fetchError) throw fetchError
 
         const now = new Date().toISOString()
-        const newQty = Number(item.qty || 0) - Number(row.qty || 0)
-        if (newQty < 0) throw new Error("Qty tidak cukup untuk salah satu item")
 
         const { error: updError } = await window.supabaseClient
           .from("barang_titipan")
           .update({
-            qty: newQty,
+            qty: 0,
             updated_at: now,
             session_id: draft.session_id
           })
@@ -696,7 +728,7 @@ window.TitipanCore = {
 
     filtered = filtered.filter(row => {
       const t = new Date(row.created_at)
-      if (mode === "today") return t.toDateString() === now.toDateString()
+      if (mode === "today") return TitipanShared.isSameWIBDay(t, now)
       if (mode === "week") return ((now - t) / 86400000) <= 7
       return true
     })
