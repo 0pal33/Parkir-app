@@ -1,5 +1,34 @@
 window.TitipanShared = {
-  nowWIB(){
+  parseDbDate(value){
+  if(!value) return null
+  if(value instanceof Date) return value
+
+  const s = String(value).trim()
+
+  // Kalau sudah ada timezone info, biarkan browser yang baca
+  if(/Z$|[+-]\d{2}:\d{2}$/.test(s)){
+    return new Date(s)
+  }
+
+  // Format timestamp tanpa timezone: 2026-05-29 12:39:00 / 2026-05-29T12:39:00
+  return new Date(s.replace(" ", "T"))
+},
+
+getWibDayRange(date = new Date()){
+  const d = new Date(date)
+  d.setHours(0,0,0,0)
+
+  const start = new Date(d)
+  const end = new Date(d)
+  end.setHours(23,59,59,999)
+
+  return {
+    startISO: start.toISOString(),
+    endISO: end.toISOString()
+  }
+},
+
+nowWIB(){
     return new Date(
       new Date().toLocaleString("en-US", { timeZone: "Asia/Jakarta" })
     )
@@ -10,33 +39,36 @@ window.TitipanShared = {
   },
 
   formatJam(dateString){
-    const d = new Date(dateString)
-    return d.toLocaleTimeString("id-ID", {
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-      hour12: false,
-      timeZone: "Asia/Jakarta"
-    })
-  },
+  const d = TitipanShared.parseDbDate(dateString)
+  if(!d || isNaN(d.getTime())) return "-"
+  return d.toLocaleTimeString("id-ID", {
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+    timeZone: "Asia/Jakarta"
+  })
+},
 
-  formatJamWIB(dateString){
-    const d = new Date(dateString)
-    return d.toLocaleTimeString("id-ID", {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: false,
-      timeZone: "Asia/Jakarta"
-    })
-  },
+formatJamWIB(dateString){
+  const d = TitipanShared.parseDbDate(dateString)
+  if(!d || isNaN(d.getTime())) return "-"
+  return d.toLocaleTimeString("id-ID", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+    timeZone: "Asia/Jakarta"
+  })
+},
 
-  formatHari(dateString){
-    const d = new Date(dateString)
-    return d.toLocaleDateString("id-ID", {
-      weekday: "long",
-      timeZone: "Asia/Jakarta"
-    })
-  },
+formatHari(dateString){
+  const d = TitipanShared.parseDbDate(dateString)
+  if(!d || isNaN(d.getTime())) return "-"
+  return d.toLocaleDateString("id-ID", {
+    weekday: "long",
+    timeZone: "Asia/Jakarta"
+  })
+},
 
   formatTanggal(dateString){
     const [year, month, day] = String(dateString || "").split("-")
@@ -49,14 +81,15 @@ window.TitipanShared = {
   },
 
   formatTanggalPendek(dateString){
-    const d = new Date(dateString)
-    return d.toLocaleDateString("id-ID", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-      timeZone: "Asia/Jakarta"
-    })
-  },
+  const d = TitipanShared.parseDbDate(dateString)
+  if(!d || isNaN(d.getTime())) return "-"
+  return d.toLocaleDateString("id-ID", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    timeZone: "Asia/Jakarta"
+  })
+},
 
   isAdmin(){
     return localStorage.getItem("adminLogin") === "true"
@@ -155,26 +188,25 @@ window.TitipanShared = {
   },
 
   formatLastMasuk(log){
-    if (!log) {
-      return `<div class="kecilBox">Terakhir masuk: -</div>`
-    }
+  if(!log) {
+    return `<div class="kecilBox">Terakhir masuk: -</div>`
+  }
 
-    const qty = Number(log.qty || 0)
-    const hari = TitipanShared.formatHari(log.created_at)
-    const tanggal = TitipanShared.formatTanggalPendek(log.created_at)
-    const jam = TitipanShared.formatJamWIB(log.created_at)
+  const qty = Number(log.qty || 0)
+  const hari = TitipanShared.formatHari(log.created_at)
+  const tanggal = TitipanShared.formatTanggalPendek(log.created_at)
+  const jam = TitipanShared.formatJamWIB(log.created_at)
 
-    return `
-      <div class="kecilBox" style="margin-top:4px;line-height:1.45">
-        <div><b>Terakhir masuk</b></div>
-        <div>${qty} pcs</div>
-        <div>${hari}</div>
-        <div>${tanggal}</div>
-        <div>${jam} WIB</div>
-      </div>
-    `
-  },
-
+  return `
+    <div class="kecilBox" style="margin-top:4px;line-height:1.45">
+      <div><b>Terakhir masuk</b></div>
+      <div>${qty} pcs</div>
+      <div>${hari}</div>
+      <div>${tanggal}</div>
+      <div>${jam} WIB</div>
+    </div>
+  `
+},
   isSameWIBDay(a, b){
     const d1 = new Date(
       new Date(a).toLocaleString("en-US", { timeZone: "Asia/Jakarta" })
