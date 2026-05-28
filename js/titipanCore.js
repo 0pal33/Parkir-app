@@ -25,8 +25,8 @@ window.TitipanCore = {
     const logBtn = document.getElementById("btnLog")
     const homeBtn = document.getElementById("btnHome")
 
-    if (kedatanganBtn) kedatanganBtn.onclick = () => this.startArrivalFlow()
-    if (logBtn) logBtn.onclick = () => this.showLog("today")
+    if (kedatanganBtn) kedatanganBtn.onclick = () => TitipanCore.startArrivalFlow()
+    if (logBtn) logBtn.onclick = () => TitipanCore.showLog("today")
     if (homeBtn) homeBtn.onclick = () => { location.href = "index.html" }
   },
 
@@ -66,7 +66,7 @@ window.TitipanCore = {
         .limit(1000)
     ])
 
-    window.TitipanState.data = barang || []
+    TitipanState.data = barang || []
 
     window.LAST_MASUK_MAP = {}
     ;(logs || []).forEach(log => {
@@ -193,11 +193,11 @@ window.TitipanCore = {
       backLabel: "Kembali",
       onCapture: (dataUrl) => {
         TitipanState.addDraft.foto_penitip = dataUrl
-        this.renderTambahForm()
+        TitipanCore.renderTambahForm()
       },
       onBack: () => {
         TitipanState.addDraft = null
-        this.renderList()
+        TitipanCore.renderList()
       }
     })
   },
@@ -270,7 +270,7 @@ window.TitipanCore = {
       })
     }
 
-    this.showAddSummary()
+    TitipanCore.showAddSummary()
   },
 
   showAddSummary(){
@@ -289,16 +289,16 @@ window.TitipanCore = {
         <div class="summaryQuestion">apakah penitip memiliki barang lain untuk dititipkan?</div>
       `,
       buttons: [
-        { label: "Ya", className: "blue", onClick: () => this.continueTambah() },
-        { label: "Tidak", className: "green", onClick: () => this.beginAddPhotoSequence(0) },
-        { label: "Batal", className: "red", onClick: () => this.renderTambahForm() }
+        { label: "Ya", className: "blue", onClick: () => TitipanCore.continueTambah() },
+        { label: "Tidak", className: "green", onClick: () => TitipanCore.beginAddPhotoSequence(0) },
+        { label: "Batal", className: "red", onClick: () => TitipanCore.renderTambahForm() }
       ]
     })
   },
 
   continueTambah(){
     TitipanUI.closeModal()
-    this.renderTambahForm()
+    TitipanCore.renderTambahForm()
   },
 
   beginAddPhotoSequence(index = 0){
@@ -319,13 +319,13 @@ window.TitipanCore = {
       backLabel: "Kembali",
       onCapture: (dataUrl) => {
         item.foto_barang = dataUrl
-        this.beginAddPhotoSequence(index + 1)
+        TitipanCore.beginAddPhotoSequence(index + 1)
       },
       onBack: () => {
         if (index === 0) {
-          this.showAddSummary()
+          TitipanCore.showAddSummary()
         } else {
-          this.beginAddPhotoSequence(index - 1)
+          TitipanCore.beginAddPhotoSequence(index - 1)
         }
       }
     })
@@ -401,6 +401,11 @@ window.TitipanCore = {
     TitipanUI.renderArrivalForm({ draft: TitipanState.arrivalDraft })
   },
 
+  renderArrivalForm(){
+    TitipanUI.showSection("form")
+    TitipanUI.renderArrivalForm({ draft: TitipanState.arrivalDraft })
+  },
+
   async saveArrivalItem(){
     const draft = TitipanState.arrivalDraft
     if (!draft) {
@@ -462,29 +467,39 @@ window.TitipanCore = {
       })
     }
 
+    TitipanCore.showArrivalSummary()
+  },
+
+  showArrivalSummary(){
+    const draft = TitipanState.arrivalDraft
+    if (!draft) return
+
+    const totalQty = draft.items.reduce((a, b) => a + Number(b.qty || 0), 0)
+    const totalBayar = draft.items.reduce((a, b) => a + Number(b.total || 0), 0)
+
     TitipanUI.openSummary({
       title: "Ringkasan kedatangan",
       body: `
         <div class="summaryText">
-          ${TitipanState.arrivalDraft.items.map(i => `${TitipanShared.escapeHtml(i.nama_item)} ${Number(i.qty || 0)} ${TitipanShared.formatRupiah(i.total)}`).join("<br>")}
+          ${draft.items.map(i => `${TitipanShared.escapeHtml(i.nama_item)} ${Number(i.qty || 0)} ${TitipanShared.formatRupiah(i.total)}`).join("<br>")}
         </div>
         <div class="summaryTotal">
-          Total ${TitipanState.arrivalDraft.items.reduce((a, b) => a + Number(b.qty || 0), 0)} ${TitipanShared.formatRupiah(TitipanState.arrivalDraft.items.reduce((a, b) => a + Number(b.total || 0), 0))}
+          Total ${totalQty} ${TitipanShared.formatRupiah(totalBayar)}
         </div>
         <div class="summaryQuestion">apakah penitip datang untuk barang lainnya?</div>
       `,
       buttons: [
-        { label: "Ya", className: "blue", onClick: () => this.continueArrival() },
-        { label: "Tidak", className: "green", onClick: () => this.beginArrivalPhotoStep() },
-        { label: "Batal", className: "red", onClick: () => this.renderArrivalForm() }
+        { label: "Ya", className: "blue", onClick: () => TitipanCore.continueArrival() },
+        { label: "Tidak", className: "green", onClick: () => TitipanCore.beginArrivalPhotoStep() },
+        { label: "Batal", className: "red", onClick: () => TitipanCore.renderArrivalForm() }
       ]
     })
   },
 
   continueArrival(){
-  TitipanUI.closeModal()
-  TitipanUI.renderArrivalForm({ draft: TitipanState.arrivalDraft })
-},
+    TitipanUI.closeModal()
+    TitipanCore.renderArrivalForm()
+  },
 
   beginArrivalPhotoStep(){
     const draft = TitipanState.arrivalDraft
@@ -497,10 +512,10 @@ window.TitipanCore = {
       backLabel: "Kembali",
       onCapture: (dataUrl) => {
         draft.foto_bukti = dataUrl
-        this.commitArrivalDraft()
+        TitipanCore.commitArrivalDraft()
       },
       onBack: () => {
-        this.renderArrivalForm()
+        TitipanCore.showArrivalSummary()
       }
     })
   },
@@ -564,6 +579,7 @@ window.TitipanCore = {
   openUpdateHarga(itemId){
     const item = (TitipanState.data || []).find(x => x.id === itemId)
     if (!item) return
+    TitipanState.current = item
     TitipanUI.openUpdateHarga({ item })
   },
 
@@ -747,6 +763,11 @@ window.TitipanCore = {
     canvas.height = video.videoHeight || 720
 
     const ctx = canvas.getContext("2d")
+    if (!ctx) {
+      alert("Gagal ambil foto")
+      return
+    }
+
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
 
     const dataUrl = canvas.toDataURL("image/jpeg", 0.88)
@@ -754,13 +775,16 @@ window.TitipanCore = {
     const cb = TitipanState.camera.onCapture
     this.stopCamera()
     TitipanUI.closeModal()
-    cb(dataUrl)
+
+    if (typeof cb === "function") {
+      cb(dataUrl)
+    }
   },
 
   cameraBack(){
     const cb = TitipanState.camera.onBack
     this.stopCamera()
     TitipanUI.closeModal()
-    if (cb) cb()
+    if (typeof cb === "function") cb()
   }
 }
