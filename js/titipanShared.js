@@ -20,6 +20,24 @@ window.TitipanShared = {
     })
   },
 
+  formatJamWIB(dateString){
+    const d = new Date(dateString)
+    return d.toLocaleTimeString("id-ID", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+      timeZone: "Asia/Jakarta"
+    })
+  },
+
+  formatHari(dateString){
+    const d = new Date(dateString)
+    return d.toLocaleDateString("id-ID", {
+      weekday: "long",
+      timeZone: "Asia/Jakarta"
+    })
+  },
+
   formatTanggal(dateString){
     const [year, month, day] = String(dateString || "").split("-")
     const d = new Date(Number(year), Number(month) - 1, Number(day))
@@ -40,24 +58,6 @@ window.TitipanShared = {
     })
   },
 
-  formatHari(dateString){
-    const d = new Date(dateString)
-    return d.toLocaleDateString("id-ID", {
-      weekday: "long",
-      timeZone: "Asia/Jakarta"
-    })
-  },
-
-  formatJamWIB(dateString){
-    const d = new Date(dateString)
-    return d.toLocaleTimeString("id-ID", {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: false,
-      timeZone: "Asia/Jakarta"
-    })
-  },
-
   isAdmin(){
     return localStorage.getItem("adminLogin") === "true"
   },
@@ -66,6 +66,7 @@ window.TitipanShared = {
     if (window.crypto && typeof window.crypto.randomUUID === "function") {
       return window.crypto.randomUUID()
     }
+
     return "xxxxxx-xxxx-4xxx-yxxx-xxxxxx".replace(/[xy]/g, c => {
       const r = Math.random() * 16 | 0
       const v = c === "x" ? r : (r & 0x3 | 0x8)
@@ -108,41 +109,39 @@ window.TitipanShared = {
     const step = Math.ceil(p / 1000) + 1
     return Math.max(2, step) * 1000
   },
-  
+
   recommendedLabel(hargaPenitip){
-  const h = Number(hargaPenitip || 0)
-
-  if(!h){
-    return "Rekomendasi otomatis akan muncul di sini"
-  }
-
-  const rekom =
-  TitipanShared.rekomendasiHargaJual(h)
-
-  return `Rekomendasi: Rp ${Number(rekom || 0)
-    .toLocaleString("id-ID")}`
-},
+    const h = Number(hargaPenitip || 0)
+    if (!h) return "Rekomendasi otomatis akan muncul di sini"
+    return "Rekomendasi: Rp " + TitipanShared.rekomendasiHargaJual(h).toLocaleString("id-ID")
+  },
 
   bindAutoHarga(penitipInput, jualInput, labelEl){
     if (!penitipInput || !jualInput) return
 
     const applyAuto = () => {
+      const p = TitipanShared.clampQty(penitipInput.value)
+      const rekom = p > 0 ? TitipanShared.rekomendasiHargaJual(p) : 0
+
+      if (labelEl) {
+        labelEl.textContent = p > 0
+          ? "Rekomendasi: Rp " + rekom.toLocaleString("id-ID")
+          : "Rekomendasi otomatis akan muncul di sini"
+      }
+
       if (jualInput.dataset.manual === "1") {
-        if (labelEl) {
-          const rekom = TitipanShared.rekomendasiHargaJual(penitipInput.value)
-          labelEl.innerHTML = `Rekomendasi: Rp ${Number(rekom || 0).toLocaleString("id-ID")}`
-        }
+        jualInput.style.color = "#111"
         return
       }
 
-      const rekom = TitipanShared.rekomendasiHargaJual(penitipInput.value)
-      jualInput.value = rekom || ""
+      if (p > 0) {
+        jualInput.value = rekom
+      } else {
+        jualInput.value = ""
+      }
+
       jualInput.dataset.manual = "0"
       jualInput.style.color = "#999"
-
-      if (labelEl) {
-        labelEl.innerHTML = `Rekomendasi: Rp ${Number(rekom || 0).toLocaleString("id-ID")}`
-      }
     }
 
     penitipInput.addEventListener("input", applyAuto)
@@ -174,6 +173,20 @@ window.TitipanShared = {
         <div>${jam} WIB</div>
       </div>
     `
+  },
+
+  isSameWIBDay(a, b){
+    const d1 = new Date(
+      new Date(a).toLocaleString("en-US", { timeZone: "Asia/Jakarta" })
+    )
+
+    const d2 = new Date(
+      new Date(b).toLocaleString("en-US", { timeZone: "Asia/Jakarta" })
+    )
+
+    return d1.getFullYear() === d2.getFullYear()
+      && d1.getMonth() === d2.getMonth()
+      && d1.getDate() === d2.getDate()
   },
 
   groupByTanggal(data, key = "created_at"){
