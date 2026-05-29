@@ -174,109 +174,141 @@ window.TitipanUI = {
   },
 
   renderArrivalForm({ draft }){
-    const formArea = document.getElementById("formArea")
-    if (!formArea) return
+  const formArea = document.getElementById("formArea")
+  if (!formArea) return
 
-    const fotoThumb = draft?.foto_bukti
-      ? `<img src="${draft.foto_bukti}" alt="foto bukti" class="photoThumb">`
-      : `<div class="photoThumb placeholder">📷</div>`
+  const fotoThumb = draft?.foto_bukti
+    ? `<img src="${draft.foto_bukti}" alt="foto bukti" class="photoThumb">`
+    : `<div class="photoThumb placeholder">📷</div>`
 
-    const penValue = draft?.penitip || ""
-    const penReadOnly = draft?.lockPenitip || false
+  const penValue = draft?.penitip || ""
+  const penReadOnly = draft?.lockPenitip || false
 
-    const selectedIds = new Set((draft?.items || []).map(x => x.item_id))
+  const selectedIds = new Set((draft?.items || []).map(x => x.item_id))
 
-    const filteredItems = (TitipanState.data || []).filter(item =>
-      TitipanShared.normalizeText(item.nama_penitip) === TitipanShared.normalizeText(penValue) &&
-      Number(item.qty || 0) > 0 &&
+  const filteredItems = (TitipanState.data || []).filter(item =>
+    TitipanShared.normalizeText(item.nama_penitip || "") === TitipanShared.normalizeText(penValue) &&
+    !selectedIds.has(item.id)
+  )
+
+  const options = filteredItems.map(item => {
+    return `<option value="${item.id}">${TitipanShared.escapeHtml(item.nama_item)} | stok ${Number(item.qty || 0)}</option>`
+  }).join("")
+
+  formArea.innerHTML = `
+    <div class="box">
+      <h3>Kedatangan Penitip</h3>
+
+      <div style="display:flex;gap:12px;align-items:center;margin-bottom:10px">
+        ${fotoThumb}
+        <div style="flex:1;text-align:left">
+          <div class="kecilBox">foto bukti transaksi</div>
+          <div class="kecilBox">${TitipanShared.escapeHtml(penValue || "Belum diisi")}</div>
+        </div>
+      </div>
+
+      <input
+        id="a_penitip"
+        placeholder="Nama penitip"
+        value="${TitipanShared.escapeHtml(penValue)}"
+        ${penReadOnly ? "readonly" : ""}
+      >
+
+      <select
+        id="a_barang"
+        style="width:100%;padding:12px;border-radius:10px;border:1px solid #ccc;font-size:16px;margin-bottom:10px"
+      >
+        <option value="">Pilih barang</option>
+        ${options}
+      </select>
+
+      <input id="a_qty" type="number" placeholder="Barang terjual">
+      
+      <div class="check">
+        <input type="checkbox" id="a_nitip_lagi">
+        <span id="a_nitip_label">Nitip lagi</span>
+      </div>
+
+      <div id="boxNitipBaru" style="display:none">
+        <input id="a_qty_baru" type="number" placeholder="berapa barang?">
+      </div>
+
+      <input id="a_bayar" readonly placeholder="Bayar penitip">
+
+      <div class="kecilBox" style="margin:6px 0 12px">
+        Daftar barang otomatis terfilter berdasarkan penitip yang sama.
+      </div>
+
+      <div class="rowBtn">
+        <button class="green" onclick="TitipanCore.saveArrivalItem()">Simpan</button>
+        <button class="red" onclick="TitipanCore.renderList()">Batal</button>
+      </div>
+    </div>
+  `
+
+  const penInput = document.getElementById("a_penitip")
+  const barangSelect = document.getElementById("a_barang")
+  const qtyInput = document.getElementById("a_qty")
+  const bayarInput = document.getElementById("a_bayar")
+  const nitipCheck = document.getElementById("a_nitip_lagi")
+  const nitipLabel = document.getElementById("a_nitip_label")
+  const boxNitipBaru = document.getElementById("boxNitipBaru")
+  const qtyBaruInput = document.getElementById("a_qty_baru")
+
+  const refreshBayar = () => {
+    const selectedId = barangSelect.value
+    const item = (TitipanState.data || []).find(x => x.id === selectedId)
+    const qty = TitipanShared.clampQty(qtyInput.value)
+    const bayar = Number(item?.harga_penitip || 0) * qty
+    bayarInput.value = TitipanShared.formatRupiah(bayar)
+  }
+
+  const refreshMode = () => {
+    const selectedId = barangSelect.value
+    const item = (TitipanState.data || []).find(x => x.id === selectedId)
+    const canSell = Number(item?.qty || 0) > 0
+
+    nitipLabel.textContent = canSell ? "Nitip lagi" : "Hanya titip"
+
+    if (!canSell) {
+      qtyInput.value = 0
+      qtyInput.disabled = true
+    } else {
+      qtyInput.disabled = false
+    }
+
+    boxNitipBaru.style.display = nitipCheck.checked ? "block" : "none"
+    refreshBayar()
+  }
+
+  const refreshOptions = () => {
+    const pen = TitipanShared.normalizeText(penInput.value)
+    const filtered = (TitipanState.data || []).filter(item =>
+      TitipanShared.normalizeText(item.nama_penitip) === pen &&
       !selectedIds.has(item.id)
     )
 
-    const remainingHint = filteredItems.length === 0
-      ? `<div class="kecilBox" style="margin-bottom:10px">Tidak ada barang aktif lagi untuk penitip ini.</div>`
-      : `<div class="kecilBox" style="margin-bottom:10px">Daftar barang otomatis terfilter berdasarkan penitip yang sama.</div>`
-
-    const options = filteredItems.map(item => {
+    barangSelect.innerHTML = `<option value="">Pilih barang</option>` + filtered.map(item => {
       return `<option value="${item.id}">${TitipanShared.escapeHtml(item.nama_item)} | stok ${Number(item.qty || 0)}</option>`
     }).join("")
 
-    formArea.innerHTML = `
-      <div class="box">
-        <h3>Kedatangan Penitip</h3>
-
-        <div style="display:flex;gap:12px;align-items:center;margin-bottom:10px">
-          ${fotoThumb}
-          <div style="flex:1;text-align:left">
-            <div class="kecilBox">foto bukti transaksi</div>
-            <div class="kecilBox">${TitipanShared.escapeHtml(penValue || "Belum diisi")}</div>
-          </div>
-        </div>
-
-        <input
-          id="a_penitip"
-          placeholder="Nama penitip"
-          value="${TitipanShared.escapeHtml(penValue)}"
-          ${penReadOnly ? "readonly" : ""}
-        >
-
-        <select
-          id="a_barang"
-          style="width:100%;padding:12px;border-radius:10px;border:1px solid #ccc;font-size:16px;margin-bottom:10px"
-        >
-          <option value="">Pilih barang</option>
-          ${options}
-        </select>
-
-        <input id="a_qty" type="number" placeholder="Barang terjual">
-        <input id="a_bayar" readonly placeholder="Bayar penitip">
-
-        ${remainingHint}
-
-        <div class="rowBtn">
-          <button class="green" onclick="TitipanCore.saveArrivalItem()">Simpan</button>
-          <button class="red" onclick="TitipanCore.renderList()">Batal</button>
-        </div>
-      </div>
-    `
-
-    const penInput = document.getElementById("a_penitip")
-    const barangSelect = document.getElementById("a_barang")
-    const qtyInput = document.getElementById("a_qty")
-    const bayarInput = document.getElementById("a_bayar")
-
-    const refreshBayar = () => {
-      const selectedId = barangSelect.value
-      const item = (TitipanState.data || []).find(x => x.id === selectedId)
-      const qty = TitipanShared.clampQty(qtyInput.value)
-      const bayar = Number(item?.harga_penitip || 0) * qty
-      bayarInput.value = TitipanShared.formatRupiah(bayar)
+    if (draft?.preselectItemId && filtered.some(x => x.id === draft.preselectItemId)) {
+      barangSelect.value = draft.preselectItemId
     }
 
-    const refreshOptions = () => {
-      const pen = TitipanShared.normalizeText(penInput.value)
-      const filtered = (TitipanState.data || []).filter(item =>
-        TitipanShared.normalizeText(item.nama_penitip) === pen &&
-        Number(item.qty || 0) > 0 &&
-        !selectedIds.has(item.id)
-      )
+    refreshMode()
+  }
 
-      barangSelect.innerHTML = `<option value="">Pilih barang</option>` + filtered.map(item => {
-        return `<option value="${item.id}">${TitipanShared.escapeHtml(item.nama_item)} | stok ${Number(item.qty || 0)}</option>`
-      }).join("")
+  penInput.addEventListener("input", refreshOptions)
+  barangSelect.addEventListener("change", refreshMode)
+  qtyInput.addEventListener("input", refreshBayar)
+  nitipCheck.addEventListener("change", () => {
+    boxNitipBaru.style.display = nitipCheck.checked ? "block" : "none"
+  })
+  qtyBaruInput.addEventListener("input", () => {})
 
-      if (draft?.preselectItemId && filtered.some(x => x.id === draft.preselectItemId)) {
-        barangSelect.value = draft.preselectItemId
-      }
-
-      refreshBayar()
-    }
-
-    penInput.addEventListener("input", refreshOptions)
-    barangSelect.addEventListener("change", refreshBayar)
-    qtyInput.addEventListener("input", refreshBayar)
-
-    refreshOptions()
-  },
+  refreshOptions()
+},
 
   renderLoading(text){
     const aksiArea = document.getElementById("aksiArea")
