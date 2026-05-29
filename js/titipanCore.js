@@ -615,7 +615,7 @@ window.TitipanCore = {
       TitipanCore.showArrivalSummary()
     }
   })
-},},
+},
 
   async commitArrivalDraft(){
   const draft = TitipanState.arrivalDraft
