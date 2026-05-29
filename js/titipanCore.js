@@ -430,166 +430,227 @@ window.TitipanCore = {
       !chosen.has(item.id)
     )
   },
+  
+  getRemainingArrivalItems(){
+  const draft = TitipanState.arrivalDraft
+  if (!draft) return []
+
+  const pen = TitipanShared.normalizeText(draft.penitip || "")
+  const chosen = new Set((draft.items || []).map(x => x.item_id))
+
+  return (TitipanState.data || []).filter(item =>
+    TitipanShared.normalizeText(item.nama_penitip || "") === pen &&
+    !chosen.has(item.id)
+  )
+},
 
   async saveArrivalItem(){
-    const draft = TitipanState.arrivalDraft
-    if (!draft) {
-      alert("Draft kedatangan belum ada")
-      return
-    }
+  const draft = TitipanState.arrivalDraft
+  if (!draft) {
+    alert("Draft kedatangan belum ada")
+    return
+  }
 
-    const penitip = document.getElementById("a_penitip")?.value.trim().replace(/\s+/g, " ")
-    const itemId = document.getElementById("a_barang")?.value
-    const qtyTerjual = TitipanShared.clampQty(document.getElementById("a_qty")?.value)
+  const penitip = document.getElementById("a_penitip")?.value.trim().replace(/\s+/g, " ")
+  const itemId = document.getElementById("a_barang")?.value
+  const qtyTerjualInput = TitipanShared.clampQty(document.getElementById("a_qty")?.value)
+  const nitipLagi = document.getElementById("a_nitip_lagi")?.checked === true
+  const qtyBaru = nitipLagi ? TitipanShared.clampQty(document.getElementById("a_qty_baru")?.value) : 0
 
-    if (!penitip || !itemId || qtyTerjual <= 0) {
-      alert("Lengkapi penitip, barang, dan qty terjual")
-      return
-    }
+  if (!penitip || !itemId) {
+    alert("Lengkapi penitip dan barang")
+    return
+  }
 
-    const item = (TitipanState.data || []).find(x => x.id === itemId)
-    if (!item) {
-      alert("Barang tidak ditemukan")
-      return
-    }
+  const item = (TitipanState.data || []).find(x => x.id === itemId)
+  if (!item) {
+    alert("Barang tidak ditemukan")
+    return
+  }
 
-    if (!draft.penitip) {
-      draft.penitip = penitip
-    }
+  if (!draft.penitip) {
+    draft.penitip = penitip
+  }
 
-    draft.lockPenitip = true
+  draft.lockPenitip = true
 
-    if (TitipanShared.normalizeText(item.nama_penitip) !== TitipanShared.normalizeText(penitip)) {
-      alert("Barang yang dipilih harus milik penitip yang sama")
-      return
-    }
+  if (TitipanShared.normalizeText(item.nama_penitip) !== TitipanShared.normalizeText(penitip)) {
+    alert("Barang yang dipilih harus milik penitip yang sama")
+    return
+  }
 
-    if (qtyTerjual > Number(item.qty || 0)) {
-      alert("Qty terjual melebihi stok")
-      return
-    }
+  const canSell = Number(item.qty || 0) > 0
+  const qtyTerjual = canSell ? qtyTerjualInput : 0
 
-    const bayarPenitip = Number(item.harga_penitip || 0) * qtyTerjual
+  if (canSell && qtyTerjual <= 0) {
+    alert("Isi jumlah barang terjual")
+    return
+  }
 
-    const existsSame = draft.items.find(x => x.item_id === item.id)
-    if (existsSame) {
-      const merge = confirm("Barang ini sudah ada di sesi kedatangan. Tambah qty ke baris yang sama?")
-      if (merge) {
-        existsSame.qty += qtyTerjual
-        existsSame.total += bayarPenitip
-      } else {
-        return
-      }
+  if (canSell && qtyTerjual > Number(item.qty || 0)) {
+    alert("Qty terjual melebihi stok")
+    return
+  }
+
+  if (nitipLagi && qtyBaru <= 0) {
+    alert("Isi jumlah barang titip baru")
+    return
+  }
+
+  const bayarPenitip = Number(item.harga_penitip || 0) * qtyTerjual
+
+  const existsSame = draft.items.find(x => x.item_id === item.id)
+  if (existsSame) {
+    const merge = confirm("Barang ini sudah ada di sesi kedatangan. Tambah qty ke baris yang sama?")
+    if (merge) {
+      existsSame.qty += qtyTerjual
+      existsSame.total += bayarPenitip
+      existsSame.qty_baru = Number(existsSame.qty_baru || 0) + qtyBaru
     } else {
-      draft.items.push({
-        item_id: item.id,
-        nama_item: item.nama_item,
-        nama_penitip: penitip,
-        qty: qtyTerjual,
-        total: bayarPenitip,
-        harga_penitip: Number(item.harga_penitip || 0),
-        harga_jual: Number(item.harga_jual || 0)
-      })
+      return
     }
+  } else {
+    draft.items.push({
+      item_id: item.id,
+      nama_item: item.nama_item,
+      nama_penitip: penitip,
+      qty: qtyTerjual,
+      total: bayarPenitip,
+      qty_baru: qtyBaru,
+      harga_penitip: Number(item.harga_penitip || 0),
+      harga_jual: Number(item.harga_jual || 0),
+      foto_penitip: item.foto_penitip || null
+    })
+  }
 
-    const remaining = TitipanCore.getRemainingArrivalItems()
+  const remaining = TitipanCore.getRemainingArrivalItems()
 
-    if (remaining.length > 0) {
-      TitipanCore.showArrivalSummary()
-    } else {
-      TitipanCore.beginArrivalPhotoStep()
-    }
-  },
+  if (remaining.length > 0) {
+    TitipanCore.showArrivalSummary()
+  } else {
+    TitipanCore.beginArrivalPhotoStep()
+  }
+},
 
   showArrivalSummary(){
-    const draft = TitipanState.arrivalDraft
-    if (!draft) return
+  const draft = TitipanState.arrivalDraft
+  if (!draft) return
 
-    const totalQty = draft.items.reduce((a, b) => a + Number(b.qty || 0), 0)
-    const totalBayar = draft.items.reduce((a, b) => a + Number(b.total || 0), 0)
+  const totalQtyJual = draft.items.reduce((a, b) => a + Number(b.qty || 0), 0)
+  const totalBayar = draft.items.reduce((a, b) => a + Number(b.total || 0), 0)
+  const totalQtyTitip = draft.items.reduce((a, b) => a + Number(b.qty_baru || 0), 0)
 
-    TitipanUI.openSummary({
-      title: "Ringkasan kedatangan",
-      body: `
-        <div class="summaryText">
-          ${draft.items.map(i => `${TitipanShared.escapeHtml(i.nama_item)} ${Number(i.qty || 0)} ${TitipanShared.formatRupiah(i.total)}`).join("<br>")}
-        </div>
-        <div class="summaryTotal">
-          Total ${totalQty} ${TitipanShared.formatRupiah(totalBayar)}
-        </div>
-        <div class="summaryQuestion">apakah penitip datang untuk barang lainnya?</div>
-      `,
-      buttons: [
-        { label: "Ya", className: "blue", onClick: () => TitipanCore.continueArrival() },
-        {
-          label: "Tidak",
-          className: "green",
-          onClick: () => TitipanCore.beginArrivalPhotoStep()
-        },
-        {
-          label: "Batal",
-          className: "red",
-          onClick: () => {
-            TitipanUI.closeModal()
-            TitipanCore.renderArrivalForm()
-          }
+  const jualLines = draft.items
+    .filter(i => Number(i.qty || 0) > 0)
+    .map(i => `${TitipanShared.escapeHtml(i.nama_item)} ${Number(i.qty || 0)} ${TitipanShared.formatRupiah(i.total)}`)
+    .join("<br>")
+
+  const titipLines = draft.items
+    .filter(i => Number(i.qty_baru || 0) > 0)
+    .map(i => `${TitipanShared.escapeHtml(i.nama_item)} ${Number(i.qty_baru || 0)}`)
+    .join("<br>")
+
+  let body = `
+    <div class="summaryText">
+      ${jualLines || "-"}
+    </div>
+    <div class="summaryTotal">
+      Total ${totalQtyJual} ${TitipanShared.formatRupiah(totalBayar)}
+    </div>
+  `
+
+  if (totalQtyTitip > 0) {
+    body += `
+      <div class="summaryQuestion" style="margin-top:14px;font-weight:bold">Titip baru :</div>
+      <div class="summaryText">
+        ${titipLines || "-"}
+      </div>
+      <div class="summaryTotal">
+        Total ${totalQtyTitip}
+      </div>
+    `
+  }
+
+  body += `
+    <div class="summaryQuestion">apakah penitip datang untuk barang lainnya?</div>
+  `
+
+  TitipanUI.openSummary({
+    title: "Ringkasan kedatangan",
+    body,
+    buttons: [
+      { label: "Ya", className: "blue", onClick: () => TitipanCore.continueArrival() },
+      { label: "Tidak", className: "green", onClick: () => TitipanCore.beginArrivalPhotoStep() },
+      {
+        label: "Batal",
+        className: "red",
+        onClick: () => {
+          TitipanUI.closeModal()
+          TitipanCore.renderArrivalForm()
         }
-      ]
-    })
-  },
+      }
+    ]
+  })
+},
 
   continueArrival(){
-    TitipanUI.closeModal()
-    TitipanCore.renderArrivalForm()
-  },
+  TitipanUI.closeModal()
+  TitipanCore.renderArrivalForm()
+},
 
   beginArrivalPhotoStep(){
-    const draft = TitipanState.arrivalDraft
-    if (!draft) return
+  const draft = TitipanState.arrivalDraft
+  if (!draft) return
 
-    this.openCameraStep({
-      title: `foto bukti transaksi dengan ${draft.penitip}`,
-      subtitle: "Ambil foto bukti transaksi, lalu klik centang.",
-      confirmLabel: "✓",
-      backLabel: "Kembali",
-      onCapture: (dataUrl) => {
-        draft.foto_bukti = dataUrl
-        TitipanCore.commitArrivalDraft()
-      },
-      onBack: () => {
-        TitipanCore.renderArrivalForm()
-      }
-    })
-  },
+  this.openCameraStep({
+    title: `foto bukti transaksi dengan ${draft.penitip}`,
+    subtitle: "Ambil foto bukti transaksi, lalu klik centang.",
+    confirmLabel: "✓",
+    backLabel: "Kembali",
+    onCapture: (dataUrl) => {
+      draft.foto_bukti = dataUrl
+      TitipanCore.commitArrivalDraft()
+    },
+    onBack: () => {
+      TitipanCore.showArrivalSummary()
+    }
+  })
+},},
 
   async commitArrivalDraft(){
-    const draft = TitipanState.arrivalDraft
-    if (!draft) return
+  const draft = TitipanState.arrivalDraft
+  if (!draft) return
 
-    try{
-      for (const row of draft.items) {
-        const { data: item, error: fetchError } = await window.supabaseClient
-          .from("barang_titipan")
-          .select("*")
-          .eq("id", row.item_id)
-          .single()
+  try{
+    for (const row of draft.items) {
+      const { data: item, error: fetchError } = await window.supabaseClient
+        .from("barang_titipan")
+        .select("*")
+        .eq("id", row.item_id)
+        .single()
 
-        if (fetchError) throw fetchError
+      if (fetchError) throw fetchError
 
-        const now = new Date().toISOString()
+      const now = new Date().toISOString()
 
-        const { error: updError } = await window.supabaseClient
-          .from("barang_titipan")
-          .update({
-            qty: 0,
-            updated_at: now,
-            session_id: draft.session_id
-          })
-          .eq("id", row.item_id)
+      let finalQty = 0
+      if (Number(row.qty_baru || 0) > 0) {
+        finalQty = Number(row.qty_baru || 0)
+      }
 
-        if (updError) throw updError
+      const { error: updError } = await window.supabaseClient
+        .from("barang_titipan")
+        .update({
+          qty: finalQty,
+          updated_at: now,
+          session_id: draft.session_id
+        })
+        .eq("id", row.item_id)
 
-        const { error: logError } = await window.supabaseClient
+      if (updError) throw updError
+
+      if (Number(row.qty || 0) > 0) {
+        const { error: logAmbilError } = await window.supabaseClient
           .from("titipan_log")
           .insert({
             session_id: draft.session_id,
@@ -603,18 +664,37 @@ window.TitipanCore = {
             created_at: now
           })
 
-        if (logError) throw logError
+        if (logAmbilError) throw logAmbilError
       }
 
-      TitipanState.arrivalDraft = null
-      TitipanUI.closeModal()
-      await this.loadData()
-      await this.renderDashboard()
-      TitipanUI.showToast("Kedatangan penitip berhasil disimpan")
-    }catch(err){
-      alert("Gagal simpan kedatangan: " + err.message)
+      if (Number(row.qty_baru || 0) > 0) {
+        const { error: logMasukError } = await window.supabaseClient
+          .from("titipan_log")
+          .insert({
+            session_id: draft.session_id,
+            item_id: row.item_id,
+            jenis: "masuk",
+            qty: row.qty_baru,
+            total: 0,
+            nama_penitip: row.nama_penitip,
+            foto_penitip: item.foto_penitip || null,
+            foto_bukti: draft.foto_bukti || item.foto_penitip || null,
+            created_at: now
+          })
+
+        if (logMasukError) throw logMasukError
+      }
     }
-  },
+
+    TitipanState.arrivalDraft = null
+    TitipanUI.closeModal()
+    await this.loadData()
+    await this.renderDashboard()
+    TitipanUI.showToast("Kedatangan penitip berhasil disimpan")
+  }catch(err){
+    alert("Gagal simpan kedatangan: " + err.message)
+  }
+},
 
   openUpdateHarga(itemId){
     const item = (TitipanState.data || []).find(x => x.id === itemId)
