@@ -361,6 +361,144 @@ button{
   .listActionBtns{flex-direction:column}
   .item{align-items:center}
 }
+
+/* ===== TITIPAN MODE PETUGAS / LIST BARU ===== */
+
+.itemPetugas{
+  display:grid;
+  grid-template-columns: 56px minmax(0,1fr) 72px 58px;
+  gap:12px;
+  align-items:center;
+  min-height:160px;
+}
+
+.photoStack{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  align-self:start;
+}
+
+.photoSlot{
+  width:56px;
+  height:56px;
+  border-radius:14px;
+  overflow:hidden;
+  background:#eef2f7;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex:0 0 auto;
+  cursor:pointer;
+  border:1px solid rgba(0,0,0,.04);
+}
+
+.photoSlot img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+.photoSlot.empty{
+  background:transparent;
+  border:1px dashed #e3e3e3;
+  cursor:default;
+}
+
+.itemMain{
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+  justify-content:flex-start;
+  gap:6px;
+  padding-top:2px;
+}
+
+.namaBlock{
+  line-height:1.15;
+}
+
+.namaBlock .nama{
+  font-size:18px;
+  font-weight:700;
+  color:#111;
+  word-break:break-word;
+}
+
+.namaBlock .kecil{
+  font-size:14px;
+  color:#777;
+  line-height:1.35;
+}
+
+.lastMasukBlock{
+  margin-top:8px;
+  color:#777;
+  line-height:1.35;
+}
+
+.lastMasukBlock .judul{
+  font-size:17px;
+  font-weight:700;
+  color:#666;
+  margin-bottom:2px;
+}
+
+.lastMasukBlock .nilai{
+  font-size:15px;
+  color:#777;
+}
+
+.qtyCol{
+  align-self:end;
+  text-align:center;
+}
+
+.qtyPetugas{
+  font-size:58px;
+  line-height:1;
+  font-weight:700;
+  color:#111;
+}
+
+.listActionBtns{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  align-self:center;
+}
+
+.listActionBtns button{
+  width:58px;
+  height:58px;
+  padding:0;
+  border-radius:16px;
+  font-size:22px;
+}
+
+@media (max-width:420px){
+  .itemPetugas{
+    grid-template-columns: 50px minmax(0,1fr) 60px 52px;
+    min-height:150px;
+  }
+
+  .photoSlot{
+    width:50px;
+    height:50px;
+    border-radius:12px;
+  }
+
+  .qtyPetugas{
+    font-size:50px;
+  }
+
+  .listActionBtns button{
+    width:52px;
+    height:52px;
+    border-radius:14px;
+    font-size:20px;
+  }
+}
 </style>
 </head>
 <body>
