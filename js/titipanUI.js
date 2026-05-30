@@ -42,79 +42,98 @@ window.TitipanUI = {
   },
 
   renderList(rows){
-    const listArea = document.getElementById("listArea")
-    if (!listArea) return
+  const listArea = document.getElementById("listArea")
+  if(!listArea) return
 
-    if (!rows || rows.length === 0) {
-      listArea.innerHTML = `<div class="box">Tidak ada data</div>`
-      return
-    }
+  if(!rows || rows.length === 0){
+    listArea.innerHTML = `<div class="box">Tidak ada data</div>`
+    return
+  }
 
-    let html = ""
+  let html = ""
 
-    rows.forEach(item => {
-      const fotoBarang = item.foto_barang || item.foto_penitip || ""
-      const thumbHtml = fotoBarang
-        ? `<img src="${fotoBarang}" alt="foto">`
-        : `<span>📷</span>`
+  rows.forEach(item=>{
+    const lastMasuk = window.LAST_MASUK_MAP?.[item.id] || null
 
-      const outerClick = TitipanShared.isAdmin()
-        ? `TitipanCore.openPenitipPhoto('${TitipanShared.escapeJs(item.id)}')`
-        : `TitipanCore.openBarangPhoto('${TitipanShared.escapeJs(item.id)}')`
+    const fotoBarang = item.foto_barang || ""
+    const fotoPenitip = item.foto_penitip || ""
+    const fotoTransaksi = lastMasuk?.foto_bukti || ""
 
-      html += `
-        <div class="item" onclick="${outerClick}">
-          <div
-            class="thumb"
-            onclick="event.stopPropagation(); TitipanCore.openBarangPhoto('${TitipanShared.escapeJs(item.id)}')"
-          >
-            ${thumbHtml}
+    const slotBarang = fotoBarang
+      ? `<img src="${fotoBarang}" alt="foto barang">`
+      : `<span>📷</span>`
+
+    const slotPenitip = fotoPenitip
+      ? `<img src="${fotoPenitip}" alt="foto penitip">`
+      : `<span>📷</span>`
+
+    const slotTransaksi = fotoTransaksi
+      ? `<img src="${fotoTransaksi}" alt="foto transaksi">`
+      : ``
+
+    html += `
+      <div class="item itemPetugas">
+        
+        <div class="photoStack">
+          <div class="photoSlot"
+               title="Foto barang"
+               onclick="event.stopPropagation(); TitipanUI.openPhotoOverlay({
+                 title: '${TitipanShared.escapeHtml(item.nama_item || "Foto barang")}',
+                 subtitle: '${TitipanShared.escapeHtml(item.nama_penitip || "")}',
+                 src: '${TitipanShared.escapeJs(fotoBarang || fotoPenitip || "")}'
+               })">
+            ${slotBarang}
           </div>
 
-          <div style="flex:1;min-width:0">
-            <div class="nama">${TitipanShared.escapeHtml(item.nama_item || "-")}</div>
-            <div class="kecil">${TitipanShared.escapeHtml(item.nama_penitip || "-")}</div>
-            <div class="kecil">
-              Jual Rp ${Number(item.harga_jual || 0).toLocaleString("id-ID")}
-            </div>
-            ${TitipanShared.formatLastMasuk(window.LAST_MASUK_MAP?.[item.id])}
+          <div class="photoSlot"
+               title="Foto penitip"
+               onclick="event.stopPropagation(); TitipanUI.openPhotoOverlay({
+                 title: '${TitipanShared.escapeHtml(item.nama_penitip || "Foto penitip")}',
+                 subtitle: '${TitipanShared.escapeHtml(item.nama_item || "")}',
+                 src: '${TitipanShared.escapeJs(fotoPenitip || fotoBarang || "")}'
+               })">
+            ${slotPenitip}
           </div>
 
-          <div class="qty">${Number(item.qty || 0)}</div>
-
-          <div class="listActionBtns" onclick="event.stopPropagation()">
-            <button
-              class="blue"
-              title="Kedatangan"
-              onclick="TitipanCore.startArrivalFlow('${TitipanShared.escapeJs(item.nama_penitip || "")}', '${TitipanShared.escapeJs(item.id)}')"
-            >📥</button>
-
-            <button
-              class="green"
-              title="Nitip Lagi"
-              onclick="TitipanCore.startTambahFlow('${TitipanShared.escapeJs(item.nama_penitip || "")}')"
-            >＋</button>
-
-            <button
-              class="orange"
-              title="Update Harga"
-              onclick="TitipanCore.openUpdateHarga('${TitipanShared.escapeJs(item.id)}')"
-            >✎</button>
-
-            ${TitipanShared.isAdmin() ? `
-              <button
-                class="red"
-                title="Hapus"
-                onclick="TitipanCore.hapusBarang('${TitipanShared.escapeJs(item.id)}')"
-              >🗑</button>
-            ` : ""}
+          <div class="photoSlot ${fotoTransaksi ? "" : "empty"}"
+               title="Foto transaksi terakhir"
+               ${fotoTransaksi ? `onclick="event.stopPropagation(); TitipanUI.openPhotoOverlay({
+                 title: 'Foto transaksi terakhir',
+                 subtitle: '${TitipanShared.escapeHtml(item.nama_penitip || "")}',
+                 src: '${TitipanShared.escapeJs(fotoTransaksi)}'
+               })"` : ""}>
+            ${slotTransaksi || ""}
           </div>
         </div>
-      `
-    })
 
-    listArea.innerHTML = html
-  },
+        <div class="itemMain">
+          <div class="namaBlock">
+            <div class="nama">${TitipanShared.escapeHtml(item.nama_item || "-")}</div>
+            <div class="kecil">${TitipanShared.escapeHtml(item.nama_penitip || "-")}</div>
+            <div class="kecil">Jual Rp ${Number(item.harga_jual || 0).toLocaleString("id-ID")}</div>
+          </div>
+
+          <div class="lastMasukBlock">
+            ${TitipanShared.formatLastMasuk(lastMasuk)}
+          </div>
+        </div>
+
+        <div class="qtyCol">
+          <div class="qtyPetugas">${Number(item.qty || 0)}</div>
+        </div>
+
+        <div class="listActionBtns" onclick="event.stopPropagation()">
+          <button class="blue" title="Kedatangan" onclick="TitipanCore.startArrivalFlow('${TitipanShared.escapeJs(item.nama_penitip || "")}','${TitipanShared.escapeJs(item.id)}')">📥</button>
+          <button class="green" title="Nitip Lagi" onclick="TitipanCore.startTambahFlow('${TitipanShared.escapeJs(item.nama_penitip || "")}')">＋</button>
+          <button class="orange" title="Update Harga" onclick="TitipanCore.openUpdateHarga('${item.id}')">✎</button>
+          ${TitipanShared.isAdmin() ? `<button class="red" title="Hapus" onclick="TitipanCore.hapusBarang('${item.id}')">🗑</button>` : ""}
+        </div>
+      </div>
+    `
+  })
+
+  listArea.innerHTML = html
+},
 
   renderTambahForm({ draft }){
     const formArea = document.getElementById("formArea")
