@@ -224,14 +224,14 @@ window.TitipanUI = {
 
       <input id="a_qty" type="number" placeholder="Barang terjual">
       
-      <div class="check">
-        <input type="checkbox" id="a_nitip_lagi">
-        <span id="a_nitip_label">Nitip lagi</span>
-      </div>
+      <div class="condRow">
+  <input type="checkbox" id="a_nitip_lagi">
+  <span id="a_nitip_label" class="condLabel">Nitip lagi</span>
+</div>
 
-      <div id="boxNitipBaru" style="display:none">
-        <input id="a_qty_baru" type="number" placeholder="berapa barang?">
-      </div>
+<div id="boxNitipBaru" class="qtyBaruWrap" style="display:none">
+  <input id="a_qty_baru" type="number" placeholder="berapa barang?">
+</div>
 
       <input id="a_bayar" readonly placeholder="Bayar penitip">
 
