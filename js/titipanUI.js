@@ -59,51 +59,45 @@ window.TitipanUI = {
     const fotoPenitip = item.foto_penitip || ""
     const fotoTransaksi = lastMasuk?.foto_bukti || ""
 
-    const slotBarang = fotoBarang
-      ? `<img src="${fotoBarang}" alt="foto barang">`
-      : `<span>📷</span>`
-
-    const slotPenitip = fotoPenitip
-      ? `<img src="${fotoPenitip}" alt="foto penitip">`
-      : `<span>📷</span>`
-
-    const slotTransaksi = fotoTransaksi
-      ? `<img src="${fotoTransaksi}" alt="foto transaksi">`
-      : ``
-
     html += `
       <div class="item itemPetugas">
-        
+
         <div class="photoStack">
           <div class="photoSlot"
                title="Foto barang"
                onclick="event.stopPropagation(); TitipanUI.openPhotoOverlay({
-                 title: '${TitipanShared.escapeHtml(item.nama_item || "Foto barang")}',
-                 subtitle: '${TitipanShared.escapeHtml(item.nama_penitip || "")}',
-                 src: '${TitipanShared.escapeJs(fotoBarang || fotoPenitip || "")}'
+                 title: '${TitipanShared.escapeJs(item.nama_item || "Foto barang")}',
+                 subtitle: '${TitipanShared.escapeJs(item.nama_penitip || "")}',
+                 src: '${TitipanShared.escapeJs(fotoBarang || "")}'
                })">
-            ${slotBarang}
+            ${fotoBarang ? `<img src="${fotoBarang}" alt="foto barang">` : `<span>📷</span>`}
           </div>
 
           <div class="photoSlot"
                title="Foto penitip"
                onclick="event.stopPropagation(); TitipanUI.openPhotoOverlay({
-                 title: '${TitipanShared.escapeHtml(item.nama_penitip || "Foto penitip")}',
-                 subtitle: '${TitipanShared.escapeHtml(item.nama_item || "")}',
-                 src: '${TitipanShared.escapeJs(fotoPenitip || fotoBarang || "")}'
+                 title: '${TitipanShared.escapeJs(item.nama_penitip || "Foto penitip")}',
+                 subtitle: '${TitipanShared.escapeJs(item.nama_item || "")}',
+                 src: '${TitipanShared.escapeJs(fotoPenitip || "")}'
                })">
-            ${slotPenitip}
+            ${fotoPenitip ? `<img src="${fotoPenitip}" alt="foto penitip">` : `<span>📷</span>`}
           </div>
 
           <div class="photoSlot ${fotoTransaksi ? "" : "empty"}"
                title="Foto transaksi terakhir"
-               ${fotoTransaksi ? `onclick="event.stopPropagation(); TitipanUI.openPhotoOverlay({
-                 title: 'Foto transaksi terakhir',
-                 subtitle: '${TitipanShared.escapeHtml(item.nama_penitip || "")}',
-                 src: '${TitipanShared.escapeJs(fotoTransaksi)}'
-               })"` : ""}>
-            ${slotTransaksi || ""}
+               ${fotoTransaksi ? `
+                 onclick="event.stopPropagation(); TitipanUI.openPhotoOverlay({
+                   title: 'Foto transaksi terakhir',
+                   subtitle: '${TitipanShared.escapeJs(item.nama_penitip || "")}',
+                   src: '${TitipanShared.escapeJs(fotoTransaksi)}'
+                 })"
+               ` : ""}>
+            ${fotoTransaksi ? `<img src="${fotoTransaksi}" alt="foto transaksi">` : ``}
           </div>
+        </div>
+
+        <div class="detailCol">
+          ${TitipanShared.formatLastMasuk(lastMasuk)}
         </div>
 
         <div class="itemMain">
@@ -111,10 +105,6 @@ window.TitipanUI = {
             <div class="nama">${TitipanShared.escapeHtml(item.nama_item || "-")}</div>
             <div class="kecil">${TitipanShared.escapeHtml(item.nama_penitip || "-")}</div>
             <div class="kecil">Jual Rp ${Number(item.harga_jual || 0).toLocaleString("id-ID")}</div>
-          </div>
-
-          <div class="lastMasukBlock">
-            ${TitipanShared.formatLastMasuk(lastMasuk)}
           </div>
         </div>
 
