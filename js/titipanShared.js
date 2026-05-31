@@ -130,6 +130,22 @@ formatHari(dateString){
       .replace(/\s+/g, " ")
       .toLowerCase()
   },
+  
+  formatNamaBaris(str, maxWordsPerLine = 3){
+  const words = String(str || "")
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+
+  if(words.length === 0) return "-"
+
+  const lines = []
+  for(let i = 0; i < words.length; i += maxWordsPerLine){
+    lines.push(words.slice(i, i + maxWordsPerLine).join(" "))
+  }
+
+  return lines.map(line => TitipanShared.escapeHtml(line)).join("<br>")
+},
 
   clampQty(n){
     const x = parseInt(n || 0)
