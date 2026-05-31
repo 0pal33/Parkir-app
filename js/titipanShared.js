@@ -188,8 +188,13 @@ formatHari(dateString){
   },
 
   formatLastMasuk(log){
-  if(!log) {
-    return `<div class="kecilBox">Terakhir masuk: -</div>`
+  if (!log) {
+    return `
+      <div class="lastMasukBlock">
+        <div class="judul">Terakhir masuk</div>
+        <div class="nilai">-</div>
+      </div>
+    `
   }
 
   const qty = Number(log.qty || 0)
@@ -198,12 +203,12 @@ formatHari(dateString){
   const jam = TitipanShared.formatJamWIB(log.created_at)
 
   return `
-    <div class="kecilBox" style="margin-top:4px;line-height:1.45">
-      <div><b>Terakhir masuk</b></div>
-      <div>${qty} pcs</div>
-      <div>${hari}</div>
-      <div>${tanggal}</div>
-      <div>${jam} WIB</div>
+    <div class="lastMasukBlock">
+      <div class="judul">Terakhir masuk</div>
+      <div class="nilai">${qty} pcs</div>
+      <div class="nilai">${hari}</div>
+      <div class="nilai">${tanggal}</div>
+      <div class="nilai">${jam} WIB</div>
     </div>
   `
 },
