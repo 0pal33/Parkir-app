@@ -102,7 +102,7 @@ window.TitipanUI = {
 
         <div class="itemMain">
           <div class="namaBlock">
-            <div class="nama">${TitipanShared.escapeHtml(item.nama_item || "-")}</div>
+            <div class="nama">${TitipanShared.formatNamaBaris(item.nama_item || "-", 3)}</div>
             <div class="kecil">${TitipanShared.escapeHtml(item.nama_penitip || "-")}</div>
             <div class="kecil">Jual Rp ${Number(item.harga_jual || 0).toLocaleString("id-ID")}</div>
           </div>
