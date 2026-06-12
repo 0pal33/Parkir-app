@@ -459,10 +459,11 @@ button{
 }
 
 .qtyCol{
-  align-self:end;
+  align-self:center;
   justify-self:center;
   text-align:center;
-  padding-top:34px; /* geser stok turun sedikit */
+  padding-top:0;
+  margin-top:-18px; /* naik sedikit */
 }
 
 .qtyPetugas{
@@ -479,8 +480,9 @@ button{
   gap:12px;
   align-self:center;
   justify-self:end;
-  padding-top:4px;
-  margin-right:2px; /* bikin tombol kanan lebih presisi */
+  padding-top:0;
+  margin-top:-16px; /* naik sedikit */
+  margin-right:2px;
 }
 
 .listActionBtns button{
@@ -494,13 +496,15 @@ button{
 
 @media (max-width:420px){
   .qtyCol{
-  padding-top:28px;
-}
+    padding-top:0;
+    margin-top:-12px;
+  }
 
-.listActionBtns{
-  gap:10px;
-  margin-right:0;
-}
+  .listActionBtns{
+    gap:10px;
+    margin-top:-12px;
+    margin-right:0;
+  }
 
   .itemPetugas{
     grid-template-columns: 50px 96px minmax(0,1fr) 68px 56px;
