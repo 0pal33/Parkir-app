@@ -60,7 +60,7 @@ window.TitipanUI = {
     const fotoTransaksi = lastMasuk?.foto_bukti || ""
 
     html += `
-      <div class="item itemPetugas">
+      <div class="item itemPetugas ${TitipanShared.isAdmin() ? "adminMode" : "petugasMode"}">
 
         <div class="photoStack">
           <div class="photoSlot"
