@@ -366,11 +366,11 @@ button{
 
 .itemPetugas{
   display:grid;
-  grid-template-columns: 56px 108px minmax(0,1fr) 82px 74px;
-  gap:14px;
+  grid-template-columns: 56px 108px minmax(0,1fr) 78px 74px;
+  gap:12px;
   align-items:center;
-  padding:18px;
-  min-height:240px;
+  padding:16px 18px;
+  min-height:222px;
 }
 
 .photoStack{
@@ -459,11 +459,11 @@ button{
 }
 
 .qtyCol{
-  align-self:center;
+  align-self:end;
   justify-self:center;
   text-align:center;
-  padding-top:0;
-  margin-top:0; /* naik sedikit */
+  padding-top:22px; /* stok turun sedikit */
+  margin-top:0;
 }
 
 .qtyPetugas{
@@ -477,11 +477,11 @@ button{
 .listActionBtns{
   display:flex;
   flex-direction:column;
-  gap:12px;
+  gap:10px;
   align-self:center;
   justify-self:end;
   padding-top:0;
-  margin-top:-20px; /* naik sedikit */
+  margin-top:-20px; /* tombol naik lebih mentok */
   margin-right:2px;
 }
 
@@ -495,22 +495,22 @@ button{
 }
 
 @media (max-width:420px){
+  .itemPetugas{
+    grid-template-columns: 50px 96px minmax(0,1fr) 64px 56px;
+    gap:10px;
+    min-height:210px;
+    padding:14px 16px;
+  }
+
   .qtyCol{
-    padding-top:0;
+    padding-top:14px;
     margin-top:0;
   }
 
   .listActionBtns{
-    gap:10px;
-    margin-top:-16px;
+    gap:8px;
+    margin-top:-18px;
     margin-right:0;
-  }
-
-  .itemPetugas{
-    grid-template-columns: 50px 96px minmax(0,1fr) 68px 56px;
-    gap:12px;
-    min-height:228px;
-    padding:16px;
   }
 
   .photoStack{
