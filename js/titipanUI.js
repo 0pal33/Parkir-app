@@ -389,26 +389,27 @@ window.TitipanUI = {
     `
   },
 
-  openUpdateHarga({ item }){
-    const rekom = TitipanShared.rekomendasiHargaJual(item.harga_penitip)
-    const card = document.getElementById("modalCard")
-    const overlay = document.getElementById("modalOverlay")
-    if (!card || !overlay) return
+  openUpdateHarga({item}){
+  const isAdmin = TitipanShared.isAdmin()
+  const rekom = TitipanShared.rekomendasiHargaJual(item.harga_penitip)
 
-    overlay.style.display = "flex"
+  const card = document.getElementById("modalCard")
+  const overlay = document.getElementById("modalOverlay")
+  if(!card || !overlay) return
+
+  overlay.style.display = "flex"
+
+  if(isAdmin){
     card.innerHTML = `
-      <div class="modalTitle">Update Harga</div>
-      <div class="modalSub">${TitipanShared.escapeHtml(item.nama_item || "")}</div>
+      <div class="modalTitle">Update</div>
+      <div class="modalSub">Edit data barang titipan</div>
 
       <input id="u_item_id" type="hidden" value="${item.id}">
+
+      <input id="u_nama_item" type="text" value="${TitipanShared.escapeHtml(item.nama_item || "")}" placeholder="Nama barang">
+      <input id="u_nama_penitip" type="text" value="${TitipanShared.escapeHtml(item.nama_penitip || "")}" placeholder="Nama penitip">
       <input id="u_penitip" type="number" value="${Number(item.harga_penitip || 0)}" placeholder="Harga penitip">
-      <input
-        id="u_jual"
-        type="number"
-        value="${Number(item.harga_jual || rekom)}"
-        placeholder="Harga jual"
-        style="color:${Number(item.harga_jual || 0) === rekom ? "#999" : "#111"}"
-      >
+      <input id="u_jual" type="number" value="${Number(item.harga_jual || rekom)}" placeholder="Harga jual" style="color:${Number(item.harga_jual || 0) === rekom ? "#999" : "#111"}">
 
       <div class="kecilBox" style="margin:6px 0 12px" id="u_rekomLabel">
         Rekomendasi: Rp ${rekom.toLocaleString("id-ID")}
@@ -419,12 +420,32 @@ window.TitipanUI = {
         <button class="red" onclick="TitipanUI.closeModal()">Batal</button>
       </div>
     `
-    TitipanShared.bindAutoHarga(
-      document.getElementById("u_penitip"),
-      document.getElementById("u_jual"),
-      document.getElementById("u_rekomLabel")
-    )
-  },
+  }else{
+    card.innerHTML = `
+      <div class="modalTitle">Update Harga</div>
+      <div class="modalSub">${TitipanShared.escapeHtml(item.nama_item || "")}</div>
+
+      <input id="u_item_id" type="hidden" value="${item.id}">
+      <input id="u_penitip" type="number" value="${Number(item.harga_penitip || 0)}" placeholder="Harga penitip">
+      <input id="u_jual" type="number" value="${Number(item.harga_jual || rekom)}" placeholder="Harga jual" style="color:${Number(item.harga_jual || 0) === rekom ? "#999" : "#111"}">
+
+      <div class="kecilBox" style="margin:6px 0 12px" id="u_rekomLabel">
+        Rekomendasi: Rp ${rekom.toLocaleString("id-ID")}
+      </div>
+
+      <div class="rowBtn">
+        <button class="green" onclick="TitipanCore.saveUpdateHarga()">Simpan</button>
+        <button class="red" onclick="TitipanUI.closeModal()">Batal</button>
+      </div>
+    `
+  }
+
+  TitipanShared.bindAutoHarga(
+    document.getElementById("u_penitip"),
+    document.getElementById("u_jual"),
+    document.getElementById("u_rekomLabel")
+  )
+},
 
   closeModal(){
     const overlay = document.getElementById("modalOverlay")
