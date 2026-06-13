@@ -361,6 +361,195 @@ button{
   .listActionBtns{flex-direction:column}
   .item{align-items:center}
 }
+
+/* ===== TITIPAN MODE PETUGAS / LIST BARU ===== */
+
+.itemPetugas{
+  display:grid;
+  grid-template-columns: 56px 108px minmax(0,1fr) 78px 74px;
+  gap:12px;
+  align-items:center;
+  padding:16px 18px;
+  min-height:222px;
+}
+
+.photoStack{
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+  align-self:flex-start;
+  padding-top:2px;
+}
+
+.photoSlot{
+  width:56px;
+  height:56px;
+  border-radius:16px;
+  overflow:hidden;
+  background:#eef2f7;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex:0 0 auto;
+  cursor:pointer;
+  border:1px solid rgba(0,0,0,.04);
+}
+
+.photoSlot img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+.photoSlot.empty{
+  background:transparent;
+  border:none;
+  cursor:default;
+}
+
+.detailCol{
+  min-width:0;
+  align-self:flex-start;
+  padding-top:2px;
+}
+
+.itemMain{
+  min-width:0;
+  align-self:flex-start;
+  padding-top:2px;
+}
+
+.namaBlock{
+  line-height:1.1;
+}
+
+.namaBlock .nama{
+  font-size:18px;
+  line-height:1.12;
+  font-weight:700;
+  color:#111;
+  word-break:normal;
+  overflow-wrap:normal;
+  white-space:normal;
+  margin-bottom:4px;
+}
+
+.namaBlock .kecil{
+  font-size:14px;
+  color:#7d7d7d;
+  line-height:1.35;
+}
+
+.lastMasukBlock{
+  line-height:1.26;
+  color:#7a7a7a;
+}
+
+.lastMasukBlock .judul{
+  font-size:17px;
+  font-weight:700;
+  color:#666;
+  margin-bottom:4px;
+}
+
+.lastMasukBlock .nilai{
+  font-size:14px;
+  color:#7a7a7a;
+  margin-bottom:1px;
+}
+
+.qtyCol{
+  align-self:end;
+  justify-self:center;
+  text-align:center;
+  padding-top:22px; /* stok turun sedikit */
+  margin-top:0;
+}
+
+.qtyPetugas{
+  font-size:72px;
+  line-height:1;
+  font-weight:700;
+  color:#111;
+  margin-top:0;
+}
+
+.listActionBtns{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  align-self:center;
+  justify-self:end;
+  padding-top:0;
+  margin-top:-20px; /* tombol naik lebih mentok */
+  margin-right:2px;
+}
+
+.listActionBtns button{
+  width:74px;
+  height:74px;
+  padding:0;
+  border-radius:18px;
+  font-size:26px;
+  box-shadow:0 3px 10px rgba(0,0,0,.08);
+}
+
+@media (max-width:420px){
+  .itemPetugas{
+    grid-template-columns: 50px 96px minmax(0,1fr) 64px 56px;
+    gap:10px;
+    min-height:210px;
+    padding:14px 16px;
+  }
+
+  .qtyCol{
+    padding-top:14px;
+    margin-top:0;
+  }
+
+  .listActionBtns{
+    gap:8px;
+    margin-top:-18px;
+    margin-right:0;
+  }
+
+  .photoStack{
+    gap:12px;
+  }
+
+  .photoSlot{
+    width:50px;
+    height:50px;
+    border-radius:14px;
+  }
+
+  .namaBlock .nama{
+    font-size:18px;
+  }
+
+  .namaBlock .kecil{
+    font-size:13px;
+  }
+
+  .lastMasukBlock .judul{
+    font-size:16px;
+  }
+
+  .lastMasukBlock .nilai{
+    font-size:13px;
+  }
+
+  .qtyPetugas{
+    font-size:60px;
+  }
+
+  .listActionBtns button{
+    width:56px;
+    height:56px;
+    border-radius:14px;
+    font-size:21px;
+  }
+}
 </style>
 </head>
 <body>

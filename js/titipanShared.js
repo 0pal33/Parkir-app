@@ -130,6 +130,22 @@ formatHari(dateString){
       .replace(/\s+/g, " ")
       .toLowerCase()
   },
+  
+  formatNamaBaris(str, maxWordsPerLine = 3){
+  const words = String(str || "")
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+
+  if(words.length === 0) return "-"
+
+  const lines = []
+  for(let i = 0; i < words.length; i += maxWordsPerLine){
+    lines.push(words.slice(i, i + maxWordsPerLine).join(" "))
+  }
+
+  return lines.map(line => TitipanShared.escapeHtml(line)).join("<br>")
+},
 
   clampQty(n){
     const x = parseInt(n || 0)
@@ -188,8 +204,13 @@ formatHari(dateString){
   },
 
   formatLastMasuk(log){
-  if(!log) {
-    return `<div class="kecilBox">Terakhir masuk: -</div>`
+  if (!log) {
+    return `
+      <div class="lastMasukBlock">
+        <div class="judul">Terakhir masuk</div>
+        <div class="nilai">-</div>
+      </div>
+    `
   }
 
   const qty = Number(log.qty || 0)
@@ -198,12 +219,12 @@ formatHari(dateString){
   const jam = TitipanShared.formatJamWIB(log.created_at)
 
   return `
-    <div class="kecilBox" style="margin-top:4px;line-height:1.45">
-      <div><b>Terakhir masuk</b></div>
-      <div>${qty} pcs</div>
-      <div>${hari}</div>
-      <div>${tanggal}</div>
-      <div>${jam} WIB</div>
+    <div class="lastMasukBlock">
+      <div class="judul">Terakhir masuk</div>
+      <div class="nilai">${qty} pcs</div>
+      <div class="nilai">${hari}</div>
+      <div class="nilai">${tanggal}</div>
+      <div class="nilai">${jam} WIB</div>
     </div>
   `
 },

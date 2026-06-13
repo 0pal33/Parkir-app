@@ -704,38 +704,57 @@ window.TitipanCore = {
   },
 
   async saveUpdateHarga(){
-    const itemId = document.getElementById("u_item_id")?.value
-    const hargaPenitip = TitipanShared.clampQty(document.getElementById("u_penitip")?.value)
-    let hargaJual = TitipanShared.clampQty(document.getElementById("u_jual")?.value)
+  const itemId = document.getElementById("u_item_id")?.value
+  const hargaPenitip = TitipanShared.clampQty(document.getElementById("u_penitip")?.value)
+  let hargaJual = TitipanShared.clampQty(document.getElementById("u_jual")?.value)
 
-    if (!itemId || hargaPenitip <= 0) {
-      alert("Harga tidak valid")
+  const isAdmin = TitipanShared.isAdmin()
+  const namaItemEl = document.getElementById("u_nama_item")
+  const namaPenitipEl = document.getElementById("u_nama_penitip")
+
+  if(!itemId || hargaPenitip <= 0){
+    alert("Harga tidak valid")
+    return
+  }
+
+  if(hargaJual <= 0){
+    hargaJual = TitipanShared.rekomendasiHargaJual(hargaPenitip)
+  }
+
+  const payload = {
+    harga_penitip: hargaPenitip,
+    harga_jual: hargaJual,
+    updated_at: new Date().toISOString()
+  }
+
+  if(isAdmin){
+    const namaItem = namaItemEl?.value.trim().replace(/\s+/g, " ")
+    const namaPenitip = namaPenitipEl?.value.trim().replace(/\s+/g, " ")
+
+    if(!namaItem || !namaPenitip){
+      alert("Nama barang dan nama penitip wajib diisi")
       return
     }
 
-    if (hargaJual <= 0) {
-      hargaJual = TitipanShared.rekomendasiHargaJual(hargaPenitip)
-    }
+    payload.nama_item = namaItem
+    payload.nama_penitip = namaPenitip
+  }
 
-    const { error } = await window.supabaseClient
-      .from("barang_titipan")
-      .update({
-        harga_penitip: hargaPenitip,
-        harga_jual: hargaJual,
-        updated_at: new Date().toISOString()
-      })
-      .eq("id", itemId)
+  const { error } = await window.supabaseClient
+    .from("barang_titipan")
+    .update(payload)
+    .eq("id", itemId)
 
-    if (error) {
-      alert(error.message)
-      return
-    }
+  if(error){
+    alert(error.message)
+    return
+  }
 
-    TitipanUI.closeModal()
-    await this.loadData()
-    await this.renderDashboard()
-    TitipanUI.showToast("Harga berhasil diperbarui")
-  },
+  TitipanUI.closeModal()
+  await this.loadData()
+  await this.renderDashboard()
+  TitipanUI.showToast("Data berhasil diperbarui")
+},
 
   async hapusBarang(id){
     if (!TitipanShared.isAdmin()) return
