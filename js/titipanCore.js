@@ -35,32 +35,36 @@ window.TitipanCore = {
       window.supabaseClient
         .from("barang_titipan")
         .select(`
-          id,
-          nama_item,
-          nama_penitip,
-          qty,
-          harga_jual,
-          harga_penitip,
-          foto_penitip,
-          foto_barang,
-          updated_at,
-          created_at
-        `)
+  id,
+  nama_item,
+  nama_penitip,
+  qty,
+  harga_jual,
+  harga_penitip,
+  foto_penitip,
+  foto_barang,
+  foto_penitip_path,
+  foto_barang_path,
+  updated_at,
+  created_at
+`)
         .order("nama_item", { ascending: true }),
 
       window.supabaseClient
         .from("titipan_log")
         .select(`
-          item_id,
-          qty,
-          created_at,
-          foto_penitip,
-          foto_bukti,
-          session_id,
-          nama_penitip,
-          jenis,
-          total
-        `)
+  item_id,
+  qty,
+  created_at,
+  foto_penitip,
+  foto_bukti,
+  foto_penitip_path,
+  foto_bukti_path,
+  session_id,
+  nama_penitip,
+  jenis,
+  total
+`)
         .eq("jenis", "masuk")
         .order("created_at", { ascending: false })
         .limit(1000)
@@ -343,60 +347,81 @@ window.TitipanCore = {
   },
 
   async commitAddDraft(){
-    const draft = TitipanState.addDraft
-    if (!draft) return
+  const draft = TitipanState.addDraft
+  if(!draft) return
 
-    try{
-      for (const item of draft.items) {
-        const now = new Date().toISOString()
+  try{
+    let fotoPenitipPath = null
 
-        const payload = {
-          session_id: draft.session_id,
-          nama_item: item.nama_item,
-          nama_penitip: item.nama_penitip,
-          qty: item.qty,
-          harga_jual: item.harga_jual,
-          harga_penitip: item.harga_penitip,
-          foto_penitip: draft.foto_penitip,
-          foto_barang: item.foto_barang || null,
-          created_at: now,
-          updated_at: now
-        }
+    if(draft.foto_penitip){
+      fotoPenitipPath = await TitipanShared.uploadDataUrlToStorage(
+        draft.foto_penitip,
+        `titipan/${draft.session_id}/penitip`
+      )
+    }
 
-        const { data: inserted, error: insertError } = await window.supabaseClient
-          .from("barang_titipan")
-          .insert(payload)
-          .select("id")
-          .single()
+    for(const item of draft.items){
+      const now = new Date().toISOString()
 
-        if (insertError) throw insertError
-
-        const { error: logError } = await window.supabaseClient
-          .from("titipan_log")
-          .insert({
-            session_id: draft.session_id,
-            item_id: inserted.id,
-            jenis: "masuk",
-            qty: item.qty,
-            total: 0,
-            nama_penitip: item.nama_penitip,
-            foto_penitip: draft.foto_penitip,
-            foto_bukti: item.foto_barang || draft.foto_penitip,
-            created_at: now
-          })
-
-        if (logError) throw logError
+      let fotoBarangPath = null
+      if(item.foto_barang){
+        fotoBarangPath = await TitipanShared.uploadDataUrlToStorage(
+          item.foto_barang,
+          `titipan/${draft.session_id}/barang`
+        )
       }
 
-      TitipanState.addDraft = null
-      TitipanUI.closeModal()
-      await this.loadData()
-      await this.renderDashboard()
-      TitipanUI.showToast("Barang berhasil ditambahkan")
-    }catch(err){
-      alert("Gagal simpan titipan: " + err.message)
+      const payload = {
+        session_id: draft.session_id,
+        nama_item: item.nama_item,
+        nama_penitip: item.nama_penitip,
+        qty: item.qty,
+        harga_jual: item.harga_jual,
+        harga_penitip: item.harga_penitip,
+        foto_penitip_path: fotoPenitipPath,
+        foto_barang_path: fotoBarangPath,
+        foto_penitip: null,
+        foto_barang: null,
+        created_at: now,
+        updated_at: now
+      }
+
+      const { data: inserted, error: insertError } = await window.supabaseClient
+        .from("barang_titipan")
+        .insert(payload)
+        .select("id")
+        .single()
+
+      if(insertError) throw insertError
+
+      const { error: logError } = await window.supabaseClient
+        .from("titipan_log")
+        .insert({
+          session_id: draft.session_id,
+          item_id: inserted.id,
+          jenis: "masuk",
+          qty: item.qty,
+          total: 0,
+          nama_penitip: item.nama_penitip,
+          foto_penitip_path: fotoPenitipPath,
+          foto_bukti_path: fotoBarangPath || fotoPenitipPath,
+          foto_penitip: null,
+          foto_bukti: null,
+          created_at: now
+        })
+
+      if(logError) throw logError
     }
-  },
+
+    TitipanState.addDraft = null
+    TitipanUI.closeModal()
+    await this.loadData()
+    await this.renderDashboard()
+    TitipanUI.showToast("Barang berhasil ditambahkan")
+  }catch(err){
+    alert("Gagal simpan titipan: " + err.message)
+  }
+},
 
   startArrivalFlow(prefillPenitip = "", preselectItemId = null){
     TitipanState.arrivalDraft = {
@@ -619,71 +644,59 @@ window.TitipanCore = {
 
   async commitArrivalDraft(){
   const draft = TitipanState.arrivalDraft
-  if (!draft) return
+  if(!draft) return
 
   try{
-    for (const row of draft.items) {
+    let fotoBuktiPath = null
+
+    if(draft.foto_bukti){
+      fotoBuktiPath = await TitipanShared.uploadDataUrlToStorage(
+        draft.foto_bukti,
+        `titipan/${draft.session_id}/bukti`
+      )
+    }
+
+    for(const row of draft.items){
       const { data: item, error: fetchError } = await window.supabaseClient
         .from("barang_titipan")
         .select("*")
         .eq("id", row.item_id)
         .single()
 
-      if (fetchError) throw fetchError
+      if(fetchError) throw fetchError
 
       const now = new Date().toISOString()
-
-      let finalQty = 0
-      if (Number(row.qty_baru || 0) > 0) {
-        finalQty = Number(row.qty_baru || 0)
-      }
+      const newQty = Number(item.qty || 0) - Number(row.qty || 0)
+      if(newQty < 0) throw new Error("Qty tidak cukup untuk salah satu item")
 
       const { error: updError } = await window.supabaseClient
         .from("barang_titipan")
         .update({
-          qty: finalQty,
+          qty: newQty,
           updated_at: now,
           session_id: draft.session_id
         })
         .eq("id", row.item_id)
 
-      if (updError) throw updError
+      if(updError) throw updError
 
-      if (Number(row.qty || 0) > 0) {
-        const { error: logAmbilError } = await window.supabaseClient
-          .from("titipan_log")
-          .insert({
-            session_id: draft.session_id,
-            item_id: row.item_id,
-            jenis: "ambil",
-            qty: row.qty,
-            total: row.total,
-            nama_penitip: row.nama_penitip,
-            foto_penitip: item.foto_penitip || null,
-            foto_bukti: draft.foto_bukti || item.foto_penitip || null,
-            created_at: now
-          })
+      const { error: logError } = await window.supabaseClient
+        .from("titipan_log")
+        .insert({
+          session_id: draft.session_id,
+          item_id: row.item_id,
+          jenis: "ambil",
+          qty: row.qty,
+          total: row.total,
+          nama_penitip: row.nama_penitip,
+          foto_penitip_path: item.foto_penitip_path || null,
+          foto_bukti_path: fotoBuktiPath,
+          foto_penitip: null,
+          foto_bukti: null,
+          created_at: now
+        })
 
-        if (logAmbilError) throw logAmbilError
-      }
-
-      if (Number(row.qty_baru || 0) > 0) {
-        const { error: logMasukError } = await window.supabaseClient
-          .from("titipan_log")
-          .insert({
-            session_id: draft.session_id,
-            item_id: row.item_id,
-            jenis: "masuk",
-            qty: row.qty_baru,
-            total: 0,
-            nama_penitip: row.nama_penitip,
-            foto_penitip: item.foto_penitip || null,
-            foto_bukti: draft.foto_bukti || item.foto_penitip || null,
-            created_at: now
-          })
-
-        if (logMasukError) throw logMasukError
-      }
+      if(logError) throw logError
     }
 
     TitipanState.arrivalDraft = null
