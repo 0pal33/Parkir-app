@@ -55,9 +55,20 @@ window.TitipanUI = {
   rows.forEach(item=>{
     const lastMasuk = window.LAST_MASUK_MAP?.[item.id] || null
 
-    const fotoBarang = item.foto_barang || ""
-    const fotoPenitip = item.foto_penitip || ""
-    const fotoTransaksi = lastMasuk?.foto_bukti || ""
+    const fotoBarang = TitipanShared.resolveImageSrc(
+  item.foto_barang_path || item.foto_barang,
+  ""
+)
+
+const fotoPenitip = TitipanShared.resolveImageSrc(
+  item.foto_penitip_path || item.foto_penitip,
+  ""
+)
+
+const fotoTransaksi = TitipanShared.resolveImageSrc(
+  lastMasuk?.foto_bukti_path || lastMasuk?.foto_bukti,
+  ""
+)
 
     html += `
       <div class="item itemPetugas ${TitipanShared.isAdmin() ? "adminMode" : "petugasMode"}">
