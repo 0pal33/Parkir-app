@@ -131,6 +131,62 @@ formatHari(dateString){
       .toLowerCase()
   },
   
+  storageBucket: "titipan-images",
+
+resolveImageSrc(pathOrBase64, fallback = ""){
+  const v = String(pathOrBase64 || "").trim()
+
+  if(!v){
+    return fallback || ""
+  }
+
+  if(v.startsWith("data:image/")){
+    return v
+  }
+
+  if(v.startsWith("http://") || v.startsWith("https://")){
+    return v
+  }
+
+  if(window.supabaseClient){
+    const { data } = window.supabaseClient
+      .storage
+      .from("titipan-images")
+      .getPublicUrl(v)
+
+    return data?.publicUrl || fallback || ""
+  }
+
+  return fallback || ""
+},
+
+async uploadDataUrlToStorage(dataUrl, folder){
+  if(!dataUrl || !dataUrl.startsWith("data:image/")){
+    return null
+  }
+
+  const res = await fetch(dataUrl)
+  const blob = await res.blob()
+  const mime = blob.type || "image/jpeg"
+  const ext = mime.split("/")[1] || "jpg"
+
+  const path = `${folder}/${Date.now()}-${TitipanShared.uid()}.${ext}`
+
+  const { error } = await window.supabaseClient
+    .storage
+    .from("titipan-images")
+    .upload(path, blob, {
+      contentType: mime,
+      upsert: false
+    })
+
+  if(error){
+    throw error
+  }
+
+  return path
+},
+  
   formatNamaBaris(str, maxWordsPerLine = 3){
   const words = String(str || "")
     .trim()
