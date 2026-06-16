@@ -644,49 +644,57 @@ window.TitipanCore = {
 
   async commitArrivalDraft(){
   const draft = TitipanState.arrivalDraft
-  if(!draft) return
+  if (!draft) return
 
   try{
     let fotoBuktiPath = null
 
-    if(draft.foto_bukti){
+    if (draft.foto_bukti) {
       fotoBuktiPath = await TitipanShared.uploadDataUrlToStorage(
         draft.foto_bukti,
         `titipan/${draft.session_id}/bukti`
       )
     }
 
-    for(const row of draft.items){
+    for (const row of draft.items) {
       const { data: item, error: fetchError } = await window.supabaseClient
         .from("barang_titipan")
         .select("*")
         .eq("id", row.item_id)
         .single()
 
-      if(fetchError) throw fetchError
+      if (fetchError) throw fetchError
 
       const now = new Date().toISOString()
-      const newQty = Number(item.qty || 0) - Number(row.qty || 0)
-      if(newQty < 0) throw new Error("Qty tidak cukup untuk salah satu item")
+      const qtyTerjual = Number(row.qty || 0)
+      const qtyTitipBaru = Number(row.qty_baru || 0)
+      const oldQty = Number(item.qty || 0)
 
+      if (qtyTerjual > oldQty) {
+        throw new Error("Qty terjual melebihi stok")
+      }
+
+      // Model B:
+      // batch lama ditutup jadi 0
       const { error: updError } = await window.supabaseClient
         .from("barang_titipan")
         .update({
-          qty: newQty,
+          qty: 0,
           updated_at: now,
           session_id: draft.session_id
         })
         .eq("id", row.item_id)
 
-      if(updError) throw updError
+      if (updError) throw updError
 
-      const { error: logError } = await window.supabaseClient
+      // log penjualan / pengambilan
+      const { error: logAmbilError } = await window.supabaseClient
         .from("titipan_log")
         .insert({
           session_id: draft.session_id,
           item_id: row.item_id,
           jenis: "ambil",
-          qty: row.qty,
+          qty: qtyTerjual,
           total: row.total,
           nama_penitip: row.nama_penitip,
           foto_penitip_path: item.foto_penitip_path || null,
@@ -696,7 +704,51 @@ window.TitipanCore = {
           created_at: now
         })
 
-      if(logError) throw logError
+      if (logAmbilError) throw logAmbilError
+
+      // kalau penitip nitip lagi, buat batch baru dengan nama barang yang sama
+      if (qtyTitipBaru > 0) {
+        const payloadBaru = {
+          session_id: draft.session_id,
+          nama_item: item.nama_item,
+          nama_penitip: row.nama_penitip,
+          qty: qtyTitipBaru,
+          harga_jual: item.harga_jual,
+          harga_penitip: item.harga_penitip,
+          foto_penitip_path: item.foto_penitip_path || null,
+          foto_barang_path: null,
+          foto_penitip: null,
+          foto_barang: null,
+          created_at: now,
+          updated_at: now
+        }
+
+        const { data: inserted, error: insertBaruError } = await window.supabaseClient
+          .from("barang_titipan")
+          .insert(payloadBaru)
+          .select("id")
+          .single()
+
+        if (insertBaruError) throw insertBaruError
+
+        const { error: logMasukError } = await window.supabaseClient
+          .from("titipan_log")
+          .insert({
+            session_id: draft.session_id,
+            item_id: inserted.id,
+            jenis: "masuk",
+            qty: qtyTitipBaru,
+            total: 0,
+            nama_penitip: row.nama_penitip,
+            foto_penitip_path: item.foto_penitip_path || null,
+            foto_bukti_path: fotoBuktiPath,
+            foto_penitip: null,
+            foto_bukti: null,
+            created_at: now
+          })
+
+        if (logMasukError) throw logMasukError
+      }
     }
 
     TitipanState.arrivalDraft = null
