@@ -666,13 +666,21 @@ window.TitipanCore = {
       if(fetchError) throw fetchError
 
       const now = new Date().toISOString()
-      const newQty = Number(item.qty || 0) - Number(row.qty || 0)
-      if(newQty < 0) throw new Error("Qty tidak cukup untuk salah satu item")
+      const qtyTerjual = Number(row.qty || 0)
+      const qtyTitipBaru = Number(row.qty_baru || 0)
+      const oldQty = Number(item.qty || 0)
 
+      if(qtyTerjual > oldQty){
+        throw new Error("Qty terjual melebihi stok")
+      }
+
+      // Satu row aktif saja:
+      // stok setelah penitip datang = qty titip baru
+      // kalau tidak titip lagi, qty jadi 0
       const { error: updError } = await window.supabaseClient
         .from("barang_titipan")
         .update({
-          qty: newQty,
+          qty: qtyTitipBaru,
           updated_at: now,
           session_id: draft.session_id
         })
@@ -680,13 +688,14 @@ window.TitipanCore = {
 
       if(updError) throw updError
 
-      const { error: logError } = await window.supabaseClient
+      // log barang yang diambil / terjual
+      const { error: logAmbilError } = await window.supabaseClient
         .from("titipan_log")
         .insert({
           session_id: draft.session_id,
           item_id: row.item_id,
           jenis: "ambil",
-          qty: row.qty,
+          qty: qtyTerjual,
           total: row.total,
           nama_penitip: row.nama_penitip,
           foto_penitip_path: item.foto_penitip_path || null,
@@ -696,7 +705,28 @@ window.TitipanCore = {
           created_at: now
         })
 
-      if(logError) throw logError
+      if(logAmbilError) throw logAmbilError
+
+      // kalau penitip nitip lagi, cukup catat log masuk pada item yang sama
+      if(qtyTitipBaru > 0){
+        const { error: logMasukError } = await window.supabaseClient
+          .from("titipan_log")
+          .insert({
+            session_id: draft.session_id,
+            item_id: row.item_id,
+            jenis: "masuk",
+            qty: qtyTitipBaru,
+            total: 0,
+            nama_penitip: row.nama_penitip,
+            foto_penitip_path: item.foto_penitip_path || null,
+            foto_bukti_path: fotoBuktiPath,
+            foto_penitip: null,
+            foto_bukti: null,
+            created_at: now
+          })
+
+        if(logMasukError) throw logMasukError
+      }
     }
 
     TitipanState.arrivalDraft = null
