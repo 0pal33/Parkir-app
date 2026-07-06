@@ -1,17 +1,49 @@
 window.TitipanShared = {
+  wibParts(date = new Date()){
+  const d = date instanceof Date ? date : new Date(date)
+  const parts = new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Asia/Jakarta",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hourCycle: "h23"
+  }).formatToParts(d)
+
+  const out = {}
+  for (const p of parts) {
+    if (p.type !== "literal") out[p.type] = p.value
+  }
+  return out
+},
+
+formatDbTimestampWIB(date = new Date()){
+  const p = TitipanShared.wibParts(date)
+  return `${p.year}-${p.month}-${p.day} ${p.hour}:${p.minute}:${p.second}`
+},
+
+getWibDayRange(date = new Date()){
+  const p = TitipanShared.wibParts(date)
+  return {
+    startDB: `${p.year}-${p.month}-${p.day} 00:00:00`,
+    endDB: `${p.year}-${p.month}-${p.day} 23:59:59`
+  }
+},
+
   parseDbDate(value){
   if(!value) return null
   if(value instanceof Date) return value
 
   const s = String(value).trim()
 
-  // Kalau sudah ada timezone info, biarkan browser yang baca
   if(/Z$|[+-]\d{2}:\d{2}$/.test(s)){
     return new Date(s)
   }
 
-  // Format timestamp tanpa timezone: 2026-05-29 12:39:00 / 2026-05-29T12:39:00
-  return new Date(s.replace(" ", "T"))
+  const normalized = s.includes("T") ? s : s.replace(" ", "T")
+  return new Date(normalized + "+07:00")
 },
 
 getWibDayRange(date = new Date()){
