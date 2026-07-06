@@ -93,14 +93,13 @@ window.TitipanCore = {
 
     dash.style.display = "grid"
 
-    const today = TitipanShared.nowWIB()
-    today.setHours(0,0,0,0)
+    const { startDB } = TitipanShared.getWibDayRange(new Date())
 
-    const { data, error } = await window.supabaseClient
-      .from("titipan_log")
-      .select("qty,total,created_at,jenis")
-      .eq("jenis", "ambil")
-      .gte("created_at", today.toISOString())
+const { data, error } = await window.supabaseClient
+  .from("titipan_log")
+  .select("qty,total,created_at,jenis")
+  .eq("jenis", "ambil")
+  .gte("created_at", startDB)
 
     if (error) {
       dash.innerHTML = `
@@ -361,7 +360,7 @@ window.TitipanCore = {
     }
 
     for(const item of draft.items){
-      const now = new Date().toISOString()
+      const now = TitipanShared.formatDbTimestampWIB(new Date())
 
       let fotoBarangPath = null
       if(item.foto_barang){
@@ -665,7 +664,7 @@ window.TitipanCore = {
 
       if(fetchError) throw fetchError
 
-      const now = new Date().toISOString()
+      const now = TitipanShared.formatDbTimestampWIB(new Date())
       const qtyTerjual = Number(row.qty || 0)
       const qtyTitipBaru = Number(row.qty_baru || 0)
       const oldQty = Number(item.qty || 0)
@@ -767,7 +766,7 @@ window.TitipanCore = {
   const payload = {
     harga_penitip: hargaPenitip,
     harga_jual: hargaJual,
-    updated_at: new Date().toISOString()
+    updated_at: TitipanShared.formatDbTimestampWIB(new Date())
   }
 
   if(isAdmin){
@@ -863,7 +862,7 @@ window.TitipanCore = {
 
   if(mode === "today"){
     const range = TitipanShared.getWibDayRange(now)
-    query = query.gte("created_at", range.startISO).lte("created_at", range.endISO)
+query = query.gte("created_at", range.startDB).lte("created_at", range.endDB)
   }
 
   if(mode === "week"){
@@ -874,7 +873,8 @@ window.TitipanCore = {
     const end = new Date(now)
     end.setHours(23,59,59,999)
 
-    query = query.gte("created_at", start.toISOString()).lte("created_at", end.toISOString())
+    query = query.gte("created_at", TitipanShared.formatDbTimestampWIB(start))
+             .lte("created_at", TitipanShared.formatDbTimestampWIB(end))
   }
 
   const { data, error } = await query
