@@ -93,13 +93,14 @@ window.TitipanCore = {
 
     dash.style.display = "grid"
 
-    const { startDB } = TitipanShared.getWibDayRange(new Date())
+const { startDB, endDB } = TitipanShared.getWibDayRange(new Date())
 
 const { data, error } = await window.supabaseClient
   .from("titipan_log")
   .select("qty,total,created_at,jenis")
   .eq("jenis", "ambil")
   .gte("created_at", startDB)
+  .lte("created_at", endDB)
 
     if (error) {
       dash.innerHTML = `
