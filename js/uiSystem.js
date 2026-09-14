@@ -14,36 +14,51 @@ if(f) f.remove()
 
 }
 
-window.showHome=function(){
+
+window.showHome=async function(){
 
 hideAll()
 
-/* TAMBAHKAN INI */
 let result=document.getElementById("resultBox")
 if(result) result.innerHTML=""
 
-/* lanjut kode lama */
 let powerBtn=document.querySelector(".logout-btn")
 let dash=document.getElementById("dashboardBtn")
 let sw=document.getElementById("switchCamBtn")
 
 if(!powerBtn) return
 
-if(localStorage.getItem("adminLogin")==="true"){
+
+/* =========================================================
+   CEK LOGIN DAN ROLE DARI SUPABASE
+   BUKAN DARI localStorage.adminLogin
+   ========================================================= */
+
+let current = await Auth.getCurrent()
+
+let isLoggedIn = !!current.user
+let isAdmin = current.profile?.role === "admin"
+
+
+if(isAdmin){
 
 if(dash) dash.style.display="flex"
+
 powerBtn.style.background="#e74c3c"
 powerBtn.onclick=logoutAdmin
 
 }else{
 
 if(dash) dash.style.display="none"
+
 powerBtn.style.background="#28a745"
 powerBtn.onclick=goAdmin
 
 }
 
+
 if(sw) sw.style.display="none"
+
 
 document.getElementById("bottomButtons").innerHTML=`
 <button class="orange" onclick="startScan()">Start Scanning</button>
@@ -55,11 +70,18 @@ loadReminder()
 
 }
 
-window.showMenuLain=function(){
+
+window.showMenuLain=async function(){
 
 hideAll()
 
-let isAdmin = localStorage.getItem("adminLogin")==="true"
+
+/* =========================================================
+   CEK ROLE DARI SUPABASE
+   ========================================================= */
+
+let isAdmin = await Auth.isAdmin()
+
 
 let html = `
 <div style="display:flex;flex-direction:column;gap:15px;width:100%;max-width:280px;margin:auto;">
@@ -67,17 +89,25 @@ let html = `
 <button class="blue" onclick="goTitipan()">Titip Jajan</button>
 `
 
+
 if(isAdmin){
+
 html += `<button class="blue" onclick="goStok()">Stok Barang</button>`
+
 html += `<button class="green" onclick="goKalkulator()">Kalkulator</button>`
+
 }
+
 
 html += `</div>`
 
-let result = document.getElementById("resultBox")
+
+let result=document.getElementById("resultBox")
+
 if(result){
-  result.innerHTML = html
+  result.innerHTML=html
 }
+
 
 document.getElementById("bottomButtons").innerHTML=`
 <button class="red" onclick="showHome()">Kembali</button>
@@ -85,9 +115,13 @@ document.getElementById("bottomButtons").innerHTML=`
 
 }
 
+
 window.goTitipan=function(){
+
 location.href="titipan.html"
+
 }
+
 
 window.showScan=function(){
 
@@ -97,6 +131,7 @@ let reader=document.getElementById("reader")
 let sw=document.getElementById("switchCamBtn")
 
 if(reader) reader.style.display="block"
+
 if(sw) sw.style.display="inline-block"
 
 document.getElementById("bottomButtons").innerHTML=`
@@ -105,9 +140,11 @@ document.getElementById("bottomButtons").innerHTML=`
 
 }
 
+
 window.showResult=function(){
 
 let sw=document.getElementById("switchCamBtn")
+
 if(sw) sw.style.display="none"
 
 document.getElementById("bottomButtons").innerHTML=`
@@ -116,6 +153,7 @@ document.getElementById("bottomButtons").innerHTML=`
 `
 
 }
+
 
 window.showManualState=function(){
 
@@ -131,23 +169,46 @@ document.getElementById("bottomButtons").innerHTML=`
 
 }
 
+
 window.goAdmin=function(){
+
 location.href="admin.html"
+
 }
+
 
 window.goDashboard=function(){
+
 location.href="dashboard.html"
+
 }
 
-window.logoutAdmin=function(){
-localStorage.removeItem("adminLogin")
-location.reload()
+
+window.logoutAdmin=async function(){
+
+const success = await Auth.logout()
+
+if(!success){
+
+alert("Logout gagal")
+return
+
 }
+
+location.reload()
+
+}
+
 
 window.showManual=function(){
+
 showManualState()
+
 }
 
+
 window.goBulanan=function(){
+
 location.href="bulanan.html"
+
 }
