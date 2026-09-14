@@ -124,7 +124,7 @@ sendResetBtn.addEventListener("click", async ()=>{
 
     let email=document.getElementById("email").value.trim()
     let password=document.getElementById("password").value
-    let btn=document.querySelector(".blue")
+    let btn=document.querySelector('button[onclick="window.login()"]')
 
     if(!email || !password){
       alert("Isi email dan password")
