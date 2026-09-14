@@ -10,9 +10,11 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
 <script src="config.js"></script>
+<script src="js/auth.js"></script>
 
 <style>
 body{
+display:none;
 font-family:Arial;
 background:#f2f2f2;
 margin:0;
@@ -306,13 +308,13 @@ opacity:0.3;
 <script>
 document.addEventListener("DOMContentLoaded", async ()=>{
 
-const { data } = await window.supabaseClient.auth.getSession()
+const allowed = await Auth.requireAdmin()
 
-if(localStorage.getItem("adminLogin") !== "true" || !data.session){
-  alert("Akses ditolak")
-  location.href="index.html"
+if(!allowed){
   return
 }
+
+document.body.style.display="block"
 
 await StokCore.loadData()
 
