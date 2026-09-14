@@ -32,39 +32,29 @@ getWibDayRange(date = new Date()){
   }
 },
 
-  parseDbDate(value){
+parseDbDate(value){
   if(!value) return null
   if(value instanceof Date) return value
 
   const s = String(value).trim()
 
+  // Timestamp yang sudah memiliki timezone
   if(/Z$|[+-]\d{2}:\d{2}$/.test(s)){
     return new Date(s)
   }
 
-  const normalized = s.includes("T") ? s : s.replace(" ", "T")
-  return new Date(normalized + "+07:00")
-},
+  // Kolom timestamp without time zone kita anggap WIB.
+  // Contoh: 2026-07-06 14:36:00 = 14:36 WIB.
+  const normalized = s.includes("T")
+    ? s
+    : s.replace(" ", "T")
 
-getWibDayRange(date = new Date()){
-  const d = new Date(date)
-  d.setHours(0,0,0,0)
-
-  const start = new Date(d)
-  const end = new Date(d)
-  end.setHours(23,59,59,999)
-
-  return {
-    startISO: start.toISOString(),
-    endISO: end.toISOString()
-  }
+  return new Date(`${normalized}+07:00`)
 },
 
 nowWIB(){
-    return new Date(
-      new Date().toLocaleString("en-US", { timeZone: "Asia/Jakarta" })
-    )
-  },
+  return new Date()
+},
 
   formatRupiah(n){
     return "Rp " + Number(n || 0).toLocaleString("id-ID")
@@ -330,25 +320,29 @@ async uploadDataUrlToStorage(dataUrl, folder){
       && d1.getDate() === d2.getDate()
   },
 
-  groupByTanggal(data, key = "created_at"){
-    const grouped = {}
-    ;(data || []).forEach(item => {
-      const value = item?.[key]
-      if (!value) return
+groupByTanggal(data, key = "created_at"){
+  const grouped = {}
 
-      const wibDate = new Date(
-        new Date(value).toLocaleString("en-US", {
-          timeZone: "Asia/Jakarta"
-        })
-      )
+  ;(data || []).forEach(item => {
+    const value = item?.[key]
+    if(!value) return
 
-      const dateKey = wibDate.toISOString().split("T")[0]
+    const d = TitipanShared.parseDbDate(value)
+    if(!d || isNaN(d.getTime())) return
 
-      if (!grouped[dateKey]) grouped[dateKey] = []
-      grouped[dateKey].push(item)
-    })
-    return grouped
-  },
+    const p = TitipanShared.wibParts(d)
+
+    const dateKey = `${p.year}-${p.month}-${p.day}`
+
+    if(!grouped[dateKey]){
+      grouped[dateKey] = []
+    }
+
+    grouped[dateKey].push(item)
+  })
+
+  return grouped
+},
 
   groupBySession(data){
     const grouped = {}
