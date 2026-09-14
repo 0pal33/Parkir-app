@@ -34,6 +34,11 @@ cursor:pointer;
 }
 .blue{background:#3498db;color:white}
 .red{background:#e74c3c;color:white}
+.forgot{background:transparent;color:#3498db;padding:8px 10px;display:block;margin:0 auto;border:none}
+.gray{background:#95a5a6;color:white}
+.forgot-box{max-width:420px;margin:20px auto 0;padding:18px;border-radius:14px;background:white;box-shadow:0 2px 10px rgba(0,0,0,.08)}
+.forgot-box p{font-size:14px;line-height:1.5;color:#555}
+.forgot-box button{margin:6px}
 </style>
 </head>
 
@@ -45,7 +50,16 @@ cursor:pointer;
 <input id="password" type="password" placeholder="Password"><br>
 
 <button class="blue" onclick="window.login()">Login</button>
+<button id="forgotPasswordBtn" class="forgot" type="button">Lupa Password?</button>
 <button class="red" onclick="window.back()">Batal</button>
+
+<div id="forgotBox" class="forgot-box" hidden>
+  <h3>Lupa Password</h3>
+  <p>Masukkan email akunmu. Link untuk membuat password baru akan dikirim ke email tersebut.</p>
+  <input id="forgotEmail" type="email" placeholder="Email akun">
+  <button id="sendResetBtn" class="blue" type="button">Kirim Link Reset</button>
+  <button id="cancelForgotBtn" class="gray" type="button">Batal</button>
+</div>
 
 <script>
 
@@ -58,6 +72,53 @@ window.addEventListener("DOMContentLoaded", ()=>{
   window.back = function(){
     location.href="index.html"
   }
+
+  const forgotBtn = document.getElementById("forgotPasswordBtn")
+const forgotBox = document.getElementById("forgotBox")
+const forgotEmail = document.getElementById("forgotEmail")
+const sendResetBtn = document.getElementById("sendResetBtn")
+const cancelForgotBtn = document.getElementById("cancelForgotBtn")
+
+forgotBtn.addEventListener("click", ()=>{
+  forgotBox.hidden = false
+  forgotEmail.value = document.getElementById("email").value.trim()
+  forgotEmail.focus()
+})
+
+cancelForgotBtn.addEventListener("click", ()=>{
+  forgotBox.hidden = true
+})
+
+sendResetBtn.addEventListener("click", async ()=>{
+  const email = forgotEmail.value.trim()
+
+  if(!email){
+    alert("Masukkan email akun")
+    forgotEmail.focus()
+    return
+  }
+
+  sendResetBtn.disabled = true
+  sendResetBtn.innerText = "Mengirim..."
+
+  const redirectTo = `${location.origin}/reset-password.html`
+
+  const { error } = await window.supabaseClient.auth.resetPasswordForEmail(email, {
+    redirectTo
+  })
+
+  if(error){
+    alert("Gagal mengirim link reset: " + error.message)
+    sendResetBtn.disabled = false
+    sendResetBtn.innerText = "Kirim Link Reset"
+    return
+  }
+
+  alert("Jika email terdaftar, link reset password sudah dikirim. Periksa Inbox atau Spam.")
+  forgotBox.hidden = true
+  sendResetBtn.disabled = false
+  sendResetBtn.innerText = "Kirim Link Reset"
+})
 
   window.login = async function(){
 
@@ -92,10 +153,16 @@ window.addEventListener("DOMContentLoaded", ()=>{
   }
 
   document.addEventListener("keydown",function(e){
-    if(e.key==="Enter"){
-      window.login()
-    }
-  })
+  if(e.key==="Enter" && !forgotBox.hidden){
+    e.preventDefault()
+    sendResetBtn.click()
+    return
+  }
+
+  if(e.key==="Enter"){
+    window.login()
+  }
+})
 
 })
 
