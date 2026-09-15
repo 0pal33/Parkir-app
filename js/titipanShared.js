@@ -113,9 +113,13 @@ formatHari(dateString){
   })
 },
 
-  isAdmin(){
-    return localStorage.getItem("adminLogin") === "true"
-  },
+  async isAdmin(){
+  if(!window.Auth){
+    return false
+  }
+
+  return await Auth.isAdmin()
+},
 
   uid(){
     if (window.crypto && typeof window.crypto.randomUUID === "function") {
