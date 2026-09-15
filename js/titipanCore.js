@@ -13,7 +13,8 @@ window.TitipanState = {
 
 window.TitipanCore = {
   async init(){
-    TitipanUI.setAdminView(TitipanShared.isAdmin())
+    const isAdmin = await TitipanShared.isAdmin()
+TitipanUI.setAdminView(isAdmin)
     await this.loadData()
     await this.renderDashboard()
     TitipanUI.renderHome()
@@ -86,7 +87,9 @@ window.TitipanCore = {
     const dash = document.getElementById("dashboardBox")
     if (!dash) return
 
-    if (!TitipanShared.isAdmin()) {
+    const isAdmin = await TitipanShared.isAdmin()
+
+if (!isAdmin) {
       dash.style.display = "none"
       return
     }
@@ -751,7 +754,7 @@ const { data, error } = await window.supabaseClient
   const hargaPenitip = TitipanShared.clampQty(document.getElementById("u_penitip")?.value)
   let hargaJual = TitipanShared.clampQty(document.getElementById("u_jual")?.value)
 
-  const isAdmin = TitipanShared.isAdmin()
+  const isAdmin = await TitipanShared.isAdmin()
   const namaItemEl = document.getElementById("u_nama_item")
   const namaPenitipEl = document.getElementById("u_nama_penitip")
 
@@ -800,7 +803,8 @@ const { data, error } = await window.supabaseClient
 },
 
   async hapusBarang(id){
-    if (!TitipanShared.isAdmin()) return
+    const isAdmin = await TitipanShared.isAdmin()
+if (!isAdmin) return
 
     const item = (TitipanState.data || []).find(x => x.id === id)
     if (!item) return
@@ -892,7 +896,9 @@ query = query.gte("created_at", range.startDB).lte("created_at", range.endDB)
     return
   }
 
-  if(TitipanShared.isAdmin()){
+  const isAdmin = await TitipanShared.isAdmin()
+
+if(isAdmin){
     TitipanUI.renderLogAdmin(rows)
   }else{
     TitipanUI.renderLogNormal(rows)
