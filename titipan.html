@@ -8,6 +8,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
+<script src="js/auth.js"></script>
 <script src="js/titipanShared.js"></script>
 <script src="js/titipanCore.js"></script>
 <script src="js/titipanUI.js"></script>
@@ -595,7 +596,10 @@ window.addEventListener("DOMContentLoaded", async ()=>{
     return
   }
 
-  TitipanUI.setAdminView(TitipanShared.isAdmin())
+  const isAdmin = await TitipanShared.isAdmin()
+
+  TitipanUI.setAdminView(isAdmin)
+
   await TitipanCore.init()
 })
 </script>
