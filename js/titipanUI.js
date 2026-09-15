@@ -1,5 +1,5 @@
 window.TitipanUI = {
-  setAdminView(isAdmin){
+  async setAdminView(isAdmin){
     const dash = document.getElementById("dashboardBox")
     const adminOnly = document.querySelectorAll(".adminOnly")
 
@@ -41,100 +41,112 @@ window.TitipanUI = {
     if (search) search.style.display = section === "list" ? "block" : "none"
   },
 
-  renderList(rows){
-  const listArea = document.getElementById("listArea")
-  if(!listArea) return
+  async renderList(rows){
+    const listArea = document.getElementById("listArea")
+    if(!listArea) return
 
-  if(!rows || rows.length === 0){
-    listArea.innerHTML = `<div class="box">Tidak ada data</div>`
-    return
-  }
+    if(!rows || rows.length === 0){
+      listArea.innerHTML = `<div class="box">Tidak ada data</div>`
+      return
+    }
 
-  let html = ""
+    /*
+      Ambil status admin SATU KALI.
+      Jangan memanggil TitipanShared.isAdmin()
+      berulang-ulang di dalam loop.
+    */
+    const isAdmin = await TitipanShared.isAdmin()
 
-  rows.forEach(item=>{
-    const lastMasuk = window.LAST_MASUK_MAP?.[item.id] || null
+    let html = ""
 
-    const fotoBarang = TitipanShared.resolveImageSrc(
-  item.foto_barang_path || item.foto_barang,
-  ""
-)
+    rows.forEach(item=>{
+      const lastMasuk = window.LAST_MASUK_MAP?.[item.id] || null
 
-const fotoPenitip = TitipanShared.resolveImageSrc(
-  item.foto_penitip_path || item.foto_penitip,
-  ""
-)
+      const fotoBarang = TitipanShared.resolveImageSrc(
+        item.foto_barang_path || item.foto_barang,
+        ""
+      )
 
-const fotoTransaksi = TitipanShared.resolveImageSrc(
-  lastMasuk?.foto_bukti_path || lastMasuk?.foto_bukti,
-  ""
-)
+      const fotoPenitip = TitipanShared.resolveImageSrc(
+        item.foto_penitip_path || item.foto_penitip,
+        ""
+      )
 
-    html += `
-      <div class="item itemPetugas ${TitipanShared.isAdmin() ? "adminMode" : "petugasMode"}">
+      const fotoTransaksi = TitipanShared.resolveImageSrc(
+        lastMasuk?.foto_bukti_path || lastMasuk?.foto_bukti,
+        ""
+      )
 
-        <div class="photoStack">
-          <div class="photoSlot"
-               title="Foto barang"
-               onclick="event.stopPropagation(); TitipanUI.openPhotoOverlay({
-                 title: '${TitipanShared.escapeJs(item.nama_item || "Foto barang")}',
-                 subtitle: '${TitipanShared.escapeJs(item.nama_penitip || "")}',
-                 src: '${TitipanShared.escapeJs(fotoBarang || "")}'
-               })">
-            ${fotoBarang ? `<img src="${fotoBarang}" alt="foto barang">` : `<span>📷</span>`}
-          </div>
+      html += `
+        <div class="item itemPetugas ${isAdmin ? "adminMode" : "petugasMode"}">
 
-          <div class="photoSlot"
-               title="Foto penitip"
-               onclick="event.stopPropagation(); TitipanUI.openPhotoOverlay({
-                 title: '${TitipanShared.escapeJs(item.nama_penitip || "Foto penitip")}',
-                 subtitle: '${TitipanShared.escapeJs(item.nama_item || "")}',
-                 src: '${TitipanShared.escapeJs(fotoPenitip || "")}'
-               })">
-            ${fotoPenitip ? `<img src="${fotoPenitip}" alt="foto penitip">` : `<span>📷</span>`}
-          </div>
-
-          <div class="photoSlot ${fotoTransaksi ? "" : "empty"}"
-               title="Foto transaksi terakhir"
-               ${fotoTransaksi ? `
+          <div class="photoStack">
+            <div class="photoSlot"
+                 title="Foto barang"
                  onclick="event.stopPropagation(); TitipanUI.openPhotoOverlay({
-                   title: 'Foto transaksi terakhir',
+                   title: '${TitipanShared.escapeJs(item.nama_item || "Foto barang")}',
                    subtitle: '${TitipanShared.escapeJs(item.nama_penitip || "")}',
-                   src: '${TitipanShared.escapeJs(fotoTransaksi)}'
-                 })"
-               ` : ""}>
-            ${fotoTransaksi ? `<img src="${fotoTransaksi}" alt="foto transaksi">` : ``}
+                   src: '${TitipanShared.escapeJs(fotoBarang || "")}'
+                 })">
+              ${fotoBarang ? `<img src="${fotoBarang}" alt="foto barang">` : `<span>📷</span>`}
+            </div>
+
+            <div class="photoSlot"
+                 title="Foto penitip"
+                 onclick="event.stopPropagation(); TitipanUI.openPhotoOverlay({
+                   title: '${TitipanShared.escapeJs(item.nama_penitip || "Foto penitip")}',
+                   subtitle: '${TitipanShared.escapeJs(item.nama_item || "")}',
+                   src: '${TitipanShared.escapeJs(fotoPenitip || "")}'
+                 })">
+              ${fotoPenitip ? `<img src="${fotoPenitip}" alt="foto penitip">` : `<span>📷</span>`}
+            </div>
+
+            <div class="photoSlot ${fotoTransaksi ? "" : "empty"}"
+                 title="Foto transaksi terakhir"
+                 ${fotoTransaksi ? `
+                   onclick="event.stopPropagation(); TitipanUI.openPhotoOverlay({
+                     title: 'Foto transaksi terakhir',
+                     subtitle: '${TitipanShared.escapeJs(item.nama_penitip || "")}',
+                     src: '${TitipanShared.escapeJs(fotoTransaksi)}'
+                   })"
+                 ` : ""}>
+              ${fotoTransaksi ? `<img src="${fotoTransaksi}" alt="foto transaksi">` : ``}
+            </div>
+          </div>
+
+          <div class="detailCol">
+            ${TitipanShared.formatLastMasuk(lastMasuk)}
+          </div>
+
+          <div class="itemMain">
+            <div class="namaBlock">
+              <div class="nama">${TitipanShared.formatNamaBaris(item.nama_item || "-", 3)}</div>
+              <div class="kecil">${TitipanShared.escapeHtml(item.nama_penitip || "-")}</div>
+              <div class="kecil">Jual Rp ${Number(item.harga_jual || 0).toLocaleString("id-ID")}</div>
+            </div>
+          </div>
+
+          <div class="qtyCol">
+            <div class="qtyPetugas">${Number(item.qty || 0)}</div>
+          </div>
+
+          <div class="listActionBtns" onclick="event.stopPropagation()">
+            <button class="blue" title="Kedatangan" onclick="TitipanCore.startArrivalFlow('${TitipanShared.escapeJs(item.nama_penitip || "")}','${TitipanShared.escapeJs(item.id)}')">📥</button>
+
+            <button class="green" title="Nitip Lagi" onclick="TitipanCore.startTambahFlow('${TitipanShared.escapeJs(item.nama_penitip || "")}')">＋</button>
+
+            <button class="orange" title="Update Harga" onclick="TitipanCore.openUpdateHarga('${item.id}')">✎</button>
+
+            ${isAdmin ? `
+              <button class="red" title="Hapus" onclick="TitipanCore.hapusBarang('${item.id}')">🗑</button>
+            ` : ""}
           </div>
         </div>
+      `
+    })
 
-        <div class="detailCol">
-          ${TitipanShared.formatLastMasuk(lastMasuk)}
-        </div>
-
-        <div class="itemMain">
-          <div class="namaBlock">
-            <div class="nama">${TitipanShared.formatNamaBaris(item.nama_item || "-", 3)}</div>
-            <div class="kecil">${TitipanShared.escapeHtml(item.nama_penitip || "-")}</div>
-            <div class="kecil">Jual Rp ${Number(item.harga_jual || 0).toLocaleString("id-ID")}</div>
-          </div>
-        </div>
-
-        <div class="qtyCol">
-          <div class="qtyPetugas">${Number(item.qty || 0)}</div>
-        </div>
-
-        <div class="listActionBtns" onclick="event.stopPropagation()">
-          <button class="blue" title="Kedatangan" onclick="TitipanCore.startArrivalFlow('${TitipanShared.escapeJs(item.nama_penitip || "")}','${TitipanShared.escapeJs(item.id)}')">📥</button>
-          <button class="green" title="Nitip Lagi" onclick="TitipanCore.startTambahFlow('${TitipanShared.escapeJs(item.nama_penitip || "")}')">＋</button>
-          <button class="orange" title="Update Harga" onclick="TitipanCore.openUpdateHarga('${item.id}')">✎</button>
-          ${TitipanShared.isAdmin() ? `<button class="red" title="Hapus" onclick="TitipanCore.hapusBarang('${item.id}')">🗑</button>` : ""}
-        </div>
-      </div>
-    `
-  })
-
-  listArea.innerHTML = html
-},
+    listArea.innerHTML = html
+  },
 
   renderTambahForm({ draft }){
     const formArea = document.getElementById("formArea")
@@ -194,141 +206,141 @@ const fotoTransaksi = TitipanShared.resolveImageSrc(
   },
 
   renderArrivalForm({ draft }){
-  const formArea = document.getElementById("formArea")
-  if (!formArea) return
+    const formArea = document.getElementById("formArea")
+    if (!formArea) return
 
-  const fotoThumb = draft?.foto_bukti
-    ? `<img src="${draft.foto_bukti}" alt="foto bukti" class="photoThumb">`
-    : `<div class="photoThumb placeholder">📷</div>`
+    const fotoThumb = draft?.foto_bukti
+      ? `<img src="${draft.foto_bukti}" alt="foto bukti" class="photoThumb">`
+      : `<div class="photoThumb placeholder">📷</div>`
 
-  const penValue = draft?.penitip || ""
-  const penReadOnly = draft?.lockPenitip || false
+    const penValue = draft?.penitip || ""
+    const penReadOnly = draft?.lockPenitip || false
 
-  const selectedIds = new Set((draft?.items || []).map(x => x.item_id))
+    const selectedIds = new Set((draft?.items || []).map(x => x.item_id))
 
-  const filteredItems = (TitipanState.data || []).filter(item =>
-    TitipanShared.normalizeText(item.nama_penitip || "") === TitipanShared.normalizeText(penValue) &&
-    !selectedIds.has(item.id)
-  )
-
-  const options = filteredItems.map(item => {
-    return `<option value="${item.id}">${TitipanShared.escapeHtml(item.nama_item)} | stok ${Number(item.qty || 0)}</option>`
-  }).join("")
-
-  formArea.innerHTML = `
-    <div class="box">
-      <h3>Kedatangan Penitip</h3>
-
-      <div style="display:flex;gap:12px;align-items:center;margin-bottom:10px">
-        ${fotoThumb}
-        <div style="flex:1;text-align:left">
-          <div class="kecilBox">foto bukti transaksi</div>
-          <div class="kecilBox">${TitipanShared.escapeHtml(penValue || "Belum diisi")}</div>
-        </div>
-      </div>
-
-      <input
-        id="a_penitip"
-        placeholder="Nama penitip"
-        value="${TitipanShared.escapeHtml(penValue)}"
-        ${penReadOnly ? "readonly" : ""}
-      >
-
-      <select
-        id="a_barang"
-        style="width:100%;padding:12px;border-radius:10px;border:1px solid #ccc;font-size:16px;margin-bottom:10px"
-      >
-        <option value="">Pilih barang</option>
-        ${options}
-      </select>
-
-      <input id="a_qty" type="number" placeholder="Barang terjual">
-      
-      <div class="condRow">
-  <input type="checkbox" id="a_nitip_lagi">
-  <span id="a_nitip_label" class="condLabel">Nitip lagi</span>
-</div>
-
-<div id="boxNitipBaru" class="qtyBaruWrap" style="display:none">
-  <input id="a_qty_baru" type="number" placeholder="berapa barang?">
-</div>
-
-      <input id="a_bayar" readonly placeholder="Bayar penitip">
-
-      <div class="kecilBox" style="margin:6px 0 12px">
-        Daftar barang otomatis terfilter berdasarkan penitip yang sama.
-      </div>
-
-      <div class="rowBtn">
-        <button class="green" onclick="TitipanCore.saveArrivalItem()">Simpan</button>
-        <button class="red" onclick="TitipanCore.renderList()">Batal</button>
-      </div>
-    </div>
-  `
-
-  const penInput = document.getElementById("a_penitip")
-  const barangSelect = document.getElementById("a_barang")
-  const qtyInput = document.getElementById("a_qty")
-  const bayarInput = document.getElementById("a_bayar")
-  const nitipCheck = document.getElementById("a_nitip_lagi")
-  const nitipLabel = document.getElementById("a_nitip_label")
-  const boxNitipBaru = document.getElementById("boxNitipBaru")
-  const qtyBaruInput = document.getElementById("a_qty_baru")
-
-  const refreshBayar = () => {
-    const selectedId = barangSelect.value
-    const item = (TitipanState.data || []).find(x => x.id === selectedId)
-    const qty = TitipanShared.clampQty(qtyInput.value)
-    const bayar = Number(item?.harga_penitip || 0) * qty
-    bayarInput.value = TitipanShared.formatRupiah(bayar)
-  }
-
-  const refreshMode = () => {
-    const selectedId = barangSelect.value
-    const item = (TitipanState.data || []).find(x => x.id === selectedId)
-    const canSell = Number(item?.qty || 0) > 0
-
-    nitipLabel.textContent = canSell ? "Nitip lagi" : "Hanya titip"
-
-    if (!canSell) {
-      qtyInput.value = 0
-      qtyInput.disabled = true
-    } else {
-      qtyInput.disabled = false
-    }
-
-    boxNitipBaru.style.display = nitipCheck.checked ? "block" : "none"
-    refreshBayar()
-  }
-
-  const refreshOptions = () => {
-    const pen = TitipanShared.normalizeText(penInput.value)
-    const filtered = (TitipanState.data || []).filter(item =>
-      TitipanShared.normalizeText(item.nama_penitip) === pen &&
+    const filteredItems = (TitipanState.data || []).filter(item =>
+      TitipanShared.normalizeText(item.nama_penitip || "") === TitipanShared.normalizeText(penValue) &&
       !selectedIds.has(item.id)
     )
 
-    barangSelect.innerHTML = `<option value="">Pilih barang</option>` + filtered.map(item => {
+    const options = filteredItems.map(item => {
       return `<option value="${item.id}">${TitipanShared.escapeHtml(item.nama_item)} | stok ${Number(item.qty || 0)}</option>`
     }).join("")
 
-    if (draft?.preselectItemId && filtered.some(x => x.id === draft.preselectItemId)) {
-      barangSelect.value = draft.preselectItemId
+    formArea.innerHTML = `
+      <div class="box">
+        <h3>Kedatangan Penitip</h3>
+
+        <div style="display:flex;gap:12px;align-items:center;margin-bottom:10px">
+          ${fotoThumb}
+          <div style="flex:1;text-align:left">
+            <div class="kecilBox">foto bukti transaksi</div>
+            <div class="kecilBox">${TitipanShared.escapeHtml(penValue || "Belum diisi")}</div>
+          </div>
+        </div>
+
+        <input
+          id="a_penitip"
+          placeholder="Nama penitip"
+          value="${TitipanShared.escapeHtml(penValue)}"
+          ${penReadOnly ? "readonly" : ""}
+        >
+
+        <select
+          id="a_barang"
+          style="width:100%;padding:12px;border-radius:10px;border:1px solid #ccc;font-size:16px;margin-bottom:10px"
+        >
+          <option value="">Pilih barang</option>
+          ${options}
+        </select>
+
+        <input id="a_qty" type="number" placeholder="Barang terjual">
+        
+        <div class="condRow">
+          <input type="checkbox" id="a_nitip_lagi">
+          <span id="a_nitip_label" class="condLabel">Nitip lagi</span>
+        </div>
+
+        <div id="boxNitipBaru" class="qtyBaruWrap" style="display:none">
+          <input id="a_qty_baru" type="number" placeholder="berapa barang?">
+        </div>
+
+        <input id="a_bayar" readonly placeholder="Bayar penitip">
+
+        <div class="kecilBox" style="margin:6px 0 12px">
+          Daftar barang otomatis terfilter berdasarkan penitip yang sama.
+        </div>
+
+        <div class="rowBtn">
+          <button class="green" onclick="TitipanCore.saveArrivalItem()">Simpan</button>
+          <button class="red" onclick="TitipanCore.renderList()">Batal</button>
+        </div>
+      </div>
+    `
+
+    const penInput = document.getElementById("a_penitip")
+    const barangSelect = document.getElementById("a_barang")
+    const qtyInput = document.getElementById("a_qty")
+    const bayarInput = document.getElementById("a_bayar")
+    const nitipCheck = document.getElementById("a_nitip_lagi")
+    const nitipLabel = document.getElementById("a_nitip_label")
+    const boxNitipBaru = document.getElementById("boxNitipBaru")
+    const qtyBaruInput = document.getElementById("a_qty_baru")
+
+    const refreshBayar = () => {
+      const selectedId = barangSelect.value
+      const item = (TitipanState.data || []).find(x => x.id === selectedId)
+      const qty = TitipanShared.clampQty(qtyInput.value)
+      const bayar = Number(item?.harga_penitip || 0) * qty
+      bayarInput.value = TitipanShared.formatRupiah(bayar)
     }
 
-    refreshMode()
-  }
+    const refreshMode = () => {
+      const selectedId = barangSelect.value
+      const item = (TitipanState.data || []).find(x => x.id === selectedId)
+      const canSell = Number(item?.qty || 0) > 0
 
-  penInput.addEventListener("input", refreshOptions)
-  barangSelect.addEventListener("change", refreshMode)
-  qtyInput.addEventListener("input", refreshBayar)
-  nitipCheck.addEventListener("change", () => {
-    boxNitipBaru.style.display = nitipCheck.checked ? "block" : "none"
-  })
-  qtyBaruInput.addEventListener("input", () => {})
+      nitipLabel.textContent = canSell ? "Nitip lagi" : "Hanya titip"
 
-  refreshOptions()
-},
+      if (!canSell) {
+        qtyInput.value = 0
+        qtyInput.disabled = true
+      } else {
+        qtyInput.disabled = false
+      }
+
+      boxNitipBaru.style.display = nitipCheck.checked ? "block" : "none"
+      refreshBayar()
+    }
+
+    const refreshOptions = () => {
+      const pen = TitipanShared.normalizeText(penInput.value)
+      const filtered = (TitipanState.data || []).filter(item =>
+        TitipanShared.normalizeText(item.nama_penitip) === pen &&
+        !selectedIds.has(item.id)
+      )
+
+      barangSelect.innerHTML = `<option value="">Pilih barang</option>` + filtered.map(item => {
+        return `<option value="${item.id}">${TitipanShared.escapeHtml(item.nama_item)} | stok ${Number(item.qty || 0)}</option>`
+      }).join("")
+
+      if (draft?.preselectItemId && filtered.some(x => x.id === draft.preselectItemId)) {
+        barangSelect.value = draft.preselectItemId
+      }
+
+      refreshMode()
+    }
+
+    penInput.addEventListener("input", refreshOptions)
+    barangSelect.addEventListener("change", refreshMode)
+    qtyInput.addEventListener("input", refreshBayar)
+    nitipCheck.addEventListener("change", () => {
+      boxNitipBaru.style.display = nitipCheck.checked ? "block" : "none"
+    })
+    qtyBaruInput.addEventListener("input", () => {})
+
+    refreshOptions()
+  },
 
   renderLoading(text){
     const aksiArea = document.getElementById("aksiArea")
@@ -400,63 +412,63 @@ const fotoTransaksi = TitipanShared.resolveImageSrc(
     `
   },
 
-  openUpdateHarga({item}){
-  const isAdmin = TitipanShared.isAdmin()
-  const rekom = TitipanShared.rekomendasiHargaJual(item.harga_penitip)
+  async openUpdateHarga({item}){
+    const isAdmin = await TitipanShared.isAdmin()
+    const rekom = TitipanShared.rekomendasiHargaJual(item.harga_penitip)
 
-  const card = document.getElementById("modalCard")
-  const overlay = document.getElementById("modalOverlay")
-  if(!card || !overlay) return
+    const card = document.getElementById("modalCard")
+    const overlay = document.getElementById("modalOverlay")
+    if(!card || !overlay) return
 
-  overlay.style.display = "flex"
+    overlay.style.display = "flex"
 
-  if(isAdmin){
-    card.innerHTML = `
-      <div class="modalTitle">Update</div>
-      <div class="modalSub">Edit data barang titipan</div>
+    if(isAdmin){
+      card.innerHTML = `
+        <div class="modalTitle">Update</div>
+        <div class="modalSub">Edit data barang titipan</div>
 
-      <input id="u_item_id" type="hidden" value="${item.id}">
+        <input id="u_item_id" type="hidden" value="${item.id}">
 
-      <input id="u_nama_item" type="text" value="${TitipanShared.escapeHtml(item.nama_item || "")}" placeholder="Nama barang">
-      <input id="u_nama_penitip" type="text" value="${TitipanShared.escapeHtml(item.nama_penitip || "")}" placeholder="Nama penitip">
-      <input id="u_penitip" type="number" value="${Number(item.harga_penitip || 0)}" placeholder="Harga penitip">
-      <input id="u_jual" type="number" value="${Number(item.harga_jual || rekom)}" placeholder="Harga jual" style="color:${Number(item.harga_jual || 0) === rekom ? "#999" : "#111"}">
+        <input id="u_nama_item" type="text" value="${TitipanShared.escapeHtml(item.nama_item || "")}" placeholder="Nama barang">
+        <input id="u_nama_penitip" type="text" value="${TitipanShared.escapeHtml(item.nama_penitip || "")}" placeholder="Nama penitip">
+        <input id="u_penitip" type="number" value="${Number(item.harga_penitip || 0)}" placeholder="Harga penitip">
+        <input id="u_jual" type="number" value="${Number(item.harga_jual || rekom)}" placeholder="Harga jual" style="color:${Number(item.harga_jual || 0) === rekom ? "#999" : "#111"}">
 
-      <div class="kecilBox" style="margin:6px 0 12px" id="u_rekomLabel">
-        Rekomendasi: Rp ${rekom.toLocaleString("id-ID")}
-      </div>
+        <div class="kecilBox" style="margin:6px 0 12px" id="u_rekomLabel">
+          Rekomendasi: Rp ${rekom.toLocaleString("id-ID")}
+        </div>
 
-      <div class="rowBtn">
-        <button class="green" onclick="TitipanCore.saveUpdateHarga()">Simpan</button>
-        <button class="red" onclick="TitipanUI.closeModal()">Batal</button>
-      </div>
-    `
-  }else{
-    card.innerHTML = `
-      <div class="modalTitle">Update Harga</div>
-      <div class="modalSub">${TitipanShared.escapeHtml(item.nama_item || "")}</div>
+        <div class="rowBtn">
+          <button class="green" onclick="TitipanCore.saveUpdateHarga()">Simpan</button>
+          <button class="red" onclick="TitipanUI.closeModal()">Batal</button>
+        </div>
+      `
+    }else{
+      card.innerHTML = `
+        <div class="modalTitle">Update Harga</div>
+        <div class="modalSub">${TitipanShared.escapeHtml(item.nama_item || "")}</div>
 
-      <input id="u_item_id" type="hidden" value="${item.id}">
-      <input id="u_penitip" type="number" value="${Number(item.harga_penitip || 0)}" placeholder="Harga penitip">
-      <input id="u_jual" type="number" value="${Number(item.harga_jual || rekom)}" placeholder="Harga jual" style="color:${Number(item.harga_jual || 0) === rekom ? "#999" : "#111"}">
+        <input id="u_item_id" type="hidden" value="${item.id}">
+        <input id="u_penitip" type="number" value="${Number(item.harga_penitip || 0)}" placeholder="Harga penitip">
+        <input id="u_jual" type="number" value="${Number(item.harga_jual || rekom)}" placeholder="Harga jual" style="color:${Number(item.harga_jual || 0) === rekom ? "#999" : "#111"}">
 
-      <div class="kecilBox" style="margin:6px 0 12px" id="u_rekomLabel">
-        Rekomendasi: Rp ${rekom.toLocaleString("id-ID")}
-      </div>
+        <div class="kecilBox" style="margin:6px 0 12px" id="u_rekomLabel">
+          Rekomendasi: Rp ${rekom.toLocaleString("id-ID")}
+        </div>
 
-      <div class="rowBtn">
-        <button class="green" onclick="TitipanCore.saveUpdateHarga()">Simpan</button>
-        <button class="red" onclick="TitipanUI.closeModal()">Batal</button>
-      </div>
-    `
-  }
+        <div class="rowBtn">
+          <button class="green" onclick="TitipanCore.saveUpdateHarga()">Simpan</button>
+          <button class="red" onclick="TitipanUI.closeModal()">Batal</button>
+        </div>
+      `
+    }
 
-  TitipanShared.bindAutoHarga(
-    document.getElementById("u_penitip"),
-    document.getElementById("u_jual"),
-    document.getElementById("u_rekomLabel")
-  )
-},
+    TitipanShared.bindAutoHarga(
+      document.getElementById("u_penitip"),
+      document.getElementById("u_jual"),
+      document.getElementById("u_rekomLabel")
+    )
+  },
 
   closeModal(){
     const overlay = document.getElementById("modalOverlay")
