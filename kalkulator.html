@@ -8,6 +8,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="config.js"></script>
+  <script src="js/auth.js"></script>
 
   <style>
     html, body{
@@ -16,6 +17,7 @@
     }
 
     body{
+      display:none;
       font-family: Arial, sans-serif;
       background:#f2f2f2;
       margin:0;
@@ -167,19 +169,15 @@
 
 <script>
 (async () => {
-  if (localStorage.getItem("adminLogin") !== "true") {
-    window.location.replace("index.html");
-    return;
-  }
+  const allowed = await Auth.requireAdmin()
 
-  const { data } = await window.supabaseClient.auth.getSession();
-  if (!data.session) {
-    window.location.replace("index.html");
-    return;
-  }
+if(!allowed){
+  return
+}
 
-  document.body.style.display = "block";
-})();
+document.body.style.display="block"
+  }
+)();
 </script>
 
 <div class="wrap">
