@@ -1,3 +1,20 @@
+/* =========================================================
+   BULANAN MENU
+   Versi RPC
+
+   Hak akses database:
+   - Public      : lihat, tambah, bayar, edit
+   - Petugas     : lihat, tambah, bayar, edit
+   - Admin       : lihat, tambah, bayar, edit, hapus
+
+   Operasi tulis:
+   - tambah_bulanan()
+   - bayar_bulanan()
+   - edit_bulanan()
+   - hapus_bulanan()
+   ========================================================= */
+
+
 /* ===== BULANAN MENU ===== */
 
 window.showBulanan = async function(){
@@ -13,7 +30,8 @@ mid.innerHTML=`
 <div class="scan-line"></div>
 </div>
 
-<button id="switchCamBtn"
+<button
+id="switchCamBtn"
 class="blue"
 onclick="switchCamera()"
 style="display:none">
@@ -54,25 +72,41 @@ let btn=document.createElement("button")
 btn.innerText="+"
 btn.className="floatingTambah"
 btn.onclick=formTambah
+
 document.body.appendChild(btn)
 
 }
 
-/* ===== FORM TAMBAH ===== */
+
+/* =========================================================
+   FORM TAMBAH
+   ========================================================= */
 
 window.formTambah = function(){
 
-hideAll();
+hideAll()
 
 document.getElementById("resultBox").innerHTML=`
 
 <h3>Tambah Pelanggan</h3>
 
-<input id="namaBulanan" placeholder="Nama" autocapitalize="words"><br>
+<input
+id="namaBulanan"
+placeholder="Nama"
+autocapitalize="words">
 
-<input id="motorBulanan" placeholder="Motornya apa?" autocapitalize="words"><br>
+<br>
 
-<select id="tempoBulanan" style="width:220px;height:40px;font-size:16px">
+<input
+id="motorBulanan"
+placeholder="Motornya apa?"
+autocapitalize="words">
+
+<br>
+
+<select
+id="tempoBulanan"
+style="width:220px;height:40px;font-size:16px">
 
 <option value="">Tanggal jatuh tempo</option>
 
@@ -108,114 +142,201 @@ document.getElementById("resultBox").innerHTML=`
 <option value="30">30</option>
 <option value="31">31</option>
 
-</select><br><br><br>
+</select>
 
-<button class="green" onclick="simpanBulanan()">Simpan</button>
+<br><br><br>
 
-`;
+<button class="green" onclick="simpanBulanan()">
+Simpan
+</button>
+
+`
 
 document.getElementById("bottomButtons").innerHTML=`
 <button class="red" onclick="showBulanan()">Kembali</button>
-`;
+`
 
 }
 
-/* ===== SIMPAN ===== */
+
+/* =========================================================
+   SIMPAN PELANGGAN
+   RPC: tambah_bulanan
+   ========================================================= */
 
 window.simpanBulanan = async function(){
 
-let nama=document.getElementById("namaBulanan").value.trim()
-let motor=document.getElementById("motorBulanan").value
-let tempo=parseInt(document.getElementById("tempoBulanan").value)
+let nama=document.getElementById("namaBulanan")?.value.trim()
+
+let motor=document.getElementById("motorBulanan")?.value.trim()
+
+let tempo=parseInt(
+document.getElementById("tempoBulanan")?.value
+)
 
 if(!nama || !tempo){
+
 alert("Nama dan jatuh tempo wajib")
+
 return
+
 }
 
 if(tempo < 1 || tempo > 31){
+
 alert("Tanggal harus 1 - 31")
+
 return
+
 }
 
-const { error } = await window.supabaseClient.from('bulanan').insert({
 
-nama:nama,
-motor:motor,
-jatuh_tempo:tempo,
-status:'aktif'
+/* ======================
+   RPC TAMBAH
+   ====================== */
 
-})
+const { data, error } =
+await window.supabaseClient.rpc(
+"tambah_bulanan",
+{
+p_nama: nama,
+p_motor: motor,
+p_jatuh_tempo: tempo
+}
+)
+
 
 if(error){
-alert("Gagal simpan: "+error.message)
+
+console.error(
+"tambah_bulanan error:",
+error
+)
+
+alert(
+"Gagal simpan: " +
+error.message
+)
+
 return
+
 }
+
+
+console.log(
+"tambah_bulanan berhasil:",
+data
+)
 
 alert("Pelanggan berhasil ditambah")
 
 document.getElementById("namaBulanan").value=""
+
 document.getElementById("motorBulanan").value=""
+
 document.getElementById("tempoBulanan").value=""
 
 showBulanan()
 
 }
 
-/* ===== LIST BAYAR ===== */
+
+/* =========================================================
+   LIST BAYAR
+   SELECT tetap langsung
+   ========================================================= */
 
 window.listBayar = async function(){
 
 document.getElementById("resultBox").innerHTML="Loading..."
 
 const {data,error}=await window.supabaseClient
-.from('bulanan')
-.select('*')
-.eq('status','aktif')
-.order('jatuh_tempo')
+.from("bulanan")
+.select("*")
+.eq("status","aktif")
+.order("jatuh_tempo")
+
 
 if(error){
-document.getElementById("resultBox").innerHTML="Gagal mengambil data"
+
+document.getElementById("resultBox").innerHTML=
+"Gagal mengambil data"
+
 return
+
 }
 
-let html="<h3>Daftar Pelanggan ("+((data||[]).length)+")</h3>"
+
+let html=
+"<h3>Daftar Pelanggan ("+
+((data||[]).length)+
+")</h3>"
+
 
 let today = new Date()
+
 let year = today.getFullYear()
+
 let month = today.getMonth()
 
+
 if((data || []).length === 0){
-document.getElementById("resultBox").innerHTML="<h3>Belum ada pelanggan</h3>";
+
+document.getElementById("resultBox").innerHTML=
+"<h3>Belum ada pelanggan</h3>"
 
 document.getElementById("bottomButtons").innerHTML=`
-<button class="red" onclick="showMenuLain()">Kembali</button>
-`;
+<button class="red" onclick="showMenuLain()">
+Kembali
+</button>
+`
 
-return;
+return
+
 }
+
 
 (data || []).forEach(p=>{
 
 let expired=false
 
-if(p.paid_until){
-let todayDate=new Date()
-let paid=new Date(p.paid_until)
-todayDate.setHours(0,0,0,0)
-paid.setHours(23,59,59,999)
 
-if(todayDate > paid) expired=true
+if(p.paid_until){
+
+let todayDate=new Date()
+
+let paid=new Date(p.paid_until)
+
+todayDate.setHours(
+0,0,0,0
+)
+
+paid.setHours(
+23,59,59,999
+)
+
+if(todayDate > paid){
+
+expired=true
+
 }
 
-let bg = expired ? "#ffd6d6" : "#ffffff"
+}
+
+
+let bg =
+expired
+? "#ffd6d6"
+: "#ffffff"
+
 
 let tempoDate
+
 
 if(p.paid_until){
 
 const [y,m,d] =
-p.paid_until.split('-')
+p.paid_until.split("-")
 
 tempoDate = new Date(
 Number(y),
@@ -224,16 +345,30 @@ Number(d)
 )
 
 }else{
-tempoDate = new Date(year,month,p.jatuh_tempo)
+
+tempoDate =
+new Date(
+year,
+month,
+p.jatuh_tempo
+)
+
 }
 
-let tanggalLengkap = tempoDate.toLocaleDateString('id-ID',{
-day:'numeric',
-month:'long',
-year:'numeric'
-})
+
+let tanggalLengkap =
+tempoDate.toLocaleDateString(
+"id-ID",
+{
+day:"numeric",
+month:"long",
+year:"numeric"
+}
+)
+
 
 html+=`
+
 <div style="
 display:flex;
 align-items:center;
@@ -253,46 +388,108 @@ align-items:center;
 font-size:14px
 ">
 
-<div style="display:flex;flex-direction:column">  <b>${p.nama}</b>  <span style="font-size:12px;color:#666"> Tarif: Rp ${Number(p.last_paid_amount || 0).toLocaleString('id-ID')} </span>  </div>
+<div style="
+display:flex;
+flex-direction:column">
+
+<b>${p.nama}</b>
+
+<span
+style="
+font-size:12px;
+color:#666">
+
+Tarif:
+Rp ${
+Number(
+p.last_paid_amount || 0
+).toLocaleString("id-ID")
+}
+
+</span>
+
+</div>
 
 <span style="min-width:80px">
 ${p.motor || "-"}
 </span>
 
-<span style="display:flex;flex-direction:column;font-size:13px">
+<span style="
+display:flex;
+flex-direction:column;
+font-size:13px">
+
 <b>Jatuh Tempo</b>
+
 ${tanggalLengkap}
+
 </span>
 
 </div>
 
-<div style="display:flex;gap:6px">
 
-<button class="green"
-style="padding:6px 12px;font-size:13px"
-onclick="formBayar('${p.id}','${p.nama}')">
+<div style="
+display:flex;
+gap:6px">
+
+<button
+class="green"
+style="
+padding:6px 12px;
+font-size:13px"
+onclick="formBayar(
+'${p.id}',
+'${p.nama}'
+)">
+
 Bayar
+
 </button>
 
-<button class="blue"
-style="padding:6px 12px;font-size:13px"
-onclick="editTempo('${p.id}','${p.nama}','${p.jatuh_tempo}')">
+
+<button
+class="blue"
+style="
+padding:6px 12px;
+font-size:13px"
+onclick="editTempo(
+'${p.id}',
+'${p.nama}',
+'${p.jatuh_tempo}'
+)">
+
 Edit
+
 </button>
 
 </div>
 
 </div>
+
 `
+
 })
+
 
 document.getElementById("resultBox").innerHTML=html
 
+
 document.getElementById("bottomButtons").innerHTML=`
-<button class="red" onclick="showMenuLain()">Kembali</button>
+<button
+class="red"
+onclick="showMenuLain()">
+
+Kembali
+
+</button>
 `
 
 }
+
+
+/* =========================================================
+   FORM BAYAR
+   ========================================================= */
 
 window.formBayar=function(id,nama){
 
@@ -302,156 +499,154 @@ document.getElementById("resultBox").innerHTML=`
 
 <h3>Bayar Bulanan</h3>
 
-<div style="font-size:20px;font-weight:bold;margin-bottom:20px">
+<div style="
+font-size:20px;
+font-weight:bold;
+margin-bottom:20px">
+
 ${nama}
+
 </div>
 
 Rp.<br><br>
 
-<input 
+<input
 id="nominalBayar"
 inputmode="numeric"
 pattern="[0-9]*"
 type="tel"
 placeholder="Contoh: 70 = 70rb"
-oninput="this.value=this.value.replace(/[^0-9]/g,'')"
->
+oninput="
+this.value=this.value.replace(/[^0-9]/g,'')
+">
 
 <br><br>
 
-<button class="green" onclick="konfirmasiBayar('${id}')">✓</button>
+<button
+class="green"
+onclick="konfirmasiBayar('${id}')">
+
+✓
+
+</button>
 
 `
 
 document.getElementById("bottomButtons").innerHTML=`
-<button class="red" onclick="listBayar()">Batal</button>
+<button
+class="red"
+onclick="listBayar()">
+
+Batal
+
+</button>
 `
 
 }
 
+
+/* =========================================================
+   KONFIRMASI BAYAR
+   RPC: bayar_bulanan
+   ========================================================= */
+
 window.konfirmasiBayar = async function(id){
 
-let nominalInput = document.getElementById("nominalBayar").value.replace(/\D/g,'') 
-let nominal = Number(nominalInput)
+let nominalInput =
+document.getElementById("nominalBayar")
+?.value
+.replace(/\D/g,"")
 
-if(nominal < 1000){
-nominal *= 1000
-}
 
 if(!nominalInput){
+
 alert("Masukkan nominal")
+
 return
+
 }
+
+
+let nominal=Number(nominalInput)
+
 
 if(!nominal){
+
 alert("Masukkan nominal")
+
 return
+
 }
 
-if(!confirm("Konfirmasi pembayaran Rp "+nominal.toLocaleString('id-ID')+",- ?")){
+
+/*
+   Konversi tetap mengikuti sistem lama:
+
+   70
+   ↓
+   Rp70.000
+
+   70000
+   ↓
+   Rp70.000
+*/
+
+if(nominal < 1000){
+
+nominal *= 1000
+
+}
+
+
+if(
+!confirm(
+"Konfirmasi pembayaran Rp "+
+nominal.toLocaleString("id-ID")+
+",- ?"
+)
+){
+
 return
+
 }
 
-/* ambil data pelanggan dulu */
 
-const {data,error:err1} = await window.supabaseClient
-.from('bulanan')
-.select('jatuh_tempo, paid_until')
-.eq('id',id)
-.single()
+/* ======================
+   RPC BAYAR
+   ====================== */
 
-if(err1){
-alert("Gagal mengambil data")
-return
+const { data, error } =
+await window.supabaseClient.rpc(
+"bayar_bulanan",
+{
+p_id: id,
+p_nominal: nominal
 }
-
-let tempo = data.jatuh_tempo
-
-let today = new Date()
-
-let baseDate
-
-if(data.paid_until){
-
-const paidUntil = new Date(data.paid_until)
-
-const compareToday = new Date(today)
-compareToday.setHours(0,0,0,0)
-
-const comparePaid = new Date(paidUntil)
-comparePaid.setHours(23,59,59,999)
-
-if(compareToday > comparePaid){
-
-baseDate = new Date(
-today.getFullYear(),
-today.getMonth(),
-tempo
 )
 
-if(today.getDate() > tempo){
-baseDate.setMonth(
-baseDate.getMonth() + 1
-)
-}
-
-}else{
-baseDate = paidUntil
-}
-
-}else{
-
-baseDate = new Date(
-today.getFullYear(),
-today.getMonth(),
-tempo
-)
-
-if(today.getDate() > tempo){
-baseDate.setMonth(
-baseDate.getMonth() + 1
-)
-}
-}
-
-let targetYear = baseDate.getFullYear()
-let targetMonth = baseDate.getMonth() + 1
-
-let maxDay = new Date(
-targetYear,
-targetMonth + 1,
-0
-).getDate()
-
-let finalDay = Math.min(
-tempo,
-maxDay
-)
-
-let nextMonth = new Date(
-targetYear,
-targetMonth,
-finalDay
-)
-
-const paidUntilString =
-nextMonth.getFullYear() + "-" +
-String(nextMonth.getMonth()+1).padStart(2,'0') + "-" +
-String(nextMonth.getDate()).padStart(2,'0')
-
-const {error}=await window.supabaseClient
-.from('bulanan')
-.update({
-paid_until: paidUntilString,
-last_paid_at:new Date().toISOString(),
-last_paid_amount:nominal
-})
-.eq('id',id)
 
 if(error){
-alert("Gagal bayar")
+
+console.error(
+"bayar_bulanan error:",
+error
+)
+
+alert(
+"Gagal bayar: " +
+error.message
+)
+
 return
+
 }
+
+
+console.log(
+"bayar_bulanan berhasil:",
+data
+)
+
 
 alert("Pembayaran berhasil")
 
@@ -459,23 +654,43 @@ listBayar()
 
 }
 
-window.editTempo = async function(id,nama,tempo){
+
+/* =========================================================
+   EDIT TEMPO
+   SELECT DATA
+   ========================================================= */
+
+window.editTempo = async function(
+id,
+nama,
+tempo
+){
 
 hideAll()
 
-const { data, error } = await window.supabaseClient
-.from('bulanan')
-.select('nama,motor')
-.eq('id', id)
+
+const { data, error } =
+await window.supabaseClient
+.from("bulanan")
+.select("nama,motor")
+.eq("id",id)
 .single()
 
+
 if(error){
-alert("Gagal mengambil data pelanggan")
+
+alert(
+"Gagal mengambil data pelanggan"
+)
+
 listBayar()
+
 return
+
 }
 
-document.getElementById("resultBox").innerHTML = `
+
+document.getElementById("resultBox").innerHTML=`
 
 <h3>Edit Pelanggan</h3>
 
@@ -483,74 +698,162 @@ document.getElementById("resultBox").innerHTML = `
 id="editNama"
 value="${data?.nama || nama}"
 placeholder="Nama"
-autocapitalize="words"
-><br>
+autocapitalize="words">
+
+<br>
 
 <input
 id="editMotor"
 value="${data?.motor || ''}"
 placeholder="Motornya apa?"
-autocapitalize="words"
-><br>
+autocapitalize="words">
 
-<select id="tempoEdit" style="width:220px;height:45px;font-size:16px">
+<br>
 
-<option value="">Tanggal baru</option>
+<select
+id="tempoEdit"
+style="
+width:220px;
+height:45px;
+font-size:16px">
 
-${Array.from({length:31},(_,i)=>`
-<option value="${i+1}" ${tempo==i+1?'selected':''}>
-${i+1}
+<option value="">
+Tanggal baru
 </option>
-`).join('')}
+
+${Array.from(
+{length:31},
+(_,i)=>`
+
+<option
+value="${i+1}"
+${tempo==i+1?"selected":""}>
+
+${i+1}
+
+</option>
+
+`
+).join("")}
 
 </select>
 
 <br><br>
 
-<button class="green" onclick="simpanTempo('${id}')">
+<button
+class="green"
+onclick="simpanTempo('${id}')">
+
 Simpan
+
 </button>
 
-<button class="red"
-style="margin-top:10px;opacity:0.8"
-onclick="hapusPelanggan('${id}',\`${nama}\`)">
+<button
+class="red"
+style="
+margin-top:10px;
+opacity:0.8"
+onclick="hapusPelanggan(
+'${id}',
+\`${nama}\`
+)">
+
 Hapus Pelanggan
+
 </button>
+
 `
 
 document.getElementById("bottomButtons").innerHTML=`
-<button class="red" onclick="listBayar()">Batal</button>
+<button
+class="red"
+onclick="listBayar()">
+
+Batal
+
+</button>
 `
+
 }
+
+
+/* =========================================================
+   SIMPAN EDIT
+   RPC: edit_bulanan
+   ========================================================= */
 
 window.simpanTempo = async function(id){
 
-let tempo = parseInt(document.getElementById("tempoEdit").value)
+let tempo =
+parseInt(
+document.getElementById("tempoEdit")?.value
+)
+
 
 if(!tempo){
+
 alert("Pilih tanggal")
+
 return
+
 }
+
 
 let nama =
-document.getElementById("editNama").value.trim()
+document.getElementById("editNama")
+?.value
+.trim()
+
 
 let motor =
-document.getElementById("editMotor").value.trim()
+document.getElementById("editMotor")
+?.value
+.trim()
 
-const {error} = await window.supabaseClient
-.from('bulanan')
-.update({
-nama:nama,
-motor:motor,
-jatuh_tempo:tempo
-})
-.eq('id',id)
+
+if(!nama){
+
+alert("Nama wajib diisi")
+
+return
+
+}
+
+
+const { data, error } =
+await window.supabaseClient.rpc(
+"edit_bulanan",
+{
+p_id: id,
+p_nama: nama,
+p_motor: motor,
+p_jatuh_tempo: tempo
+}
+)
+
 
 if(error){
-alert("Gagal update")
+
+console.error(
+"edit_bulanan error:",
+error
+)
+
+alert(
+"Gagal update: " +
+error.message
+)
+
 return
+
 }
+
+
+console.log(
+"edit_bulanan berhasil:",
+data
+)
+
 
 alert("Jatuh tempo diperbarui")
 
@@ -558,25 +861,71 @@ listBayar()
 
 }
 
-window.hapusPelanggan = async function(id,nama){
+
+/* =========================================================
+   HAPUS PELANGGAN
+   RPC: hapus_bulanan
+   ADMIN ONLY
+   ========================================================= */
+
+window.hapusPelanggan = async function(
+id,
+nama
+){
 
 if(!id) return
 
-let konfirmasi = confirm(
-"Yakin hapus pelanggan:\n\n"+nama+" ?"
+
+let konfirmasi =
+confirm(
+"Yakin hapus pelanggan:\n\n"+
+nama+
+" ?"
 )
 
-if(!konfirmasi) return
 
-const { error } = await window.supabaseClient
-.from('bulanan')
-.delete()
-.eq('id',id)
+if(!konfirmasi){
+
+return
+
+}
+
+
+/* ======================
+   RPC HAPUS
+   ====================== */
+
+const { data, error } =
+await window.supabaseClient.rpc(
+"hapus_bulanan",
+{
+p_id: id
+}
+)
+
 
 if(error){
-alert("Gagal hapus: "+error.message)
+
+console.error(
+"hapus_bulanan error:",
+error
+)
+
+alert(
+"Gagal hapus: " +
+error.message
+)
+
 return
+
 }
+
+
+console.log(
+"hapus_bulanan berhasil:",
+data
+)
+
 
 alert("Pelanggan berhasil dihapus")
 
