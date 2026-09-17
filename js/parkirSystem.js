@@ -210,16 +210,19 @@ CHECKIN
 
 window.checkin = async function(k){
 
-const {error}=await window.supabaseClient
-.from("parkir")
-.insert({
-kode:k,
-status:"on",
-checkin_at:new Date()
-})
+try{
+
+const {data, error}=await window.supabaseClient.rpc(
+"checkin_parkir",
+{
+p_kode: k,
+p_checkin_at: new Date().toISOString()
+}
+)
 
 if(error){
-alert("Gagal checkin")
+console.error(error)
+alert("Gagal checkin: " + error.message)
 return
 }
 
@@ -240,6 +243,13 @@ document.getElementById("bottomButtons").innerHTML=`
 <button class="blue" onclick="showManual()">Ketik Manual</button>
 <button class="green" onclick="showMenuLain()">Menu Lainnya</button>
 `
+
+}catch(err){
+
+console.error(err)
+alert("Checkin gagal: " + err.message)
+
+}
 
 }
 
@@ -362,19 +372,31 @@ return
 
 if(!confirm("Batalkan parkir ini?")) return
 
-const {error:errDelete}=await window.supabaseClient
-.from("parkir")
-.delete()
-.eq("kode",k)
-.eq("status","on")
+try{
 
-if(errDelete){
-alert("Gagal batal parkir")
+const {error:cancelError} =
+await window.supabaseClient.rpc(
+"batal_parkir",
+{
+p_parkir_id: data.id
+}
+)
+
+if(cancelError){
+console.error(cancelError)
+alert("Gagal batal parkir: " + cancelError.message)
 return
 }
 
 window.scanLocked=false
 
 await window.onScan(k)
+
+}catch(err){
+
+console.error(err)
+alert("Gagal batal parkir: " + err.message)
+
+}
 
 }
