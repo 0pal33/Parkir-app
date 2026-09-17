@@ -650,6 +650,7 @@ const { data, error } = await window.supabaseClient
   if(!draft) return
 
   try{
+
     let fotoBuktiPath = null
 
     if(draft.foto_bukti){
@@ -660,85 +661,51 @@ const { data, error } = await window.supabaseClient
     }
 
     for(const row of draft.items){
-      const { data: item, error: fetchError } = await window.supabaseClient
-        .from("barang_titipan")
-        .select("*")
-        .eq("id", row.item_id)
-        .single()
 
-      if(fetchError) throw fetchError
+      const { data, error } =
+        await window.supabaseClient.rpc(
+          "proses_kedatangan_titipan",
+          {
+            p_item_id: row.item_id,
+            p_qty_terjual: Number(row.qty || 0),
+            p_qty_titip_baru: Number(row.qty_baru || 0),
+            p_session_id: draft.session_id,
+            p_nama_penitip: row.nama_penitip,
+            p_foto_bukti_path: fotoBuktiPath
+          }
+        )
 
-      const now = TitipanShared.formatDbTimestampWIB(new Date())
-      const qtyTerjual = Number(row.qty || 0)
-      const qtyTitipBaru = Number(row.qty_baru || 0)
-      const oldQty = Number(item.qty || 0)
-
-      if(qtyTerjual > oldQty){
-        throw new Error("Qty terjual melebihi stok")
+      if(error){
+        throw error
       }
 
-      // Satu row aktif saja:
-      // stok setelah penitip datang = qty titip baru
-      // kalau tidak titip lagi, qty jadi 0
-      const { error: updError } = await window.supabaseClient
-        .from("barang_titipan")
-        .update({
-          qty: qtyTitipBaru,
-          updated_at: now,
-          session_id: draft.session_id
-        })
-        .eq("id", row.item_id)
-
-      if(updError) throw updError
-
-      // log barang yang diambil / terjual
-      const { error: logAmbilError } = await window.supabaseClient
-        .from("titipan_log")
-        .insert({
-          session_id: draft.session_id,
-          item_id: row.item_id,
-          jenis: "ambil",
-          qty: qtyTerjual,
-          total: row.total,
-          nama_penitip: row.nama_penitip,
-          foto_penitip_path: item.foto_penitip_path || null,
-          foto_bukti_path: fotoBuktiPath,
-          foto_penitip: null,
-          foto_bukti: null,
-          created_at: now
-        })
-
-      if(logAmbilError) throw logAmbilError
-
-      // kalau penitip nitip lagi, cukup catat log masuk pada item yang sama
-      if(qtyTitipBaru > 0){
-        const { error: logMasukError } = await window.supabaseClient
-          .from("titipan_log")
-          .insert({
-            session_id: draft.session_id,
-            item_id: row.item_id,
-            jenis: "masuk",
-            qty: qtyTitipBaru,
-            total: 0,
-            nama_penitip: row.nama_penitip,
-            foto_penitip_path: item.foto_penitip_path || null,
-            foto_bukti_path: fotoBuktiPath,
-            foto_penitip: null,
-            foto_bukti: null,
-            created_at: now
-          })
-
-        if(logMasukError) throw logMasukError
+      if(!data?.success){
+        throw new Error("Proses kedatangan gagal")
       }
     }
 
     TitipanState.arrivalDraft = null
+
     TitipanUI.closeModal()
+
     await this.loadData()
     await this.renderDashboard()
-    TitipanUI.showToast("Kedatangan penitip berhasil disimpan")
+
+    TitipanUI.showToast(
+      "Kedatangan penitip berhasil disimpan"
+    )
+
   }catch(err){
-    alert("Gagal simpan kedatangan: " + err.message)
+
+    console.error(
+      "commitArrivalDraft error:",
+      err
+    )
+
+    alert(
+      "Gagal simpan kedatangan: " +
+      err.message
+    )
   }
 },
 
