@@ -858,18 +858,13 @@ query = query.gte("created_at", range.startDB).lte("created_at", range.endDB)
 
   const rows = data || []
 
-  if(!rows.length){
-    TitipanUI.renderLoading("Tidak ada data")
-    return
-  }
-
-  const isAdmin = await TitipanShared.isAdmin()
+const isAdmin = await TitipanShared.isAdmin()
 
 if(isAdmin){
-    TitipanUI.renderLogAdmin(rows)
-  }else{
-    TitipanUI.renderLogNormal(rows)
-  }
+  TitipanUI.renderLogAdmin(rows)
+}else{
+  TitipanUI.renderLogNormal(rows)
+}
 },
 
   async openCameraStep({
