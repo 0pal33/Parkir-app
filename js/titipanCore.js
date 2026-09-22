@@ -824,6 +824,8 @@ if (!isAdmin) return
       nama_penitip,
       foto_penitip,
       foto_bukti,
+      foto_penitip_path,
+      foto_bukti_path,
       qty,
       total,
       created_at,
