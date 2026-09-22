@@ -716,57 +716,151 @@ const { data, error } = await window.supabaseClient
     TitipanUI.openUpdateHarga({ item })
   },
 
-  async saveUpdateHarga(){
-  const itemId = document.getElementById("u_item_id")?.value
-  const hargaPenitip = TitipanShared.clampQty(document.getElementById("u_penitip")?.value)
-  let hargaJual = TitipanShared.clampQty(document.getElementById("u_jual")?.value)
+ async saveUpdateHarga(){
 
-  const isAdmin = await TitipanShared.isAdmin()
-  const namaItemEl = document.getElementById("u_nama_item")
-  const namaPenitipEl = document.getElementById("u_nama_penitip")
+  const itemId =
+    document.getElementById("u_item_id")?.value
+
+  const hargaPenitip =
+    TitipanShared.clampQty(
+      document.getElementById("u_penitip")?.value
+    )
+
+  let hargaJual =
+    TitipanShared.clampQty(
+      document.getElementById("u_jual")?.value
+    )
+
+  const isAdmin =
+    await TitipanShared.isAdmin()
+
+  const namaItemEl =
+    document.getElementById("u_nama_item")
+
+  const namaPenitipEl =
+    document.getElementById("u_nama_penitip")
+
+
+  /* =========================
+     VALIDASI
+     ========================= */
 
   if(!itemId || hargaPenitip <= 0){
     alert("Harga tidak valid")
     return
   }
 
+
   if(hargaJual <= 0){
-    hargaJual = TitipanShared.rekomendasiHargaJual(hargaPenitip)
+    hargaJual =
+      TitipanShared.rekomendasiHargaJual(
+        hargaPenitip
+      )
   }
 
-  const payload = {
-    harga_penitip: hargaPenitip,
-    harga_jual: hargaJual,
-    updated_at: TitipanShared.formatDbTimestampWIB(new Date())
-  }
+
+  /* =========================
+     DATA RPC
+     ========================= */
+
+  let namaItem = null
+  let namaPenitip = null
+
+
+  /*
+    ADMIN:
+    boleh mengubah nama barang
+    dan nama penitip.
+
+    PUBLIC / PETUGAS:
+    nama dikirim NULL sehingga
+    RPC hanya mengubah harga.
+  */
 
   if(isAdmin){
-    const namaItem = namaItemEl?.value.trim().replace(/\s+/g, " ")
-    const namaPenitip = namaPenitipEl?.value.trim().replace(/\s+/g, " ")
+
+    namaItem =
+      namaItemEl?.value
+        .trim()
+        .replace(/\s+/g, " ")
+
+    namaPenitip =
+      namaPenitipEl?.value
+        .trim()
+        .replace(/\s+/g, " ")
+
 
     if(!namaItem || !namaPenitip){
-      alert("Nama barang dan nama penitip wajib diisi")
+
+      alert(
+        "Nama barang dan nama penitip wajib diisi"
+      )
+
       return
     }
-
-    payload.nama_item = namaItem
-    payload.nama_penitip = namaPenitip
   }
 
-  const { error } = await window.supabaseClient
-    .from("barang_titipan")
-    .update(payload)
-    .eq("id", itemId)
+
+  /* =========================
+     UPDATE MELALUI RPC
+     ========================= */
+
+  const { data, error } =
+    await window.supabaseClient.rpc(
+      "update_harga_titipan",
+      {
+        p_item_id: itemId,
+        p_harga_penitip: hargaPenitip,
+        p_harga_jual: hargaJual,
+        p_nama_item: namaItem,
+        p_nama_penitip: namaPenitip
+      }
+    )
+
+
+  /* =========================
+     HASIL RPC
+     ========================= */
 
   if(error){
-    alert(error.message)
+
+    console.error(
+      "update_harga_titipan error:",
+      error
+    )
+
+    alert(
+      "Gagal update harga: " +
+      error.message
+    )
+
     return
   }
 
+
+  if(!data?.success){
+
+    alert(
+      "Update harga gagal"
+    )
+
+    return
+  }
+
+
+  /* =========================
+     SELESAI
+     ========================= */
+
   TitipanUI.closeModal()
+
   await this.loadData()
+
   await this.renderDashboard()
-  TitipanUI.showToast("Data berhasil diperbarui")
+
+  TitipanUI.showToast(
+    "Data berhasil diperbarui"
+  )
 },
 
   async hapusBarang(id){
