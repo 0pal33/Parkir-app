@@ -554,7 +554,11 @@ window.TitipanUI = {
     keys.forEach(key => {
       const group = TitipanShared.sortByCreatedAtAsc(grouped[key])
       const head = group[0] || {}
-      const photo = head.foto_bukti || head.foto_penitip || ""
+      const photo = TitipanShared.resolveImageSrc(
+  head.foto_bukti_path || head.foto_bukti ||
+  head.foto_penitip_path || head.foto_penitip,
+  ""
+)
       const penName = head.nama_penitip || "-"
 
       html += `
