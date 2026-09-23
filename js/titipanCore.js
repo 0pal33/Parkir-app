@@ -738,172 +738,302 @@ window.TitipanCore = {
   },
 
   showArrivalSummary(){
-    const draft = TitipanState.arrivalDraft
-    if (!draft) return
 
-    if (!draft.items.length) {
-      TitipanUI.closeModal()
-      TitipanCore.renderArrivalForm()
-      return
-    }
+  const draft = TitipanState.arrivalDraft
+  if (!draft) return
 
-    const totalQtyJual = draft.items.reduce(
-      (a, b) => a + Number(b.qty || 0),
-      0
-    )
+  if (!draft.items.length) {
+    TitipanUI.closeModal()
+    TitipanCore.renderArrivalForm()
+    return
+  }
 
-    const totalBayar = draft.items.reduce(
-      (a, b) => a + Number(b.total || 0),
-      0
-    )
+  const totalQtyJual = draft.items.reduce(
+    (a, b) => a + Number(b.qty || 0),
+    0
+  )
 
-    const totalQtyTitip = draft.items.reduce(
-      (a, b) => a + Number(b.qty_baru || 0),
-      0
-    )
+  const totalBayar = draft.items.reduce(
+    (a, b) => a + Number(b.total || 0),
+    0
+  )
 
-    const itemLines = draft.items.map(item => {
-      const nama = TitipanShared.escapeHtml(item.nama_item)
-      const qty = Number(item.qty || 0)
-      const qtyBaru = Number(item.qty_baru || 0)
-      const total = TitipanShared.formatRupiah(item.total || 0)
-      const tmpId = TitipanShared.escapeJs(item.tmp_id)
+  const totalQtyTitip = draft.items.reduce(
+    (a, b) => a + Number(b.qty_baru || 0),
+    0
+  )
 
-      return `
-        <div style="
+  /*
+    ======================================================
+    DAFTAR ITEM
+    ======================================================
+
+    Jangan gunakan class "summaryText" sebagai pembungkus
+    daftar item karena CSS lama summaryText dapat membuat
+    jarak vertikal menjadi sangat besar.
+  */
+
+  const itemLines = draft.items.map(item => {
+
+    const nama =
+      TitipanShared.escapeHtml(
+        item.nama_item || "-"
+      )
+
+    const qty =
+      Number(item.qty || 0)
+
+    const qtyBaru =
+      Number(item.qty_baru || 0)
+
+    const total =
+      TitipanShared.formatRupiah(
+        item.total || 0
+      )
+
+    const tmpId =
+      TitipanShared.escapeJs(
+        item.tmp_id
+      )
+
+    return `
+      <div
+        style="
           border:1px solid #ddd;
           border-radius:12px;
           padding:12px;
-          margin-bottom:10px;
-        ">
-          <div style="
-            font-weight:bold;
-            margin-bottom:6px;
-          ">
-            ${nama}
-          </div>
+          margin:0 0 10px 0;
+          box-sizing:border-box;
+          background:#fff;
+        "
+      >
 
-          <div style="
+        <!-- NAMA BARANG -->
+        <div
+          style="
+            font-size:17px;
+            font-weight:700;
+            line-height:1.3;
+            margin-bottom:10px;
+          "
+        >
+          ${nama}
+        </div>
+
+        <!-- TERJUAL -->
+        <div
+          style="
             font-size:14px;
-            line-height:1.6;
-          ">
-            Terjual:
-            <b>${qty}</b>
+            line-height:1.4;
+            margin-bottom:5px;
+          "
+        >
+          Terjual:
+          <strong>${qty}</strong>
+          <span style="margin-left:6px">
             ${total}
-          </div>
+          </span>
+        </div>
 
-          ${
-            qtyBaru > 0
-              ? `
-                <div style="
+        <!-- TITIP BARU -->
+        ${
+          qtyBaru > 0
+            ? `
+              <div
+                style="
                   font-size:14px;
-                  line-height:1.6;
-                ">
-                  Titip baru:
-                  <b>${qtyBaru}</b>
-                </div>
-              `
-              : ""
-          }
+                  line-height:1.4;
+                  margin-bottom:10px;
+                "
+              >
+                Titip baru:
+                <strong>${qtyBaru}</strong>
+              </div>
+            `
+            : ""
+        }
 
-          <div style="
+        <!-- TOMBOL ITEM -->
+        <div
+          style="
             display:flex;
             gap:8px;
-            margin-top:10px;
-          ">
-            <button
-              type="button"
-              class="blue"
-              style="
-                flex:1;
-                padding:10px;
-                border-radius:8px;
-              "
-              onclick="TitipanCore.editArrivalItem('${tmpId}')"
-            >
-              Edit
-            </button>
+            width:100%;
+            margin-top:8px;
+          "
+        >
 
-            <button
-              type="button"
-              class="red"
-              style="
-                flex:1;
-                padding:10px;
-                border-radius:8px;
-              "
-              onclick="TitipanCore.deleteArrivalItem('${tmpId}')"
-            >
-              Hapus
-            </button>
-          </div>
+          <button
+            type="button"
+            class="blue"
+            style="
+              flex:1;
+              min-width:0;
+              min-height:42px;
+              padding:9px 10px;
+              border-radius:8px;
+              box-sizing:border-box;
+            "
+            onclick="
+              TitipanCore.editArrivalItem('${tmpId}')
+            "
+          >
+            Edit
+          </button>
+
+          <button
+            type="button"
+            class="red"
+            style="
+              flex:1;
+              min-width:0;
+              min-height:42px;
+              padding:9px 10px;
+              border-radius:8px;
+              box-sizing:border-box;
+            "
+            onclick="
+              TitipanCore.deleteArrivalItem('${tmpId}')
+            "
+          >
+            Hapus
+          </button>
+
         </div>
-      `
-    }).join("")
 
-    let body = `
-      <div style="
-        margin-bottom:10px;
-        font-weight:bold;
-      ">
-        Penitip:
-        ${TitipanShared.escapeHtml(draft.penitip || "-")}
-      </div>
-
-      <div class="summaryText">
-        ${itemLines}
-      </div>
-
-      <div
-        class="summaryTotal"
-        style="margin-top:12px"
-      >
-        Total terjual:
-        ${totalQtyJual}
-        ${TitipanShared.formatRupiah(totalBayar)}
       </div>
     `
+  }).join("")
 
-    if (totalQtyTitip > 0) {
-      body += `
-        <div
-          class="summaryTotal"
-          style="margin-top:8px"
-        >
-          Total titip baru:
-          ${totalQtyTitip}
-        </div>
-      `
-    }
+  /*
+    ======================================================
+    ISI RINGKASAN
+    ======================================================
+  */
 
-    TitipanUI.openSummary({
-      title: "Ringkasan kedatangan",
-      body,
+  let body = `
 
-      buttons: [
-        {
-          label: "+ Tambah Barang",
-          className: "blue",
-          onClick: () =>
-            TitipanCore.addAnotherArrivalItem()
-        },
+    <div
+      style="
+        margin-bottom:12px;
+        font-size:17px;
+        font-weight:700;
+        line-height:1.3;
+      "
+    >
+      Penitip:
+      ${TitipanShared.escapeHtml(
+        draft.penitip || "-"
+      )}
+    </div>
 
-        {
-          label: "Lanjut Foto Bukti",
-          className: "green",
-          onClick: () =>
-            TitipanCore.beginArrivalPhotoStep()
-        },
+    <!-- LIST ITEM -->
+    <div
+      style="
+        display:block;
+        width:100%;
+        margin:0;
+        padding:0;
+        height:auto;
+        min-height:0;
+      "
+    >
+      ${itemLines}
+    </div>
 
-        {
-          label: "Batalkan Seluruh Kedatangan",
-          className: "red",
-          onClick: () =>
-            TitipanCore.cancelArrivalDraft()
-        }
-      ]
-    })
-  },
+    <!-- TOTAL TERJUAL -->
+    <div
+      style="
+        margin-top:12px;
+        padding-top:10px;
+        border-top:1px solid #eee;
+        font-size:15px;
+        font-weight:700;
+        line-height:1.5;
+      "
+    >
+      Total terjual:
+      ${totalQtyJual}
+      ${TitipanShared.formatRupiah(totalBayar)}
+    </div>
+  `
+
+  /*
+    ======================================================
+    TOTAL TITIP BARU
+    ======================================================
+  */
+
+  if (totalQtyTitip > 0) {
+
+    body += `
+
+      <div
+        style="
+          margin-top:5px;
+          font-size:15px;
+          font-weight:700;
+          line-height:1.5;
+        "
+      >
+        Total titip baru:
+        ${totalQtyTitip}
+      </div>
+
+    `
+  }
+
+  /*
+    ======================================================
+    MODAL BUTTON
+    ======================================================
+  */
+
+  TitipanUI.openSummary({
+
+    title:
+      "Ringkasan kedatangan",
+
+    body,
+
+    buttons: [
+
+      {
+        label:
+          "+ Tambah Barang",
+
+        className:
+          "blue",
+
+        onClick: () =>
+          TitipanCore.addAnotherArrivalItem()
+      },
+
+      {
+        label:
+          "Lanjut Foto Bukti",
+
+        className:
+          "green",
+
+        onClick: () =>
+          TitipanCore.beginArrivalPhotoStep()
+      },
+
+      {
+        label:
+          "Batalkan Seluruh Kedatangan",
+
+        className:
+          "red",
+
+        onClick: () =>
+          TitipanCore.cancelArrivalDraft()
+      }
+
+    ]
+  })
+},
 
   continueArrival(){
     TitipanUI.closeModal()
