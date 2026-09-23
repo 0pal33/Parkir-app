@@ -353,23 +353,85 @@ window.TitipanUI = {
     if (!card || !overlay) return
 
     overlay.style.display = "flex"
+    overlay.style.alignItems = "center"
+    overlay.style.justifyContent = "center"
+
+    /* FIX: modal mengikuti tinggi isi, bukan memenuhi layar */
+    card.style.height = "auto"
+    card.style.minHeight = "0"
+    card.style.maxHeight = "90vh"
+    card.style.overflowY = "auto"
+    card.style.display = "block"
+    card.style.boxSizing = "border-box"
 
     card.innerHTML = `
-      <div class="modalTitle">${TitipanShared.escapeHtml(title || "")}</div>
-      <div class="modalBody">${body || ""}</div>
-      <div class="rowBtn" style="margin-top:12px">
+      <div
+        class="modalTitle"
+        style="
+          margin-bottom:12px;
+          line-height:1.3;
+        "
+      >
+        ${TitipanShared.escapeHtml(title || "")}
+      </div>
+
+      <div
+        class="modalBody"
+        style="
+          display:block;
+          height:auto;
+          min-height:0;
+          max-height:none;
+          overflow:visible;
+          flex:none;
+          margin:0;
+          padding:0;
+        "
+      >
+        ${body || ""}
+      </div>
+
+      <div
+        class="rowBtn"
+        style="
+          display:flex;
+          flex-wrap:wrap;
+          gap:8px;
+          margin-top:16px;
+          width:100%;
+          height:auto;
+        "
+      >
         ${(buttons || []).map((btn, idx) => `
-          <button class="${btn.className || "blue"}" data-btn-index="${idx}">
+          <button
+            class="${btn.className || "blue"}"
+            data-btn-index="${idx}"
+            type="button"
+            style="
+              flex:1 1 140px;
+              min-height:46px;
+              padding:10px 12px;
+              box-sizing:border-box;
+            "
+          >
             ${TitipanShared.escapeHtml(btn.label)}
           </button>
         `).join("")}
       </div>
     `
 
-    const btnEls = card.querySelectorAll("button[data-btn-index]")
+    const btnEls =
+      card.querySelectorAll(
+        "button[data-btn-index]"
+      )
+
     btnEls.forEach((el, idx) => {
       const meta = buttons[idx]
-      el.onclick = meta && meta.onClick ? meta.onClick : null
+
+      el.onclick =
+        meta && meta.onClick
+          ? meta.onClick
+          : null
     })
   },
 
